@@ -1,0 +1,66 @@
+**[1] Nome do Projeto**
+GeoCadastra - Plataforma de Vistorias Ambientais
+
+**[2] Visão Geral do App**
+O GeoCadastra é uma plataforma voltada para equipes técnicas e fiscais ambientais que realizam levantamentos de propriedades em ácnicas e fiscais ambientais que realizam levantamentos de propriedades em \xe1reas de reservatório. O sistema substitui planilhas e documentos preenchidos manualmente por um fluxo digital integrado, que permite o preenchimento em campo, mesmo offline, com posterior sincronização automática. Ao final, o app gera um relatório no formato padronizado exigido pelo ório no formato padronizado exigido pelo \xf3rgão fiscalizador, incluindo fotos e mapas.
+
+A ferramenta atende especialmente profissionais que atuam em regiões remotas com acesso limitado à internet, onde a agilidade no preenchimento e padronização são cruciais. O foco é garantir produtividade em campo e consistência nos relatórios gerados.
+
+**[3] Objetivos da Primeira Versão (v1)**
+
+* Eliminar o preenchimento manual de fichas de campo
+* Permitir captura offline de dados e fotos com posterior upload automático
+* Gerar relatórios automaticamente no layout padronizado existente
+* Criar mapa com polígono das coordenadas inseridas
+* Testar a usabilidade em campo com equipe técnica
+
+**[4] Personas Prioritárias**
+
+* Fiscais ambientais contratados para vistorias de propriedades ribeirinhas
+* Técnicos de campo que realizam levantamento e registro fotográfico em regiões sem conectividade
+
+**[5] Funcionalidades Essenciais (MVP)**
+
+* **Formulário de cadastramento digital**: preenchimento com base na estrutura da planilha (dados de propriedade, coordenadas, usos do solo, observações)
+* **Registro offline**: app permite funcionamento completo sem internet
+* **Upload automático**: sincronização de dados e fotos assim que houver conexão
+* **Inserção de fotos 6x8**: quadro com duas fotos lado a lado por linha, com legenda
+* **Geração automática de relatório**: layout igual ao modelo "RO-NOT-ITU-2025.12.16"
+* **Mapa com polígono**: gera automaticamente imagem do mapa com polígono baseado nas coordenadas inseridas (início/fim)
+* **Exportação do PDF**: permite baixar ou enviar por e-mail o relatório
+
+**[6] Fluxo Principal do Usuário**
+
+* Acessa o app no tablet
+* Seleciona "Nova vistoria"
+* Preenche dados da propriedade
+* Insere coordenadas de início/fim
+* Marca os usos encontrados (com área ou unidade)
+* Tira fotos e adiciona legendas
+* Adiciona observações finais e croqui (upload de imagem ou desenhar)
+* Salva offline (se sem internet)
+* Ao reconectar, o app envia dados e fotos
+* Gera relatório no layout padrão com fotos, mapa e dados preenchidos
+
+**[7] Requisitos Não-Funcionais**
+
+* Plataforma: App mobile responsivo (tablet Android)
+* Ferramenta: Desenvolvido com Glide ou FlutterFlow (No Code/Low Code)
+* Multilíngue: Português (inicial), com suporte futuro para inglês
+* Banco de dados na nuvem com armazenamento local temporário
+* Capacidade para 1.000 relatórios salvos por dispositivo
+* Exportação em PDF igual ao modelo DOCX anexado
+* Layout de foto com 2 imagens lado a lado, tamanho padrão 6x8 cm
+
+**[8] Itens Fora do Escopo (por enquanto)**
+
+* Assinatura eletrônica do relatório
+* Integração com sistemas externos do governo
+* Validação automática de coordenadas por satélite
+* Geração de dashboard com histórico de vistorias
+
+**[9] Indicadores de Sucesso da v1**
+
+* Pelo menos 30 relatórios gerados e exportados no primeiro mês
+* 100% dos cadastros funcionando offline com upload bem-sucedido posterior
+* Feedback positivo de pelo menos 3 fiscais sobre ganho de tempo e usabilidade
