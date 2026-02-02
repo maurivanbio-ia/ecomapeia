@@ -321,8 +321,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   logo: {
-    width: 280,
-    height: 100,
+    width: 340,
+    height: 140,
   },
   bottomSpacer: {
     height: Spacing["4xl"],
