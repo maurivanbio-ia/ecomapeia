@@ -318,10 +318,11 @@ const styles = StyleSheet.create({
   logoContainer: {
     alignItems: "center",
     justifyContent: "center",
+    flex: 1,
   },
   logo: {
-    width: 280,
-    height: 120,
+    width: 320,
+    height: 160,
   },
   bottomSpacer: {
     height: Spacing["4xl"],
