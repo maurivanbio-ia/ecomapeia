@@ -3,15 +3,16 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Feather } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { Platform, StyleSheet } from "react-native";
+import { NavigatorScreenParams } from "@react-navigation/native";
 import HomeStackNavigator from "@/navigation/HomeStackNavigator";
 import ProfileStackNavigator from "@/navigation/ProfileStackNavigator";
-import VistoriasStackNavigator from "@/navigation/VistoriasStackNavigator";
+import VistoriasStackNavigator, { VistoriasStackParamList } from "@/navigation/VistoriasStackNavigator";
 import IAStackNavigator from "@/navigation/IAStackNavigator";
 import { useTheme } from "@/hooks/useTheme";
 
 export type MainTabParamList = {
   HomeTab: undefined;
-  VistoriasTab: undefined;
+  VistoriasTab: NavigatorScreenParams<VistoriasStackParamList> | undefined;
   IATab: undefined;
   ProfileTab: undefined;
 };

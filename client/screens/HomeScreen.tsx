@@ -19,8 +19,10 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, CompositeNavigationProp } from "@react-navigation/native";
 import type { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { VistoriasStackParamList } from "@/navigation/VistoriasStackNavigator";
 import { useQuery } from "@tanstack/react-query";
 
 import { ThemedText } from "@/components/ThemedText";
@@ -35,7 +37,10 @@ import { apiRequest } from "@/lib/query-client";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-type NavigationProp = BottomTabNavigationProp<MainTabParamList>;
+type NavigationProp = CompositeNavigationProp<
+  BottomTabNavigationProp<MainTabParamList>,
+  NativeStackNavigationProp<VistoriasStackParamList>
+>;
 
 interface Vistoria {
   id: string;
@@ -279,12 +284,19 @@ export default function HomeScreen() {
           {filteredVistorias.length > 0 ? (
             <View style={styles.recentList}>
               {filteredVistorias.slice(0, 5).map((vistoria) => (
-                <View
+                <Pressable
                   key={vistoria.id}
                   style={[
                     styles.recentCard,
                     { backgroundColor: theme.backgroundDefault, borderColor: theme.border },
                   ]}
+                  onPress={() => {
+                    Haptics.selectionAsync();
+                    navigation.navigate("VistoriasTab", {
+                      screen: "DetalhesVistoria",
+                      params: { vistoriaId: vistoria.id },
+                    });
+                  }}
                 >
                   <View style={styles.recentCardContent}>
                     <View style={styles.recentCardHeader}>
@@ -312,7 +324,7 @@ export default function HomeScreen() {
                     </ThemedText>
                   </View>
                   <Feather name="chevron-right" size={20} color={theme.tabIconDefault} />
-                </View>
+                </Pressable>
               ))}
             </View>
           ) : (
