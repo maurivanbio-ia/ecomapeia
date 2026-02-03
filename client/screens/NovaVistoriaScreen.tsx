@@ -1194,7 +1194,10 @@ export default function NovaVistoriaScreen() {
               style={[styles.mapBiomasButton, { backgroundColor: "#4caf50" }]}
               onPress={() => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                navigation.navigate("MapBiomas" as never);
+                navigation.navigate("MapBiomas" as never, {
+                  latitude: polygonCoordinates[0]?.latitude,
+                  longitude: polygonCoordinates[0]?.longitude,
+                } as never);
               }}
             >
               <Feather name="globe" size={18} color="#fff" />
