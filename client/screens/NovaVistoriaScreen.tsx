@@ -33,6 +33,7 @@ import DatePickerField from "@/components/DatePickerField";
 import SignatureCapture from "@/components/SignatureCapture";
 import { captureCurrentUTM, requestLocationPermission } from "@/lib/gpsUtils";
 import { saveVistoriaOffline } from "@/lib/offlineStorage";
+import { PhotoWatermarkProcessor, getCurrentLocation, createWatermarkData, WatermarkData } from "@/lib/photoWatermark";
 
 const MARGEM_OPTIONS = ["DIREITA", "ESQUERDA"];
 const TIPO_INSPECAO_OPTIONS = ["CADASTRAMENTO", "MONITORAMENTO", "FISCALIZAÇÃO"];
@@ -214,6 +215,12 @@ export default function NovaVistoriaScreen() {
   ]);
 
   const [photos, setPhotos] = useState<Photo[]>([]);
+  const [pendingWatermark, setPendingWatermark] = useState<{
+    id: string;
+    uri: string;
+    watermarkData: WatermarkData;
+  } | null>(null);
+  const [processingPhoto, setProcessingPhoto] = useState(false);
   const [mapImageUri, setMapImageUri] = useState<string | null>(null);
   const [signatureUri, setSignatureUri] = useState<string | null>(null);
   const [capturingGPS, setCapturingGPS] = useState(false);
@@ -727,6 +734,8 @@ export default function NovaVistoriaScreen() {
       return;
     }
 
+    const location = await getCurrentLocation();
+
     const result = await ImagePicker.launchCameraAsync({
       mediaTypes: ["images"],
       quality: 0.8,
@@ -735,15 +744,45 @@ export default function NovaVistoriaScreen() {
 
     if (!result.canceled && result.assets[0]) {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      
+      const photoId = Date.now().toString();
+      const watermarkData = createWatermarkData(location);
+      
+      setProcessingPhoto(true);
+      setPendingWatermark({
+        id: photoId,
+        uri: result.assets[0].uri,
+        watermarkData,
+      });
+    }
+  };
+
+  const handleWatermarkProcessed = (id: string, newUri: string) => {
+    setPhotos((prev) => [
+      ...prev,
+      {
+        id,
+        uri: newUri,
+        legenda: "",
+      },
+    ]);
+    setPendingWatermark(null);
+    setProcessingPhoto(false);
+  };
+
+  const handleWatermarkError = (id: string) => {
+    if (pendingWatermark) {
       setPhotos((prev) => [
         ...prev,
         {
-          id: Date.now().toString(),
-          uri: result.assets[0].uri,
+          id,
+          uri: pendingWatermark.uri,
           legenda: "",
         },
       ]);
     }
+    setPendingWatermark(null);
+    setProcessingPhoto(false);
   };
 
   const pickFromGallery = async () => {
@@ -860,6 +899,11 @@ export default function NovaVistoriaScreen() {
 
   return (
     <ThemedView style={styles.container}>
+      <PhotoWatermarkProcessor
+        pendingPhoto={pendingWatermark}
+        onProcessed={handleWatermarkProcessed}
+        onError={handleWatermarkError}
+      />
       <KeyboardAwareScrollViewCompat
         style={styles.scrollView}
         contentContainerStyle={[
@@ -1323,10 +1367,23 @@ export default function NovaVistoriaScreen() {
           <View style={styles.photoButtons}>
             <Pressable
               onPress={pickImage}
-              style={[styles.photoBtn, { backgroundColor: Colors.light.primary }]}
+              disabled={processingPhoto}
+              style={[
+                styles.photoBtn, 
+                { backgroundColor: processingPhoto ? theme.border : Colors.light.primary }
+              ]}
             >
-              <Feather name="camera" size={20} color="#FFFFFF" />
-              <ThemedText style={styles.photoBtnText}>Tirar Foto</ThemedText>
+              {processingPhoto ? (
+                <>
+                  <ActivityIndicator size="small" color="#FFFFFF" />
+                  <ThemedText style={styles.photoBtnText}>Processando...</ThemedText>
+                </>
+              ) : (
+                <>
+                  <Feather name="camera" size={20} color="#FFFFFF" />
+                  <ThemedText style={styles.photoBtnText}>Tirar Foto</ThemedText>
+                </>
+              )}
             </Pressable>
 
             <Pressable
