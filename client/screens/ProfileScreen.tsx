@@ -17,9 +17,9 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
-
-type LanguageOption = "Português" | "English" | "Español";
+import { Language } from "@/lib/translations";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -29,35 +29,34 @@ export default function ProfileScreen() {
   const tabBarHeight = useBottomTabBarHeight();
   const { theme } = useTheme();
   const { user, logout } = useAuth();
+  const { language, setLanguage, t } = useLanguage();
 
-  const [selectedLanguage, setSelectedLanguage] = useState<LanguageOption>("Português");
   const [languageModalVisible, setLanguageModalVisible] = useState(false);
   const [aboutModalVisible, setAboutModalVisible] = useState(false);
+  const [notificationModalVisible, setNotificationModalVisible] = useState(false);
 
-  const handleLanguageSelect = (language: LanguageOption) => {
+  const handleLanguageSelect = (lang: Language) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setSelectedLanguage(language);
+    setLanguage(lang);
     setLanguageModalVisible(false);
   };
 
-  const handleNotifications = async () => {
+  const handleNotifications = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    
+    setNotificationModalVisible(true);
+  };
+
+  const openDeviceSettings = async () => {
     if (Platform.OS === "web") {
-      Alert.alert(
-        "Notificações",
-        "Para gerenciar notificações no navegador, acesse as configurações do seu navegador."
-      );
+      Alert.alert(t.notificationsTitle, t.notificationsWebMessage);
     } else {
       try {
         await Linking.openSettings();
       } catch (error) {
-        Alert.alert(
-          "Erro",
-          "Não foi possível abrir as configurações do dispositivo."
-        );
+        Alert.alert(t.error, t.errorOpenSettings);
       }
     }
+    setNotificationModalVisible(false);
   };
 
   const handleAbout = () => {
@@ -72,12 +71,12 @@ export default function ProfileScreen() {
       logout();
     } else {
       Alert.alert(
-        "Sair da conta",
-        "Tem certeza que deseja sair?",
+        t.logoutConfirmTitle,
+        t.logoutConfirmMessage,
         [
-          { text: "Cancelar", style: "cancel" },
+          { text: t.cancel, style: "cancel" },
           { 
-            text: "Sair", 
+            text: t.exit, 
             style: "destructive",
             onPress: logout,
           },
@@ -131,26 +130,26 @@ export default function ProfileScreen() {
 
         {/* Settings Section */}
         <Animated.View entering={FadeInDown.duration(500).delay(200)}>
-          <ThemedText style={styles.sectionTitle}>Configurações</ThemedText>
+          <ThemedText style={styles.sectionTitle}>{t.settings}</ThemedText>
           <View style={[styles.settingsCard, { backgroundColor: theme.backgroundDefault }]}>
             <SettingsItem
               icon="bell"
-              label="Notificações"
+              label={t.notifications}
               onPress={handleNotifications}
               theme={theme}
             />
             <View style={[styles.divider, { backgroundColor: theme.border }]} />
             <SettingsItem
               icon="globe"
-              label="Idioma"
-              value={selectedLanguage}
+              label={t.language}
+              value={language}
               onPress={() => setLanguageModalVisible(true)}
               theme={theme}
             />
             <View style={[styles.divider, { backgroundColor: theme.border }]} />
             <SettingsItem
               icon="info"
-              label="Sobre o App"
+              label={t.aboutApp}
               onPress={handleAbout}
               theme={theme}
             />
@@ -159,7 +158,7 @@ export default function ProfileScreen() {
 
         {/* Logout Button */}
         <Animated.View entering={FadeInDown.duration(500).delay(300)}>
-          <LogoutButton onPress={handleLogout} />
+          <LogoutButton onPress={handleLogout} label={t.logout} />
         </Animated.View>
 
         {/* App Version */}
@@ -188,20 +187,20 @@ export default function ProfileScreen() {
           style={styles.modalOverlay}
           onPress={() => setLanguageModalVisible(false)}
         >
-          <View style={[styles.modalContent, { backgroundColor: theme.backgroundDefault }]}>
-            <ThemedText style={styles.modalTitle}>Selecione o Idioma</ThemedText>
+          <Pressable style={[styles.modalContent, { backgroundColor: theme.backgroundDefault }]}>
+            <ThemedText style={styles.modalTitle}>{t.selectLanguage}</ThemedText>
             
-            {(["Português", "English", "Español"] as LanguageOption[]).map((lang) => (
+            {(["Português", "English", "Español"] as Language[]).map((lang) => (
               <Pressable
                 key={lang}
                 style={[
                   styles.languageOption,
-                  selectedLanguage === lang && { backgroundColor: Colors.light.accent + "20" },
+                  language === lang && { backgroundColor: Colors.light.accent + "20" },
                 ]}
                 onPress={() => handleLanguageSelect(lang)}
               >
                 <ThemedText style={styles.languageText}>{lang}</ThemedText>
-                {selectedLanguage === lang ? (
+                {language === lang ? (
                   <Feather name="check" size={20} color={Colors.light.accent} />
                 ) : null}
               </Pressable>
@@ -211,9 +210,53 @@ export default function ProfileScreen() {
               style={styles.modalCloseButton}
               onPress={() => setLanguageModalVisible(false)}
             >
-              <ThemedText style={styles.modalCloseText}>Fechar</ThemedText>
+              <ThemedText style={styles.modalCloseText}>{t.close}</ThemedText>
             </Pressable>
-          </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
+      {/* Notifications Modal */}
+      <Modal
+        visible={notificationModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setNotificationModalVisible(false)}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setNotificationModalVisible(false)}
+        >
+          <Pressable style={[styles.modalContent, { backgroundColor: theme.backgroundDefault }]}>
+            <View style={styles.notificationIconContainer}>
+              <Feather name="bell" size={48} color={Colors.light.accent} />
+            </View>
+            <ThemedText style={styles.modalTitle}>{t.notificationsSettings}</ThemedText>
+            
+            <ThemedText style={styles.notificationDescription}>
+              {Platform.OS === "web" 
+                ? t.notificationsWebMessage
+                : t.notificationsEnabled
+              }
+            </ThemedText>
+
+            {Platform.OS !== "web" ? (
+              <Pressable
+                style={[styles.settingsButton, { backgroundColor: Colors.light.accent }]}
+                onPress={openDeviceSettings}
+              >
+                <Feather name="settings" size={18} color="#FFFFFF" />
+                <ThemedText style={styles.settingsButtonText}>{t.openSettings}</ThemedText>
+              </Pressable>
+            ) : null}
+
+            <Pressable
+              style={styles.modalCloseButton}
+              onPress={() => setNotificationModalVisible(false)}
+            >
+              <ThemedText style={styles.modalCloseText}>{t.close}</ThemedText>
+            </Pressable>
+          </Pressable>
         </Pressable>
       </Modal>
 
@@ -228,58 +271,54 @@ export default function ProfileScreen() {
           style={styles.modalOverlay}
           onPress={() => setAboutModalVisible(false)}
         >
-          <View style={[styles.aboutModalContent, { backgroundColor: theme.backgroundDefault }]}>
+          <Pressable style={[styles.aboutModalContent, { backgroundColor: theme.backgroundDefault }]}>
             <ScrollView showsVerticalScrollIndicator={false}>
               <View style={styles.aboutHeader}>
                 <View style={[styles.aboutLogoContainer, { backgroundColor: Colors.light.primary }]}>
                   <Feather name="map-pin" size={40} color="#FFFFFF" />
                 </View>
                 <ThemedText style={styles.aboutAppName}>MapeIA</ThemedText>
-                <ThemedText style={styles.aboutVersion}>Versão 1.0.0</ThemedText>
+                <ThemedText style={styles.aboutVersion}>{t.version} 1.0.0</ThemedText>
               </View>
 
               <View style={styles.aboutSection}>
-                <ThemedText style={styles.aboutSectionTitle}>Sobre o Aplicativo</ThemedText>
-                <ThemedText style={styles.aboutText}>
-                  O MapeIA é uma plataforma profissional de vistorias ambientais desenvolvida para técnicos de campo que trabalham em áreas remotas de reservatórios hidrelétricos.
-                </ThemedText>
-                <ThemedText style={styles.aboutText}>
-                  O aplicativo substitui formulários de papel por uma solução digital com capacidade offline, captura de fotos, mapeamento de polígonos por coordenadas UTM e geração automatizada de relatórios em PDF e Word.
-                </ThemedText>
+                <ThemedText style={styles.aboutSectionTitle}>{t.aboutTheApp}</ThemedText>
+                <ThemedText style={styles.aboutText}>{t.appDescription1}</ThemedText>
+                <ThemedText style={styles.aboutText}>{t.appDescription2}</ThemedText>
               </View>
 
               <View style={styles.aboutSection}>
-                <ThemedText style={styles.aboutSectionTitle}>Funcionalidades</ThemedText>
+                <ThemedText style={styles.aboutSectionTitle}>{t.features}</ThemedText>
                 <View style={styles.featureItem}>
                   <Feather name="wifi-off" size={16} color={Colors.light.accent} />
-                  <ThemedText style={styles.featureText}>Modo offline com sincronização</ThemedText>
+                  <ThemedText style={styles.featureText}>{t.featureOffline}</ThemedText>
                 </View>
                 <View style={styles.featureItem}>
                   <Feather name="camera" size={16} color={Colors.light.accent} />
-                  <ThemedText style={styles.featureText}>Captura de fotos com legendas</ThemedText>
+                  <ThemedText style={styles.featureText}>{t.featurePhotos}</ThemedText>
                 </View>
                 <View style={styles.featureItem}>
                   <Feather name="map" size={16} color={Colors.light.accent} />
-                  <ThemedText style={styles.featureText}>Mapeamento de polígonos UTM</ThemedText>
+                  <ThemedText style={styles.featureText}>{t.featurePolygon}</ThemedText>
                 </View>
                 <View style={styles.featureItem}>
                   <Feather name="navigation" size={16} color={Colors.light.accent} />
-                  <ThemedText style={styles.featureText}>Captura automática de GPS</ThemedText>
+                  <ThemedText style={styles.featureText}>{t.featureGPS}</ThemedText>
                 </View>
                 <View style={styles.featureItem}>
                   <Feather name="file-text" size={16} color={Colors.light.accent} />
-                  <ThemedText style={styles.featureText}>Geração de relatórios PDF e Word</ThemedText>
+                  <ThemedText style={styles.featureText}>{t.featureReports}</ThemedText>
                 </View>
               </View>
 
               <View style={styles.aboutSection}>
-                <ThemedText style={styles.aboutSectionTitle}>Desenvolvido por</ThemedText>
+                <ThemedText style={styles.aboutSectionTitle}>{t.developedBy}</ThemedText>
                 <View style={styles.developerInfo}>
                   <ThemedText style={styles.companyName}>
                     EcoBrasil Consultoria Ambiental
                   </ThemedText>
                   <ThemedText style={styles.developerName}>
-                    por Maurivan Vaz Ribeiro
+                    {t.by} Maurivan Vaz Ribeiro
                   </ThemedText>
                   <ThemedText 
                     style={styles.cnpjText}
@@ -296,9 +335,9 @@ export default function ProfileScreen() {
               style={[styles.aboutCloseButton, { backgroundColor: Colors.light.accent }]}
               onPress={() => setAboutModalVisible(false)}
             >
-              <ThemedText style={styles.aboutCloseText}>Fechar</ThemedText>
+              <ThemedText style={styles.aboutCloseText}>{t.close}</ThemedText>
             </Pressable>
-          </View>
+          </Pressable>
         </Pressable>
       </Modal>
     </ThemedView>
@@ -344,9 +383,10 @@ function SettingsItem({ icon, label, value, onPress, theme }: SettingsItemProps)
 
 interface LogoutButtonProps {
   onPress: () => void;
+  label: string;
 }
 
-function LogoutButton({ onPress }: LogoutButtonProps) {
+function LogoutButton({ onPress, label }: LogoutButtonProps) {
   const scale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -374,7 +414,7 @@ function LogoutButton({ onPress }: LogoutButtonProps) {
         lightColor={Colors.light.error}
         darkColor={Colors.dark.error}
       >
-        Sair da conta
+        {label}
       </ThemedText>
     </AnimatedPressable>
   );
@@ -521,6 +561,30 @@ const styles = StyleSheet.create({
   modalCloseText: {
     fontSize: 16,
     color: Colors.light.textSecondary,
+  },
+  notificationIconContainer: {
+    alignItems: "center",
+    marginBottom: Spacing.lg,
+  },
+  notificationDescription: {
+    fontSize: 14,
+    textAlign: "center",
+    marginBottom: Spacing.xl,
+    lineHeight: 22,
+  },
+  settingsButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.md,
+    gap: Spacing.sm,
+    marginBottom: Spacing.md,
+  },
+  settingsButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#FFFFFF",
   },
   aboutModalContent: {
     width: "100%",
