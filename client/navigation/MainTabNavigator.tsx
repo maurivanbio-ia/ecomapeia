@@ -6,11 +6,13 @@ import { Platform, StyleSheet } from "react-native";
 import HomeStackNavigator from "@/navigation/HomeStackNavigator";
 import ProfileStackNavigator from "@/navigation/ProfileStackNavigator";
 import VistoriasStackNavigator from "@/navigation/VistoriasStackNavigator";
+import IAStackNavigator from "@/navigation/IAStackNavigator";
 import { useTheme } from "@/hooks/useTheme";
 
 export type MainTabParamList = {
   HomeTab: undefined;
   VistoriasTab: undefined;
+  IATab: undefined;
   ProfileTab: undefined;
 };
 
@@ -62,6 +64,16 @@ export default function MainTabNavigator() {
           title: "Vistorias",
           tabBarIcon: ({ color, size }) => (
             <Feather name="clipboard" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="IATab"
+        component={IAStackNavigator}
+        options={{
+          title: "IA",
+          tabBarIcon: ({ color, size }) => (
+            <Feather name="cpu" size={size} color={color} />
           ),
         }}
       />
