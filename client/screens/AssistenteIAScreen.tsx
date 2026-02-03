@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import Animated, { FadeInDown } from "react-native-reanimated";
@@ -38,6 +39,7 @@ const QUICK_QUESTIONS = [
 export default function AssistenteIAScreen() {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
+  const tabBarHeight = useBottomTabBarHeight();
   const headerHeight = useHeaderHeight();
   const flatListRef = useRef<FlatList>(null);
   
@@ -190,7 +192,7 @@ export default function AssistenteIAScreen() {
           showsVerticalScrollIndicator={false}
         />
 
-        <View style={[styles.inputContainer, { paddingBottom: insets.bottom + Spacing.sm }]}>
+        <View style={[styles.inputContainer, { paddingBottom: tabBarHeight + Spacing.sm }]}>
           <View style={[styles.inputWrapper, { backgroundColor: theme.backgroundDefault, borderColor: theme.border }]}>
             <TextInput
               style={[styles.input, { color: theme.text }]}
