@@ -7,6 +7,7 @@ import { registerChatRoutes } from "./replit_integrations/chat";
 import pdfRoutes from "./routes/pdf";
 import docxRoutes from "./routes/docx";
 import kmzRoutes from "./routes/kmz";
+import tenantRoutes from "./routes/tenant";
 import aiRoutes from "./ai-routes";
 import mapbiomasRoutes from "./mapbiomas-routes";
 import environmentalRoutes from "./environmental-routes";
@@ -35,6 +36,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Register Team and Notification routes
   app.use("/api/team", teamRoutes);
+  
+  // Register Multi-tenant routes (Empresas e Projetos)
+  app.use("/api/tenant", tenantRoutes);
   
   // Register PDF routes
   app.use("/api/pdf", pdfRoutes);
