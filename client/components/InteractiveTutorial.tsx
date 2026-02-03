@@ -22,6 +22,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedText } from "@/components/ThemedText";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
+import { useAuth } from "@/hooks/useAuth";
 
 const TUTORIAL_COMPLETED_KEY = "@mapeia_tutorial_completed";
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -145,18 +146,27 @@ export function InteractiveTutorial({ onComplete, forceShow = false, onClose }: 
   const [visible, setVisible] = useState(forceShow);
   const [currentStep, setCurrentStep] = useState(0);
   const insets = useSafeAreaInsets();
+  const { user, isLoading: authLoading } = useAuth();
   
   const pulseScale = useSharedValue(1);
   const pulseOpacity = useSharedValue(1);
 
   useEffect(() => {
+    // Only show tutorial if user is logged in
+    if (authLoading) return;
+    
+    if (!user) {
+      setVisible(false);
+      return;
+    }
+    
     if (forceShow) {
       setVisible(true);
       setCurrentStep(0);
     } else {
       checkTutorialStatus();
     }
-  }, [forceShow]);
+  }, [forceShow, user, authLoading]);
 
   useEffect(() => {
     const step = tutorialSteps[currentStep];
