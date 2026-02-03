@@ -10,11 +10,13 @@ import {
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import Animated, { FadeIn } from "react-native-reanimated";
+import { useQuery } from "@tanstack/react-query";
 
 import { ThemedText } from "@/components/ThemedText";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 import {
   searchAlert,
+  searchAlertsByMunicipality,
   MapBiomasAlert,
   getBiomeColor,
   getSourceLabel,
@@ -29,13 +31,22 @@ interface MapBiomasPanelProps {
   onAlertSelect?: (alertCode: number) => void;
 }
 
+type SearchMode = "code" | "inspection";
+
 export function MapBiomasPanel({ theme, onAlertSelect }: MapBiomasPanelProps) {
+  const [searchMode, setSearchMode] = useState<SearchMode>("code");
   const [isLoading, setIsLoading] = useState(false);
   const [alertCode, setAlertCode] = useState("");
   const [alert, setAlert] = useState<MapBiomasAlert | null>(null);
+  const [alerts, setAlerts] = useState<MapBiomasAlert[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [selectedVistoria, setSelectedVistoria] = useState<any>(null);
 
-  const handleSearch = async () => {
+  const { data: vistorias = [] } = useQuery<any[]>({
+    queryKey: ["/api/vistorias"],
+  });
+
+  const handleSearchByCode = async () => {
     const code = parseInt(alertCode, 10);
     if (isNaN(code) || code <= 0) {
       setError("Digite um código de alerta válido");
@@ -46,6 +57,7 @@ export function MapBiomasPanel({ theme, onAlertSelect }: MapBiomasPanelProps) {
     setIsLoading(true);
     setError(null);
     setAlert(null);
+    setAlerts([]);
 
     try {
       const result = await searchAlert(code);
@@ -64,6 +76,44 @@ export function MapBiomasPanel({ theme, onAlertSelect }: MapBiomasPanelProps) {
     }
   };
 
+  const handleSearchByInspection = async (vistoria: any) => {
+    if (!vistoria?.municipio) {
+      setError("Vistoria não possui município definido");
+      return;
+    }
+
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setIsLoading(true);
+    setError(null);
+    setAlert(null);
+    setAlerts([]);
+    setSelectedVistoria(vistoria);
+
+    try {
+      const results = await searchAlertsByMunicipality(vistoria.municipio);
+      setAlerts(results);
+      if (results.length === 0) {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      } else {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }
+    } catch (err: any) {
+      setError(err.message || "Falha ao buscar alertas");
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleModeChange = (mode: SearchMode) => {
+    setSearchMode(mode);
+    setAlert(null);
+    setAlerts([]);
+    setError(null);
+    setSelectedVistoria(null);
+    setAlertCode("");
+  };
+
   const severity = alert ? getAlertSeverity(alert.areaHa) : null;
 
   return (
@@ -78,37 +128,132 @@ export function MapBiomasPanel({ theme, onAlertSelect }: MapBiomasPanelProps) {
         </View>
       </View>
 
-      <ThemedText style={styles.description}>
-        Consulte alertas de desmatamento pelo código do alerta MapBiomas.
-      </ThemedText>
-
-      <View style={styles.searchContainer}>
-        <TextInput
-          style={[styles.input, { backgroundColor: theme.border + "40", color: theme.text }]}
-          placeholder="Código do alerta (ex: 12345)"
-          placeholderTextColor={theme.tabIconDefault}
-          value={alertCode}
-          onChangeText={setAlertCode}
-          keyboardType="numeric"
-        />
+      <View style={styles.modeTabs}>
         <Pressable
-          onPress={handleSearch}
-          disabled={isLoading || !alertCode.trim()}
+          onPress={() => handleModeChange("code")}
           style={[
-            styles.searchButton,
-            { 
-              backgroundColor: alertCode.trim() ? "#2E7D32" : theme.border,
-              opacity: isLoading ? 0.7 : 1 
-            },
+            styles.modeTab,
+            { backgroundColor: searchMode === "code" ? "#2E7D32" : theme.border + "40" },
           ]}
         >
-          {isLoading ? (
-            <ActivityIndicator size="small" color="#FFFFFF" />
-          ) : (
-            <Feather name="search" size={18} color="#FFFFFF" />
-          )}
+          <Feather
+            name="hash"
+            size={14}
+            color={searchMode === "code" ? "#FFFFFF" : theme.tabIconDefault}
+          />
+          <ThemedText
+            style={[
+              styles.modeTabText,
+              { color: searchMode === "code" ? "#FFFFFF" : theme.text },
+            ]}
+          >
+            Por Código
+          </ThemedText>
+        </Pressable>
+        <Pressable
+          onPress={() => handleModeChange("inspection")}
+          style={[
+            styles.modeTab,
+            { backgroundColor: searchMode === "inspection" ? "#2E7D32" : theme.border + "40" },
+          ]}
+        >
+          <Feather
+            name="clipboard"
+            size={14}
+            color={searchMode === "inspection" ? "#FFFFFF" : theme.tabIconDefault}
+          />
+          <ThemedText
+            style={[
+              styles.modeTabText,
+              { color: searchMode === "inspection" ? "#FFFFFF" : theme.text },
+            ]}
+          >
+            Por Vistoria
+          </ThemedText>
         </Pressable>
       </View>
+
+      {searchMode === "code" ? (
+        <>
+          <ThemedText style={styles.description}>
+            Consulte alertas de desmatamento pelo código do alerta MapBiomas.
+          </ThemedText>
+
+          <View style={styles.searchContainer}>
+            <TextInput
+              style={[styles.input, { backgroundColor: theme.border + "40", color: theme.text }]}
+              placeholder="Código do alerta (ex: 12345)"
+              placeholderTextColor={theme.tabIconDefault}
+              value={alertCode}
+              onChangeText={setAlertCode}
+              keyboardType="numeric"
+            />
+            <Pressable
+              onPress={handleSearchByCode}
+              disabled={isLoading || !alertCode.trim()}
+              style={[
+                styles.searchButton,
+                { 
+                  backgroundColor: alertCode.trim() ? "#2E7D32" : theme.border,
+                  opacity: isLoading ? 0.7 : 1 
+                },
+              ]}
+            >
+              {isLoading ? (
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              ) : (
+                <Feather name="search" size={18} color="#FFFFFF" />
+              )}
+            </Pressable>
+          </View>
+        </>
+      ) : (
+        <>
+          <ThemedText style={styles.description}>
+            Selecione uma vistoria para buscar alertas no município correspondente.
+          </ThemedText>
+
+          {vistorias.length > 0 ? (
+            <ScrollView style={styles.vistoriasList} nestedScrollEnabled>
+              {vistorias.map((v: any) => (
+                <Pressable
+                  key={v.id}
+                  onPress={() => handleSearchByInspection(v)}
+                  style={[
+                    styles.vistoriaItem,
+                    { 
+                      borderColor: selectedVistoria?.id === v.id ? "#2E7D32" : theme.border,
+                      backgroundColor: selectedVistoria?.id === v.id ? "#2E7D32" + "10" : "transparent",
+                    },
+                  ]}
+                >
+                  <View style={styles.vistoriaInfo}>
+                    <ThemedText style={styles.vistoriaNotificacao} numberOfLines={1}>
+                      {v.numero_notificacao || "Sem número"}
+                    </ThemedText>
+                    <ThemedText style={styles.vistoriaMunicipio} numberOfLines={1}>
+                      <Feather name="map-pin" size={11} color={theme.tabIconDefault} />{" "}
+                      {v.municipio || "Sem município"}
+                    </ThemedText>
+                  </View>
+                  <Feather
+                    name={selectedVistoria?.id === v.id ? "check-circle" : "chevron-right"}
+                    size={16}
+                    color={selectedVistoria?.id === v.id ? "#2E7D32" : theme.tabIconDefault}
+                  />
+                </Pressable>
+              ))}
+            </ScrollView>
+          ) : (
+            <View style={styles.emptyVistorias}>
+              <Feather name="inbox" size={24} color={theme.tabIconDefault} />
+              <ThemedText style={styles.emptyVistoriasText}>
+                Nenhuma vistoria cadastrada
+              </ThemedText>
+            </View>
+          )}
+        </>
+      )}
 
       {error ? (
         <ThemedText style={styles.errorText}>{error}</ThemedText>
@@ -235,12 +380,110 @@ export function MapBiomasPanel({ theme, onAlertSelect }: MapBiomasPanelProps) {
         </Animated.View>
       ) : null}
 
-      {!alert && !error && !isLoading ? (
+      {isLoading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#2E7D32" />
+          <ThemedText style={styles.loadingText}>
+            {searchMode === "code" ? "Buscando alerta..." : `Buscando alertas em ${selectedVistoria?.municipio}...`}
+          </ThemedText>
+        </View>
+      ) : null}
+
+      {searchMode === "inspection" && alerts.length > 0 ? (
+        <Animated.View entering={FadeIn.duration(400)}>
+          <ThemedText style={styles.resultsCount}>
+            {alerts.length} alerta{alerts.length !== 1 ? "s" : ""} em {selectedVistoria?.municipio}
+          </ThemedText>
+          <ScrollView style={styles.alertsList} nestedScrollEnabled>
+            {alerts.map((a, index) => {
+              const alertSeverity = getAlertSeverity(a.areaHa);
+              return (
+                <Pressable
+                  key={a.alertCode}
+                  onPress={() => onAlertSelect?.(a.alertCode)}
+                  style={[styles.alertCardCompact, { borderColor: theme.border }]}
+                >
+                  <View style={styles.alertHeader}>
+                    <View
+                      style={[
+                        styles.severityBadge,
+                        { backgroundColor: getAlertSeverityColor(alertSeverity) + "20" },
+                      ]}
+                    >
+                      <View
+                        style={[
+                          styles.severityDot,
+                          { backgroundColor: getAlertSeverityColor(alertSeverity) },
+                        ]}
+                      />
+                      <ThemedText
+                        style={[styles.severityText, { color: getAlertSeverityColor(alertSeverity) }]}
+                      >
+                        {formatArea(a.areaHa)}
+                      </ThemedText>
+                    </View>
+                    <View
+                      style={[
+                        styles.biomeBadge,
+                        { backgroundColor: getBiomeColor(a.biome) + "20" },
+                      ]}
+                    >
+                      <ThemedText style={[styles.biomeText, { color: getBiomeColor(a.biome) }]}>
+                        {a.biome}
+                      </ThemedText>
+                    </View>
+                  </View>
+                  <View style={styles.alertRowCompact}>
+                    <ThemedText style={styles.alertCodeText}>#{a.alertCode}</ThemedText>
+                    <ThemedText style={styles.alertDateText}>{formatDate(a.detectedAt)}</ThemedText>
+                  </View>
+                  <View style={styles.statsRowCompact}>
+                    <View style={styles.statItemCompact}>
+                      <Feather name="home" size={12} color="#2196F3" />
+                      <ThemedText style={styles.statValueCompact}>{a.ruralPropertiesTotal}</ThemedText>
+                    </View>
+                    <View style={styles.statItemCompact}>
+                      <Feather name="layers" size={12} color="#4CAF50" />
+                      <ThemedText style={styles.statValueCompact}>{a.legalReservesTotal}</ThemedText>
+                    </View>
+                    <View style={styles.statItemCompact}>
+                      <Feather name="shield" size={12} color="#FF9800" />
+                      <ThemedText style={styles.statValueCompact}>{a.appTotal}</ThemedText>
+                    </View>
+                  </View>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+        </Animated.View>
+      ) : null}
+
+      {searchMode === "inspection" && selectedVistoria && alerts.length === 0 && !isLoading && !error ? (
+        <View style={styles.emptyState}>
+          <Feather name="check-circle" size={40} color="#4CAF50" />
+          <ThemedText style={styles.emptyTitle}>Nenhum Alerta</ThemedText>
+          <ThemedText style={styles.emptySubtitle}>
+            Não foram encontrados alertas de desmatamento em {selectedVistoria.municipio}.
+          </ThemedText>
+        </View>
+      ) : null}
+
+      {searchMode === "code" && !alert && !error && !isLoading ? (
         <View style={styles.emptyState}>
           <Feather name="search" size={40} color={theme.tabIconDefault} />
           <ThemedText style={styles.emptyTitle}>Consultar Alerta</ThemedText>
           <ThemedText style={styles.emptySubtitle}>
             Digite o código do alerta MapBiomas para ver os detalhes de desmatamento, áreas protegidas e propriedades rurais afetadas.
+          </ThemedText>
+        </View>
+      ) : null}
+
+      {searchMode === "inspection" && !selectedVistoria && !isLoading ? (
+        <View style={styles.emptyState}>
+          <Feather name="clipboard" size={40} color={theme.tabIconDefault} />
+          <ThemedText style={styles.emptyTitle}>Selecionar Vistoria</ThemedText>
+          <ThemedText style={styles.emptySubtitle}>
+            Selecione uma vistoria acima para buscar alertas de desmatamento no município correspondente.
           </ThemedText>
         </View>
       ) : null}
@@ -437,5 +680,108 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: Spacing.xs,
     lineHeight: 18,
+  },
+  modeTabs: {
+    flexDirection: "row",
+    gap: Spacing.sm,
+    marginBottom: Spacing.md,
+  },
+  modeTab: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.md,
+    gap: Spacing.xs,
+  },
+  modeTabText: {
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  vistoriasList: {
+    maxHeight: 180,
+    marginBottom: Spacing.md,
+  },
+  vistoriaItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: Spacing.sm,
+    borderWidth: 1,
+    borderRadius: BorderRadius.sm,
+    marginBottom: Spacing.xs,
+  },
+  vistoriaInfo: {
+    flex: 1,
+  },
+  vistoriaNotificacao: {
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  vistoriaMunicipio: {
+    fontSize: 11,
+    color: Colors.light.textSecondary,
+    marginTop: 2,
+  },
+  emptyVistorias: {
+    alignItems: "center",
+    padding: Spacing.lg,
+    gap: Spacing.sm,
+  },
+  emptyVistoriasText: {
+    fontSize: 13,
+    color: Colors.light.textSecondary,
+  },
+  loadingContainer: {
+    alignItems: "center",
+    paddingVertical: Spacing.xl,
+    gap: Spacing.md,
+  },
+  loadingText: {
+    fontSize: 14,
+    color: Colors.light.textSecondary,
+  },
+  resultsCount: {
+    fontSize: 13,
+    color: Colors.light.textSecondary,
+    marginBottom: Spacing.sm,
+  },
+  alertsList: {
+    maxHeight: 350,
+  },
+  alertCardCompact: {
+    borderWidth: 1,
+    borderRadius: BorderRadius.sm,
+    padding: Spacing.sm,
+    marginBottom: Spacing.sm,
+  },
+  alertRowCompact: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginVertical: 4,
+  },
+  alertCodeText: {
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  alertDateText: {
+    fontSize: 11,
+    color: Colors.light.textSecondary,
+  },
+  statsRowCompact: {
+    flexDirection: "row",
+    gap: Spacing.md,
+    marginTop: 4,
+  },
+  statItemCompact: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  statValueCompact: {
+    fontSize: 12,
+    fontWeight: "500",
   },
 });
