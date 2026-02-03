@@ -155,14 +155,74 @@ Preferred communication style: Simple, everyday language.
 - Map screenshot capture for documentation
 - Web fallback shows point count with Expo Go instructions
 
+**GPS Auto-Capture (NEW):**
+- Real-time GPS coordinate capture with expo-location
+- Automatic conversion from Lat/Long to UTM coordinates
+- Zone detection (supports all UTM zones)
+- One-tap capture of current position as polygon point
+- Utility functions in `client/lib/gpsUtils.ts`
+
+**Digital Signature Capture (NEW):**
+- SVG-based drawing canvas with pan responder
+- Clear and save functionality
+- Signature preview display
+- Component: `client/components/SignatureCapture.tsx`
+
+**Visual Date Picker (NEW):**
+- Native date picker on iOS (modal spinner)
+- Native date picker on Android (default picker)
+- Web fallback with text input
+- Components: `DatePickerField.tsx` / `DatePickerField.web.tsx`
+
+**PDF Report Generation (NEW):**
+- Server-side HTML template matching UHE Itupararanga standard format
+- Property information, coordinates, interventions, photos
+- Endpoint: `/api/pdf/vistoria/:id`
+- Client uses expo-print and expo-sharing for native rendering
+
+**Offline Mode with Synchronization (NEW):**
+- AsyncStorage-based local persistence for vistorias
+- Automatic queue for pending uploads
+- Manual sync trigger from dashboard
+- Visual status indicators (Sincronizado/Pendente)
+- Utility functions in `client/lib/offlineStorage.ts`
+
+**Dashboard with Statistics (NEW):**
+- Total vistorias count
+- Pending sync count
+- Synced count
+- Recent vistorias list with status badges
+- One-tap synchronization button
+
+**Inspection Details Screen (NEW):**
+- View complete inspection data
+- PDF export functionality
+- Polygon visualization
+- Photo gallery display
+- Screen: `client/screens/DetalhesVistoriaScreen.tsx`
+
+**General Map View (NEW):**
+- All property polygons on single satellite map
+- Interactive markers with callouts
+- Navigation to inspection details
+- Legend showing total properties
+- Screen: `client/screens/MapaGeralScreen.tsx` (with web fallback)
+
 **Components:**
 - `MapPolygonView` - Platform-aware polygon display
   - `MapPolygonView.tsx` - Native version with react-native-maps
   - `MapPolygonView.web.tsx` - Web fallback with Expo Go guidance
+- `SignatureCapture` - Digital signature canvas
+- `DatePickerField` - Visual date selection (with web fallback)
+
+**Additional NPM Packages:**
+- expo-location - GPS coordinates capture
+- expo-print - Native PDF rendering
+- expo-sharing - Document sharing
+- @react-native-community/datetimepicker - Date selection
 
 ### Future Integrations (Planned)
 
-- PDF report generation matching existing templates
 - Photo storage with cloud upload
-- Offline-first data sync system
 - AI-powered inspection suggestions and analysis
+- Full offline-first sync with conflict resolution
