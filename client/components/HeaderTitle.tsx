@@ -28,7 +28,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   icon: {
-    width: 100,
-    height: 32,
+    width: 140,
+    height: 44,
   },
 });
