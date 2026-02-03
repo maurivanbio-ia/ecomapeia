@@ -667,6 +667,59 @@ export default function NovaVistoriaScreen() {
     );
   };
 
+  // Track if environmental checks were already triggered for manual entry
+  const [manualChecksTriggered, setManualChecksTriggered] = useState(false);
+
+  // Check and trigger environmental verification when manual coordinates are entered
+  const checkManualCoordinates = () => {
+    // Only check if not already triggered and we have at least one point
+    if (manualChecksTriggered || utmPoints.length === 0) return;
+
+    const firstPoint = utmPoints[0];
+    const e = parseFloat(firstPoint.e);
+    const n = parseFloat(firstPoint.n);
+    const zonaUtm = formData.zona_utm || "";
+
+    // Validate that we have valid UTM coordinates
+    if (isNaN(e) || isNaN(n) || e === 0 || n === 0) return;
+    if (!zonaUtm || zonaUtm.length < 2) return;
+
+    // Parse zone number and letter
+    const zoneMatch = zonaUtm.match(/^(\d+)([A-Z])?$/i);
+    if (!zoneMatch) return;
+
+    const zone = parseInt(zoneMatch[1], 10);
+    const zoneLetter = (zoneMatch[2] || "S").toUpperCase();
+    const isNorth = zoneLetter >= "N";
+
+    // Validate UTM ranges
+    if (zone < 1 || zone > 60) return;
+    if (e < 100000 || e > 900000) return;
+    if (n < 0 || n > 10000000) return;
+
+    try {
+      const latLng = utmToLatLng(e, n, zone, isNorth);
+      
+      if (latLng.latitude && latLng.longitude) {
+        setManualChecksTriggered(true);
+        
+        // Trigger all environmental checks
+        fetchCARByCoordinates(latLng.latitude, latLng.longitude);
+        fetchUCByCoordinates(latLng.latitude, latLng.longitude);
+        checkEmbargoByCoordinates(latLng.latitude, latLng.longitude, carInfo?.carCode);
+        fetchWeatherByCoordinates(latLng.latitude, latLng.longitude);
+        
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        Alert.alert(
+          "Coordenadas Válidas",
+          `Analisando dados ambientais para:\nE: ${e.toFixed(2)}\nN: ${n.toFixed(2)}\n\nBuscando CAR, Unidades de Conservação e verificando embargos...`
+        );
+      }
+    } catch (error) {
+      console.error("Error converting UTM to LatLng:", error);
+    }
+  };
+
   const pickImage = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== "granted") {
@@ -945,6 +998,7 @@ export default function NovaVistoriaScreen() {
               placeholderTextColor={theme.tabIconDefault}
               value={formData.zona_utm}
               onChangeText={(value) => updateField("zona_utm", value)}
+              onBlur={checkManualCoordinates}
             />
           </View>
 
@@ -969,6 +1023,7 @@ export default function NovaVistoriaScreen() {
                   placeholderTextColor={theme.tabIconDefault}
                   value={point.e}
                   onChangeText={(value) => updateUtmPoint(point.id, "e", value)}
+                  onBlur={() => index === 0 && checkManualCoordinates()}
                   keyboardType="numeric"
                 />
               </View>
@@ -986,6 +1041,7 @@ export default function NovaVistoriaScreen() {
                   placeholderTextColor={theme.tabIconDefault}
                   value={point.n}
                   onChangeText={(value) => updateUtmPoint(point.id, "n", value)}
+                  onBlur={() => index === 0 && checkManualCoordinates()}
                   keyboardType="numeric"
                 />
               </View>
