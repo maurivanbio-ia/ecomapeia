@@ -25,6 +25,25 @@ interface Usuario {
   tipo_usuario: string;
 }
 
+const TEAM_COLORS = [
+  { id: "green", color: "#2E7D32", label: "Verde" },
+  { id: "blue", color: "#1565C0", label: "Azul" },
+  { id: "orange", color: "#EF6C00", label: "Laranja" },
+  { id: "purple", color: "#7B1FA2", label: "Roxo" },
+  { id: "red", color: "#C62828", label: "Vermelho" },
+  { id: "teal", color: "#00838F", label: "Azul-petróleo" },
+];
+
+const AREAS_ATUACAO = [
+  "Margem Esquerda",
+  "Margem Direita",
+  "Setor Norte",
+  "Setor Sul",
+  "Setor Central",
+  "Área de Preservação",
+  "Reservatório Principal",
+];
+
 export default function EquipesScreen() {
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
@@ -34,6 +53,9 @@ export default function EquipesScreen() {
   const [selectedTeam, setSelectedTeam] = useState<Equipe | null>(null);
   const [newTeamName, setNewTeamName] = useState("");
   const [newTeamDescription, setNewTeamDescription] = useState("");
+  const [newTeamColor, setNewTeamColor] = useState(TEAM_COLORS[0].id);
+  const [newTeamArea, setNewTeamArea] = useState("");
+  const [selectedResponsavel, setSelectedResponsavel] = useState<string | null>(null);
 
   const { data: teamsData, isLoading: loadingTeams } = useQuery({
     queryKey: ["/api/team/equipes"],
@@ -49,21 +71,28 @@ export default function EquipesScreen() {
   });
 
   const createTeamMutation = useMutation({
-    mutationFn: async (data: { nome: string; descricao: string }) => {
+    mutationFn: async (data: { nome: string; descricao: string; cor?: string; area_atuacao?: string }) => {
       const response = await apiRequest("POST", "/api/team/equipes", {
         ...data,
-        responsavel_id: user?.id,
+        responsavel_id: selectedResponsavel || user?.id,
       });
       return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/team/equipes"] });
       setShowCreateModal(false);
-      setNewTeamName("");
-      setNewTeamDescription("");
+      resetForm();
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     },
   });
+
+  const resetForm = () => {
+    setNewTeamName("");
+    setNewTeamDescription("");
+    setNewTeamColor(TEAM_COLORS[0].id);
+    setNewTeamArea("");
+    setSelectedResponsavel(null);
+  };
 
   const addMemberMutation = useMutation({
     mutationFn: async (data: { equipe_id: number; usuario_id: string }) => {
@@ -91,18 +120,27 @@ export default function EquipesScreen() {
     },
   });
 
-  const teams: Equipe[] = teamsData?.teams || [];
-  const users: Usuario[] = usersData?.users || [];
-  const members = membersData?.members || [];
+  const teams: Equipe[] = (teamsData as any)?.teams || [];
+  const users: Usuario[] = (usersData as any)?.users || [];
+  const members = (membersData as any)?.members || [];
 
   const handleCreateTeam = () => {
     if (!newTeamName.trim()) {
       Alert.alert("Erro", "Nome da equipe é obrigatório");
       return;
     }
+    
+    const teamColor = TEAM_COLORS.find(c => c.id === newTeamColor)?.color || TEAM_COLORS[0].color;
+    const descricaoCompleta = [
+      newTeamDescription,
+      newTeamArea ? `Área: ${newTeamArea}` : null,
+    ].filter(Boolean).join("\n");
+
     createTeamMutation.mutate({
       nome: newTeamName,
-      descricao: newTeamDescription,
+      descricao: descricaoCompleta,
+      cor: teamColor,
+      area_atuacao: newTeamArea,
     });
   };
 
@@ -198,48 +236,153 @@ export default function EquipesScreen() {
         <View style={[styles.modalContainer, { paddingTop: insets.top }]}>
           <View style={styles.modalHeader}>
             <ThemedText style={styles.modalTitle}>Nova Equipe</ThemedText>
-            <Pressable onPress={() => setShowCreateModal(false)}>
+            <Pressable onPress={() => { setShowCreateModal(false); resetForm(); }}>
               <Feather name="x" size={24} color={Colors.light.text} />
             </Pressable>
           </View>
 
-          <View style={styles.modalContent}>
-            <View style={styles.inputGroup}>
-              <ThemedText style={styles.label}>Nome da Equipe</ThemedText>
-              <TextInput
-                style={styles.input}
-                value={newTeamName}
-                onChangeText={setNewTeamName}
-                placeholder="Ex: Equipe Campo Sul"
-                placeholderTextColor={Colors.light.textSecondary}
-              />
-            </View>
+          <FlatList
+            data={[1]}
+            keyExtractor={() => "form"}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.formContent}
+            renderItem={() => (
+              <>
+                <View style={styles.inputGroup}>
+                  <ThemedText style={styles.label}>Nome da Equipe *</ThemedText>
+                  <TextInput
+                    style={styles.input}
+                    value={newTeamName}
+                    onChangeText={setNewTeamName}
+                    placeholder="Ex: Equipe Campo Sul"
+                    placeholderTextColor={Colors.light.textSecondary}
+                  />
+                </View>
 
-            <View style={styles.inputGroup}>
-              <ThemedText style={styles.label}>Descrição (opcional)</ThemedText>
-              <TextInput
-                style={[styles.input, styles.textArea]}
-                value={newTeamDescription}
-                onChangeText={setNewTeamDescription}
-                placeholder="Descreva a área de atuação da equipe"
-                placeholderTextColor={Colors.light.textSecondary}
-                multiline
-                numberOfLines={3}
-              />
-            </View>
+                <View style={styles.inputGroup}>
+                  <ThemedText style={styles.label}>Descrição</ThemedText>
+                  <TextInput
+                    style={[styles.input, styles.textArea]}
+                    value={newTeamDescription}
+                    onChangeText={setNewTeamDescription}
+                    placeholder="Descreva as responsabilidades da equipe"
+                    placeholderTextColor={Colors.light.textSecondary}
+                    multiline
+                    numberOfLines={3}
+                  />
+                </View>
 
-            <Pressable
-              style={[styles.createButton, createTeamMutation.isPending && styles.buttonDisabled]}
-              onPress={handleCreateTeam}
-              disabled={createTeamMutation.isPending}
-            >
-              {createTeamMutation.isPending ? (
-                <ActivityIndicator color="#fff" size="small" />
-              ) : (
-                <ThemedText style={styles.createButtonText}>Criar Equipe</ThemedText>
-              )}
-            </Pressable>
-          </View>
+                <View style={styles.inputGroup}>
+                  <ThemedText style={styles.label}>Cor de Identificação</ThemedText>
+                  <View style={styles.colorGrid}>
+                    {TEAM_COLORS.map((c) => (
+                      <Pressable
+                        key={c.id}
+                        onPress={() => {
+                          setNewTeamColor(c.id);
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        }}
+                        style={[
+                          styles.colorOption,
+                          { backgroundColor: c.color },
+                          newTeamColor === c.id && styles.colorSelected,
+                        ]}
+                      >
+                        {newTeamColor === c.id ? (
+                          <Feather name="check" size={18} color="#fff" />
+                        ) : null}
+                      </Pressable>
+                    ))}
+                  </View>
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <ThemedText style={styles.label}>Área de Atuação</ThemedText>
+                  <View style={styles.areaGrid}>
+                    {AREAS_ATUACAO.map((area) => (
+                      <Pressable
+                        key={area}
+                        onPress={() => {
+                          setNewTeamArea(newTeamArea === area ? "" : area);
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        }}
+                        style={[
+                          styles.areaOption,
+                          newTeamArea === area && styles.areaSelected,
+                        ]}
+                      >
+                        <ThemedText
+                          style={[
+                            styles.areaOptionText,
+                            newTeamArea === area && styles.areaSelectedText,
+                          ]}
+                        >
+                          {area}
+                        </ThemedText>
+                      </Pressable>
+                    ))}
+                  </View>
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <ThemedText style={styles.label}>Responsável</ThemedText>
+                  <View style={styles.responsavelList}>
+                    {users.length > 0 ? (
+                      users.slice(0, 5).map((u) => (
+                        <Pressable
+                          key={u.id}
+                          onPress={() => {
+                            setSelectedResponsavel(selectedResponsavel === u.id ? null : u.id);
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                          }}
+                          style={[
+                            styles.responsavelOption,
+                            selectedResponsavel === u.id && styles.responsavelSelected,
+                          ]}
+                        >
+                          <View style={[styles.responsavelAvatar, { backgroundColor: TEAM_COLORS.find(c => c.id === newTeamColor)?.color || Colors.light.accent }]}>
+                            <ThemedText style={styles.responsavelInitial}>
+                              {u.nome.charAt(0).toUpperCase()}
+                            </ThemedText>
+                          </View>
+                          <View style={styles.responsavelInfo}>
+                            <ThemedText style={styles.responsavelName}>{u.nome}</ThemedText>
+                            <ThemedText style={styles.responsavelRole}>{u.tipo_usuario}</ThemedText>
+                          </View>
+                          {selectedResponsavel === u.id ? (
+                            <Feather name="check-circle" size={20} color={Colors.light.success} />
+                          ) : (
+                            <Feather name="circle" size={20} color={Colors.light.border} />
+                          )}
+                        </Pressable>
+                      ))
+                    ) : (
+                      <ThemedText style={styles.noUsersText}>Nenhum usuário disponível</ThemedText>
+                    )}
+                  </View>
+                </View>
+
+                <Pressable
+                  style={[
+                    styles.createButton,
+                    { backgroundColor: TEAM_COLORS.find(c => c.id === newTeamColor)?.color || Colors.light.accent },
+                    createTeamMutation.isPending && styles.buttonDisabled
+                  ]}
+                  onPress={handleCreateTeam}
+                  disabled={createTeamMutation.isPending}
+                >
+                  {createTeamMutation.isPending ? (
+                    <ActivityIndicator color="#fff" size="small" />
+                  ) : (
+                    <>
+                      <Feather name="users" size={18} color="#fff" />
+                      <ThemedText style={styles.createButtonText}>Criar Equipe</ThemedText>
+                    </>
+                  )}
+                </Pressable>
+              </>
+            )}
+          />
         </View>
       </Modal>
 
@@ -374,7 +517,7 @@ const styles = StyleSheet.create({
   teamCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: Colors.light.surface,
+    backgroundColor: Colors.light.backgroundSecondary,
     padding: Spacing.lg,
     borderRadius: 12,
     gap: Spacing.md,
@@ -401,7 +544,7 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: Colors.light.background,
+    backgroundColor: Colors.light.backgroundRoot,
   },
   modalHeader: {
     flexDirection: "row",
@@ -428,24 +571,27 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   input: {
-    backgroundColor: Colors.light.surface,
+    backgroundColor: Colors.light.inputBackground,
     borderRadius: 8,
     padding: 14,
     fontSize: 16,
     color: Colors.light.text,
     borderWidth: 1,
-    borderColor: Colors.light.border,
+    borderColor: Colors.light.inputBorder,
   },
   textArea: {
     minHeight: 80,
     textAlignVertical: "top",
   },
   createButton: {
+    flexDirection: "row",
     backgroundColor: Colors.light.accent,
     padding: 16,
     borderRadius: 12,
     alignItems: "center",
+    justifyContent: "center",
     marginTop: Spacing.lg,
+    gap: Spacing.sm,
   },
   buttonDisabled: {
     opacity: 0.6,
@@ -471,7 +617,7 @@ const styles = StyleSheet.create({
   memberItem: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: Colors.light.surface,
+    backgroundColor: Colors.light.backgroundSecondary,
     padding: Spacing.md,
     borderRadius: 10,
     gap: Spacing.md,
@@ -506,9 +652,107 @@ const styles = StyleSheet.create({
   userItem: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: Colors.light.surface,
+    backgroundColor: Colors.light.backgroundSecondary,
     padding: Spacing.md,
     borderRadius: 10,
     gap: Spacing.md,
+  },
+  formContent: {
+    padding: Spacing.lg,
+    paddingBottom: Spacing["3xl"],
+  },
+  colorGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: Spacing.sm,
+  },
+  colorOption: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "transparent",
+  },
+  colorSelected: {
+    borderColor: "#fff",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  areaGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: Spacing.sm,
+  },
+  areaOption: {
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+    backgroundColor: Colors.light.backgroundSecondary,
+  },
+  areaSelected: {
+    borderColor: Colors.light.success,
+    backgroundColor: Colors.light.success + "15",
+  },
+  areaOptionText: {
+    fontSize: 13,
+    color: Colors.light.text,
+  },
+  areaSelectedText: {
+    color: Colors.light.success,
+    fontWeight: "600",
+  },
+  responsavelList: {
+    gap: Spacing.sm,
+  },
+  responsavelOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: Spacing.md,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+    backgroundColor: Colors.light.backgroundSecondary,
+    gap: Spacing.md,
+  },
+  responsavelSelected: {
+    borderColor: Colors.light.success,
+    backgroundColor: Colors.light.success + "10",
+  },
+  responsavelAvatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  responsavelInitial: {
+    color: "#fff",
+    fontWeight: "700",
+    fontSize: 14,
+  },
+  responsavelInfo: {
+    flex: 1,
+  },
+  responsavelName: {
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  responsavelRole: {
+    fontSize: 12,
+    color: Colors.light.textSecondary,
+  },
+  noUsersText: {
+    fontSize: 13,
+    color: Colors.light.textSecondary,
+    fontStyle: "italic",
+    textAlign: "center",
+    padding: Spacing.md,
   },
 });
