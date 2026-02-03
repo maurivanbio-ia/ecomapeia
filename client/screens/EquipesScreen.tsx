@@ -201,15 +201,7 @@ export default function EquipesScreen() {
   );
 
   return (
-    <ThemedView style={[styles.container, { paddingTop: insets.top + Spacing.lg }]}>
-      <View style={styles.header}>
-        <ThemedText style={styles.title}>Equipes</ThemedText>
-        <Pressable style={styles.addButton} onPress={() => setShowCreateModal(true)}>
-          <Feather name="plus" size={20} color="#fff" />
-          <ThemedText style={styles.addButtonText}>Nova Equipe</ThemedText>
-        </Pressable>
-      </View>
-
+    <ThemedView style={[styles.container, { paddingTop: Spacing.lg }]}>
       {loadingTeams ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={Colors.light.accent} />
@@ -455,6 +447,17 @@ export default function EquipesScreen() {
           </View>
         </View>
       </Modal>
+
+      <Pressable
+        style={[styles.fab, { bottom: insets.bottom + 20 }]}
+        onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+          setShowCreateModal(true);
+        }}
+      >
+        <Feather name="plus" size={24} color="#fff" />
+        <ThemedText style={styles.fabText}>Nova Equipe</ThemedText>
+      </Pressable>
     </ThemedView>
   );
 }
@@ -754,5 +757,26 @@ const styles = StyleSheet.create({
     fontStyle: "italic",
     textAlign: "center",
     padding: Spacing.md,
+  },
+  fab: {
+    position: "absolute",
+    right: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: Colors.light.accent,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 28,
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+  },
+  fabText: {
+    color: "#fff",
+    fontWeight: "700",
+    fontSize: 16,
   },
 });
