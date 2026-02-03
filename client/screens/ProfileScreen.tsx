@@ -312,6 +312,34 @@ export default function ProfileScreen() {
           </Pressable>
         </Animated.View>
 
+        {/* Admin Management Button - only for admins */}
+        {tenantData?.isAdmin ? (
+          <Animated.View entering={FadeInDown.duration(500).delay(175)}>
+            <Pressable
+              style={[styles.gestaoCard, { backgroundColor: "#8b5cf615", borderColor: "#8b5cf6" }]}
+              onPress={() => {
+                Haptics.selectionAsync();
+                navigation.navigate("Gestao");
+              }}
+            >
+              <View style={styles.tenantCardContent}>
+                <View style={[styles.tenantIcon, { backgroundColor: "#8b5cf6" }]}>
+                  <Feather name="settings" size={20} color="#fff" />
+                </View>
+                <View style={styles.tenantInfo}>
+                  <ThemedText style={styles.tenantEmpresaNome}>
+                    Gestão da Empresa
+                  </ThemedText>
+                  <ThemedText style={[styles.tenantProjetoNome, { color: theme.tabIconDefault }]}>
+                    Projetos, equipe e dashboard
+                  </ThemedText>
+                </View>
+              </View>
+              <Feather name="chevron-right" size={20} color={theme.tabIconDefault} />
+            </Pressable>
+          </Animated.View>
+        ) : null}
+
         {/* Appearance Settings */}
         <Animated.View entering={FadeInDown.duration(500).delay(200)}>
           <ThemedText style={styles.sectionTitle}>{t.settings}</ThemedText>
@@ -1168,5 +1196,14 @@ const styles = StyleSheet.create({
   tenantProjetoNome: {
     fontSize: 13,
     marginTop: 2,
+  },
+  gestaoCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.lg,
+    marginBottom: Spacing.xl,
+    borderLeftWidth: 4,
   },
 });
