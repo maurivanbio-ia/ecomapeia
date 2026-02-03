@@ -284,6 +284,43 @@ export default function NovaVistoriaScreen() {
   const [loadingCompliance, setLoadingCompliance] = useState(false);
   const [showComplianceModal, setShowComplianceModal] = useState(false);
 
+  const [savedTracks, setSavedTracks] = useState<Array<{
+    id: string;
+    legenda: string;
+    points: typeof trackPoints;
+    distance: number;
+    duration: number;
+    color: string;
+  }>>([]);
+  const [showTrackLegendModal, setShowTrackLegendModal] = useState(false);
+  const [trackLegendInput, setTrackLegendInput] = useState("");
+
+  const trackColors = ["#FF6B00", "#4CAF50", "#2196F3", "#9C27B0", "#FF5722", "#00BCD4", "#E91E63", "#795548"];
+
+  const saveCurrentTrack = () => {
+    if (trackPoints.length === 0) return;
+    
+    const newTrack = {
+      id: Date.now().toString(),
+      legenda: trackLegendInput.trim() || `Trajeto ${savedTracks.length + 1}`,
+      points: [...trackPoints],
+      distance: totalDistance,
+      duration: elapsedTime,
+      color: trackColors[savedTracks.length % trackColors.length],
+    };
+    
+    setSavedTracks(prev => [...prev, newTrack]);
+    clearTrack();
+    setTrackLegendInput("");
+    setShowTrackLegendModal(false);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  };
+
+  const removeTrack = (trackId: string) => {
+    setSavedTracks(prev => prev.filter(t => t.id !== trackId));
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  };
+
   const polygonCoordinates = useMemo(() => {
     const zoneMatch = formData.zona_utm.match(/(\d+)([A-Za-z])/);
     if (!zoneMatch) return [];
@@ -416,13 +453,39 @@ export default function NovaVistoriaScreen() {
           direcao_vento: weatherData.direcaoVento,
           nebulosidade: weatherData.nebulosidade,
         } : null,
-        track_points: trackPoints.length > 0 ? trackPoints.map(p => ({
-          lat: p.latitude,
-          lon: p.longitude,
-          alt: p.altitude,
-          acc: p.accuracy,
-          ts: p.timestamp,
-        })) : null,
+        track_points: (() => {
+          const allTracks = savedTracks.map(track => ({
+            legenda: track.legenda,
+            color: track.color,
+            distance: track.distance,
+            duration: track.duration,
+            points: track.points.map(p => ({
+              lat: p.latitude,
+              lon: p.longitude,
+              alt: p.altitude,
+              acc: p.accuracy,
+              ts: p.timestamp,
+            })),
+          }));
+          
+          if (trackPoints.length > 0) {
+            allTracks.push({
+              legenda: `Trajeto ${savedTracks.length + 1}`,
+              color: trackColors[savedTracks.length % trackColors.length],
+              distance: totalDistance,
+              duration: elapsedTime,
+              points: trackPoints.map(p => ({
+                lat: p.latitude,
+                lon: p.longitude,
+                alt: p.altitude,
+                acc: p.accuracy,
+                ts: p.timestamp,
+              })),
+            });
+          }
+          
+          return allTracks.length > 0 ? allTracks : null;
+        })(),
       });
       return response.json();
     },
@@ -1249,25 +1312,76 @@ export default function NovaVistoriaScreen() {
                 </Pressable>
               )}
               {trackPoints.length > 0 && !isTracking ? (
-                <Pressable
-                  onPress={() => {
-                    Alert.alert(
-                      "Limpar Trajeto",
-                      "Deseja apagar o trajeto gravado?",
-                      [
-                        { text: "Cancelar", style: "cancel" },
-                        { text: "Apagar", style: "destructive", onPress: clearTrack },
-                      ]
-                    );
-                  }}
-                  style={[styles.trackingBtnOutline, { borderColor: Colors.light.error }]}
-                >
-                  <Feather name="trash-2" size={18} color={Colors.light.error} />
-                  <ThemedText style={[styles.trackingBtnTextOutline, { color: Colors.light.error }]}>Limpar</ThemedText>
-                </Pressable>
+                <>
+                  <Pressable
+                    onPress={() => setShowTrackLegendModal(true)}
+                    style={[styles.trackingBtnOutline, { borderColor: Colors.light.accent }]}
+                  >
+                    <Feather name="save" size={18} color={Colors.light.accent} />
+                    <ThemedText style={[styles.trackingBtnTextOutline, { color: Colors.light.accent }]}>Salvar</ThemedText>
+                  </Pressable>
+                  <Pressable
+                    onPress={() => {
+                      Alert.alert(
+                        "Limpar Trajeto",
+                        "Deseja apagar o trajeto atual sem salvar?",
+                        [
+                          { text: "Cancelar", style: "cancel" },
+                          { text: "Apagar", style: "destructive", onPress: clearTrack },
+                        ]
+                      );
+                    }}
+                    style={[styles.trackingBtnOutline, { borderColor: Colors.light.error }]}
+                  >
+                    <Feather name="trash-2" size={18} color={Colors.light.error} />
+                    <ThemedText style={[styles.trackingBtnTextOutline, { color: Colors.light.error }]}>Limpar</ThemedText>
+                  </Pressable>
+                </>
               ) : null}
             </View>
           </View>
+
+          {savedTracks.length > 0 ? (
+            <View style={[styles.savedTracksContainer, { backgroundColor: theme.backgroundSecondary }]}>
+              <ThemedText style={[styles.sectionSubtitle, { color: theme.text, marginBottom: Spacing.sm }]}>
+                Trajetos Salvos ({savedTracks.length})
+              </ThemedText>
+              {savedTracks.map((track, index) => (
+                <View 
+                  key={track.id} 
+                  style={[styles.savedTrackItem, { borderLeftColor: track.color }]}
+                >
+                  <View style={styles.savedTrackInfo}>
+                    <View style={[styles.trackColorDot, { backgroundColor: track.color }]} />
+                    <View style={{ flex: 1 }}>
+                      <ThemedText style={[styles.savedTrackLabel, { color: theme.text }]}>
+                        {track.legenda}
+                      </ThemedText>
+                      <ThemedText style={[styles.savedTrackStats, { color: theme.tabIconDefault }]}>
+                        {track.points.length} pontos • {track.distance >= 1000 
+                          ? `${(track.distance / 1000).toFixed(2)} km` 
+                          : `${Math.round(track.distance)} m`} • {Math.floor(track.duration / 60)}:{(track.duration % 60).toString().padStart(2, "0")}
+                      </ThemedText>
+                    </View>
+                  </View>
+                  <Pressable
+                    onPress={() => {
+                      Alert.alert(
+                        "Remover Trajeto",
+                        `Deseja remover "${track.legenda}"?`,
+                        [
+                          { text: "Cancelar", style: "cancel" },
+                          { text: "Remover", style: "destructive", onPress: () => removeTrack(track.id) },
+                        ]
+                      );
+                    }}
+                  >
+                    <Feather name="x-circle" size={20} color={Colors.light.error} />
+                  </Pressable>
+                </View>
+              ))}
+            </View>
+          ) : null}
 
           {carInfo ? (
             <View style={[styles.carInfoCard, { backgroundColor: Colors.light.accent + "15", borderColor: Colors.light.accent }]}>
@@ -1811,6 +1925,62 @@ export default function NovaVistoriaScreen() {
                 Nenhuma análise disponível
               </ThemedText>
             )}
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={showTrackLegendModal}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={() => setShowTrackLegendModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: theme.backgroundSecondary, maxWidth: 400 }]}>
+            <View style={styles.modalHeader}>
+              <ThemedText style={[styles.modalTitle, { color: theme.text }]}>
+                Salvar Trajeto
+              </ThemedText>
+              <TouchableOpacity onPress={() => setShowTrackLegendModal(false)}>
+                <Feather name="x" size={24} color={theme.text} />
+              </TouchableOpacity>
+            </View>
+
+            <ThemedText style={[styles.label, { color: theme.text, marginTop: Spacing.md }]}>
+              Legenda do Trajeto
+            </ThemedText>
+            <TextInput
+              style={[styles.input, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
+              value={trackLegendInput}
+              onChangeText={setTrackLegendInput}
+              placeholder={`Ex: Área de APP, Desmatamento, Limite norte...`}
+              placeholderTextColor={theme.tabIconDefault}
+              autoFocus
+            />
+
+            <View style={{ marginTop: Spacing.md }}>
+              <ThemedText style={[styles.savedTrackStats, { color: theme.tabIconDefault }]}>
+                {trackPoints.length} pontos • {totalDistance >= 1000 
+                  ? `${(totalDistance / 1000).toFixed(2)} km` 
+                  : `${Math.round(totalDistance)} m`} • {Math.floor(elapsedTime / 60)}:{(elapsedTime % 60).toString().padStart(2, "0")}
+              </ThemedText>
+            </View>
+
+            <View style={{ flexDirection: "row", gap: Spacing.md, marginTop: Spacing.lg }}>
+              <Pressable
+                onPress={() => setShowTrackLegendModal(false)}
+                style={[styles.trackingBtnOutline, { flex: 1, borderColor: theme.border }]}
+              >
+                <ThemedText style={[styles.trackingBtnTextOutline, { color: theme.text }]}>Cancelar</ThemedText>
+              </Pressable>
+              <Pressable
+                onPress={saveCurrentTrack}
+                style={[styles.trackingBtn, { flex: 1, backgroundColor: Colors.light.accent }]}
+              >
+                <Feather name="check" size={18} color="#FFFFFF" />
+                <ThemedText style={styles.trackingBtnText}>Salvar</ThemedText>
+              </Pressable>
+            </View>
           </View>
         </View>
       </Modal>
@@ -2405,5 +2575,39 @@ const styles = StyleSheet.create({
   trackingBtnTextOutline: {
     fontSize: 14,
     fontWeight: "600",
+  },
+  savedTracksContainer: {
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.md,
+    marginBottom: Spacing.md,
+  },
+  savedTrackItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    marginBottom: Spacing.xs,
+    borderLeftWidth: 4,
+    borderRadius: BorderRadius.sm,
+    backgroundColor: "rgba(0,0,0,0.05)",
+  },
+  savedTrackInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+    flex: 1,
+  },
+  trackColorDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+  },
+  savedTrackLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  savedTrackStats: {
+    fontSize: 12,
   },
 });
