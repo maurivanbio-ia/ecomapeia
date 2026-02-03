@@ -7,6 +7,9 @@ import {
   Alert,
   Image,
   ActivityIndicator,
+  Modal,
+  TouchableOpacity,
+  ScrollView,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
@@ -215,6 +218,29 @@ export default function NovaVistoriaScreen() {
     areaKm2?: number;
   } | null>(null);
   const [loadingUC, setLoadingUC] = useState(false);
+  
+  const [embargoCheck, setEmbargoCheck] = useState<{
+    level: string;
+    hasEmbargoRisk: boolean;
+    isInsideProtectedArea: boolean;
+    protectedAreaName?: string;
+    protectionLevel?: string;
+    reasons: string[];
+    recommendations: string[];
+  } | null>(null);
+  const [loadingEmbargo, setLoadingEmbargo] = useState(false);
+  
+  const [complianceAnalysis, setComplianceAnalysis] = useState<{
+    conformidadeGeral: string;
+    pontuacao: number;
+    riscos: Array<{ tipo: string; nivel: string; descricao: string; fundamentacaoLegal?: string }>;
+    naoConformidades: Array<{ item: string; descricao: string; acaoCorretiva: string; prazoSugerido?: string }>;
+    pontosFavoraveis: string[];
+    recomendacoes: string[];
+    resumoExecutivo: string;
+  } | null>(null);
+  const [loadingCompliance, setLoadingCompliance] = useState(false);
+  const [showComplianceModal, setShowComplianceModal] = useState(false);
 
   const polygonCoordinates = useMemo(() => {
     const zoneMatch = formData.zona_utm.match(/(\d+)([A-Za-z])/);
@@ -420,6 +446,74 @@ export default function NovaVistoriaScreen() {
     }
   };
 
+  const checkEmbargoByCoordinates = async (latitude: number, longitude: number, carCode?: string) => {
+    setLoadingEmbargo(true);
+    try {
+      const response = await fetch(
+        new URL("/api/conservation/check-embargo", getApiUrl()).toString(),
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ lat: latitude, lon: longitude, carCode }),
+        }
+      );
+      const data = await response.json();
+      
+      if (data.success) {
+        setEmbargoCheck({
+          level: data.embargoRisk?.level || "LOW",
+          hasEmbargoRisk: data.embargoRisk?.hasEmbargoRisk || false,
+          isInsideProtectedArea: data.isInsideProtectedArea || false,
+          protectedAreaName: data.protectedAreaName,
+          protectionLevel: data.protectionLevel,
+          reasons: data.embargoRisk?.reasons || [],
+          recommendations: data.recommendations || [],
+        });
+        return data;
+      }
+      return null;
+    } catch (error) {
+      console.error("Error checking embargo:", error);
+      return null;
+    } finally {
+      setLoadingEmbargo(false);
+    }
+  };
+
+  const runComplianceAnalysis = async (coordinates: { lat: number; lon: number }) => {
+    setLoadingCompliance(true);
+    try {
+      const response = await fetch(
+        new URL("/api/ai/compliance-analysis", getApiUrl()).toString(),
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            coordinates,
+            ucInfo,
+            carInfo,
+            embargoCheck,
+            propertyType: formData.tipo_propriedade,
+            landUse: formData.uso_solo,
+            observations: formData.observacoes,
+          }),
+        }
+      );
+      const data = await response.json();
+      
+      if (data.success && data.analysis) {
+        setComplianceAnalysis(data.analysis);
+        return data.analysis;
+      }
+      return null;
+    } catch (error) {
+      console.error("Error running compliance analysis:", error);
+      return null;
+    } finally {
+      setLoadingCompliance(false);
+    }
+  };
+
   const captureGPSPoint = async () => {
     setCapturingGPS(true);
     try {
@@ -448,9 +542,10 @@ export default function NovaVistoriaScreen() {
         if (lat && lng) {
           fetchCARByCoordinates(lat, lng);
           fetchUCByCoordinates(lat, lng);
+          checkEmbargoByCoordinates(lat, lng, carInfo?.carCode);
           Alert.alert(
             "Coordenada Capturada",
-            `E: ${utm.easting.toFixed(2)}\nN: ${utm.northing.toFixed(2)}\n\nBuscando CAR e UC mais próxima...`
+            `E: ${utm.easting.toFixed(2)}\nN: ${utm.northing.toFixed(2)}\n\nAnalisando dados ambientais...`
           );
         } else {
           Alert.alert("Sucesso", `Coordenada capturada!\nE: ${utm.easting.toFixed(2)}\nN: ${utm.northing.toFixed(2)}`);
@@ -893,6 +988,84 @@ export default function NovaVistoriaScreen() {
             </View>
           ) : null}
 
+          {embargoCheck ? (
+            <View style={[styles.carInfoCard, { 
+              backgroundColor: embargoCheck.level === "HIGH" ? "#e5393520" : 
+                              embargoCheck.level === "MEDIUM" ? Colors.light.warning + "20" : 
+                              Colors.light.success + "15", 
+              borderColor: embargoCheck.level === "HIGH" ? "#e53935" : 
+                          embargoCheck.level === "MEDIUM" ? Colors.light.warning : 
+                          Colors.light.success
+            }]}>
+              <View style={styles.carInfoHeader}>
+                <Feather 
+                  name={embargoCheck.level === "HIGH" ? "alert-octagon" : embargoCheck.level === "MEDIUM" ? "alert-triangle" : "check-circle"} 
+                  size={18} 
+                  color={embargoCheck.level === "HIGH" ? "#e53935" : embargoCheck.level === "MEDIUM" ? Colors.light.warning : Colors.light.success} 
+                />
+                <ThemedText style={[styles.carInfoTitle, { 
+                  color: embargoCheck.level === "HIGH" ? "#e53935" : 
+                        embargoCheck.level === "MEDIUM" ? Colors.light.warning : 
+                        Colors.light.success 
+                }]}>
+                  {embargoCheck.level === "HIGH" ? "Risco de Embargo: ALTO" : 
+                   embargoCheck.level === "MEDIUM" ? "Risco de Embargo: MÉDIO" : 
+                   "Sem Risco de Embargo"}
+                </ThemedText>
+              </View>
+              {embargoCheck.reasons.length > 0 ? (
+                embargoCheck.reasons.map((reason, idx) => (
+                  <ThemedText key={idx} style={[styles.carDetails, { color: theme.tabIconDefault }]}>
+                    • {reason}
+                  </ThemedText>
+                ))
+              ) : null}
+              {embargoCheck.recommendations.length > 0 ? (
+                <View style={{ marginTop: Spacing.xs }}>
+                  <ThemedText style={[styles.carDetails, { color: theme.primary, fontWeight: "600" }]}>
+                    Recomendações:
+                  </ThemedText>
+                  {embargoCheck.recommendations.slice(0, 2).map((rec, idx) => (
+                    <ThemedText key={idx} style={[styles.carDetails, { color: theme.tabIconDefault, fontSize: 12 }]}>
+                      • {rec}
+                    </ThemedText>
+                  ))}
+                </View>
+              ) : null}
+            </View>
+          ) : loadingEmbargo ? (
+            <View style={[styles.carInfoCard, { backgroundColor: theme.backgroundSecondary }]}>
+              <ActivityIndicator size="small" color={Colors.light.warning} />
+              <ThemedText style={{ marginLeft: Spacing.sm, color: theme.tabIconDefault }}>
+                Verificando sobreposição com áreas protegidas...
+              </ThemedText>
+            </View>
+          ) : null}
+
+          {utmPoints.length > 0 && !loadingCompliance ? (
+            <TouchableOpacity
+              style={[styles.complianceButton, { backgroundColor: theme.primary }]}
+              onPress={() => {
+                if (polygonCoordinates.length > 0) {
+                  runComplianceAnalysis({ lat: polygonCoordinates[0].latitude, lon: polygonCoordinates[0].longitude });
+                  setShowComplianceModal(true);
+                }
+              }}
+            >
+              <Feather name="file-text" size={18} color="#fff" />
+              <ThemedText style={styles.complianceButtonText}>
+                Análise de Conformidade Ambiental
+              </ThemedText>
+            </TouchableOpacity>
+          ) : loadingCompliance ? (
+            <View style={[styles.carInfoCard, { backgroundColor: theme.backgroundSecondary }]}>
+              <ActivityIndicator size="small" color={theme.primary} />
+              <ThemedText style={{ marginLeft: Spacing.sm, color: theme.tabIconDefault }}>
+                Executando análise de conformidade com IA...
+              </ThemedText>
+            </View>
+          ) : null}
+
           {polygonCoordinates.length >= 3 ? (
             <View style={styles.mapSection}>
               <ThemedText style={styles.subLabel}>Visualização do Polígono</ThemedText>
@@ -1061,6 +1234,112 @@ export default function NovaVistoriaScreen() {
           )}
         </Pressable>
       </KeyboardAwareScrollViewCompat>
+
+      <Modal
+        visible={showComplianceModal}
+        animationType="fade"
+        transparent
+        onRequestClose={() => setShowComplianceModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: theme.backgroundDefault }]}>
+            <View style={styles.modalHeader}>
+              <ThemedText style={styles.modalTitle}>Análise de Conformidade</ThemedText>
+              <TouchableOpacity onPress={() => setShowComplianceModal(false)}>
+                <Feather name="x" size={24} color={theme.text} />
+              </TouchableOpacity>
+            </View>
+
+            {loadingCompliance ? (
+              <View style={{ alignItems: "center", padding: Spacing.xl }}>
+                <ActivityIndicator size="large" color={theme.primary} />
+                <ThemedText style={{ marginTop: Spacing.md, color: theme.textSecondary }}>
+                  Analisando conformidade ambiental...
+                </ThemedText>
+              </View>
+            ) : complianceAnalysis ? (
+              <ScrollView showsVerticalScrollIndicator={false}>
+                <View style={[styles.complianceScore, { 
+                  backgroundColor: complianceAnalysis.conformidadeGeral === "CONFORME" ? Colors.light.success + "20" :
+                                   complianceAnalysis.conformidadeGeral === "PARCIALMENTE_CONFORME" ? Colors.light.warning + "20" :
+                                   "#e5393520"
+                }]}>
+                  <ThemedText style={[styles.scoreValue, { 
+                    color: complianceAnalysis.conformidadeGeral === "CONFORME" ? Colors.light.success :
+                           complianceAnalysis.conformidadeGeral === "PARCIALMENTE_CONFORME" ? Colors.light.warning :
+                           "#e53935"
+                  }]}>
+                    {complianceAnalysis.pontuacao || 0}%
+                  </ThemedText>
+                  <ThemedText style={[styles.scoreLabel, { 
+                    color: complianceAnalysis.conformidadeGeral === "CONFORME" ? Colors.light.success :
+                           complianceAnalysis.conformidadeGeral === "PARCIALMENTE_CONFORME" ? Colors.light.warning :
+                           "#e53935"
+                  }]}>
+                    {complianceAnalysis.conformidadeGeral === "CONFORME" ? "CONFORME" :
+                     complianceAnalysis.conformidadeGeral === "PARCIALMENTE_CONFORME" ? "PARCIALMENTE CONFORME" :
+                     "NÃO CONFORME"}
+                  </ThemedText>
+                </View>
+
+                {complianceAnalysis.resumoExecutivo ? (
+                  <View style={styles.complianceSection}>
+                    <ThemedText style={[styles.complianceSectionTitle, { color: theme.primary }]}>
+                      Resumo Executivo
+                    </ThemedText>
+                    <ThemedText style={{ color: theme.textSecondary, fontSize: 13, lineHeight: 20 }}>
+                      {complianceAnalysis.resumoExecutivo}
+                    </ThemedText>
+                  </View>
+                ) : null}
+
+                {complianceAnalysis.riscos && complianceAnalysis.riscos.length > 0 ? (
+                  <View style={styles.complianceSection}>
+                    <ThemedText style={[styles.complianceSectionTitle, { color: "#e53935" }]}>
+                      Riscos Identificados
+                    </ThemedText>
+                    {complianceAnalysis.riscos.map((risco, idx) => (
+                      <View key={idx} style={[styles.riskItem, { 
+                        backgroundColor: risco.nivel === "CRITICO" || risco.nivel === "ALTO" ? "#e5393515" : 
+                                        risco.nivel === "MEDIO" ? Colors.light.warning + "15" : 
+                                        Colors.light.success + "15"
+                      }]}>
+                        <ThemedText style={[styles.riskItemTitle, { 
+                          color: risco.nivel === "CRITICO" || risco.nivel === "ALTO" ? "#e53935" : 
+                                risco.nivel === "MEDIO" ? Colors.light.warning : 
+                                Colors.light.success
+                        }]}>
+                          [{risco.nivel}] {risco.tipo}
+                        </ThemedText>
+                        <ThemedText style={[styles.riskItemDesc, { color: theme.textSecondary }]}>
+                          {risco.descricao}
+                        </ThemedText>
+                      </View>
+                    ))}
+                  </View>
+                ) : null}
+
+                {complianceAnalysis.recomendacoes && complianceAnalysis.recomendacoes.length > 0 ? (
+                  <View style={styles.complianceSection}>
+                    <ThemedText style={[styles.complianceSectionTitle, { color: theme.primary }]}>
+                      Recomendações
+                    </ThemedText>
+                    {complianceAnalysis.recomendacoes.map((rec, idx) => (
+                      <ThemedText key={idx} style={{ color: theme.textSecondary, fontSize: 12, marginBottom: 4 }}>
+                        • {rec}
+                      </ThemedText>
+                    ))}
+                  </View>
+                ) : null}
+              </ScrollView>
+            ) : (
+              <ThemedText style={{ color: theme.textSecondary, textAlign: "center" }}>
+                Nenhuma análise disponível
+              </ThemedText>
+            )}
+          </View>
+        </View>
+      </Modal>
     </ThemedView>
   );
 }
@@ -1314,5 +1593,79 @@ const styles = StyleSheet.create({
   },
   carDetails: {
     fontSize: 12,
+  },
+  complianceButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    borderRadius: BorderRadius.md,
+    marginTop: Spacing.md,
+    gap: Spacing.sm,
+  },
+  complianceButtonText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: Spacing.lg,
+  },
+  modalContent: {
+    width: "100%",
+    maxHeight: "90%",
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.lg,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: Spacing.md,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+  },
+  complianceScore: {
+    alignItems: "center",
+    paddingVertical: Spacing.md,
+    marginBottom: Spacing.md,
+    borderRadius: BorderRadius.md,
+  },
+  scoreValue: {
+    fontSize: 48,
+    fontWeight: "700",
+  },
+  scoreLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    marginTop: Spacing.xs,
+  },
+  complianceSection: {
+    marginBottom: Spacing.md,
+  },
+  complianceSectionTitle: {
+    fontSize: 14,
+    fontWeight: "600",
+    marginBottom: Spacing.sm,
+  },
+  riskItem: {
+    padding: Spacing.sm,
+    borderRadius: BorderRadius.sm,
+    marginBottom: Spacing.xs,
+  },
+  riskItemTitle: {
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  riskItemDesc: {
+    fontSize: 11,
+    marginTop: 2,
   },
 });
