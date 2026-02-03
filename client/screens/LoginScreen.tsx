@@ -237,14 +237,14 @@ export default function LoginScreen() {
               lightColor="rgba(255,255,255,0.8)"
               darkColor="rgba(255,255,255,0.8)"
             >
-              EcoBrasil Consultoria Ambiental
+              EcoIA - Inteligência Ambiental
             </ThemedText>
             <ThemedText
               style={styles.footerCnpj}
               lightColor="rgba(255,255,255,0.5)"
               darkColor="rgba(255,255,255,0.5)"
             >
-              CNPJ 11.253.635/0001-17
+              por Maurivan Vaz Ribeiro
             </ThemedText>
           </Animated.View>
         </View>
