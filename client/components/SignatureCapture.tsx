@@ -16,19 +16,35 @@ import { captureRef } from "react-native-view-shot";
 import Svg, { Path } from "react-native-svg";
 
 interface SignatureCaptureProps {
-  onSignatureCapture: (uri: string) => void;
+  onSignatureCapture: (uri: string, timestamp?: string) => void;
   signatureUri: string | null;
+  signatureTimestamp?: string | null;
+  showTimestamp?: boolean;
 }
 
 export default function SignatureCapture({
   onSignatureCapture,
   signatureUri,
+  signatureTimestamp,
+  showTimestamp = true,
 }: SignatureCaptureProps) {
   const { theme } = useTheme();
   const [modalVisible, setModalVisible] = useState(false);
   const [paths, setPaths] = useState<string[]>([]);
   const [currentPath, setCurrentPath] = useState<string>("");
+  const [timestamp, setTimestamp] = useState<string>(signatureTimestamp || "");
   const signatureRef = useRef<View>(null);
+  
+  const formatTimestamp = (date: Date): string => {
+    return date.toLocaleString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+  };
 
   const panResponder = useRef(
     PanResponder.create({
@@ -63,7 +79,9 @@ export default function SignatureCapture({
           format: "png",
           quality: 1,
         });
-        onSignatureCapture(uri);
+        const newTimestamp = formatTimestamp(new Date());
+        setTimestamp(newTimestamp);
+        onSignatureCapture(uri, newTimestamp);
         setModalVisible(false);
       } catch (error) {
         console.error("Error capturing signature:", error);
@@ -91,10 +109,19 @@ export default function SignatureCapture({
               <Path d={paths.join(" ")} stroke="#000" strokeWidth={2} fill="none" />
             </Svg>
           </View>
+          {showTimestamp && timestamp ? (
+            <View style={styles.timestampContainer}>
+              <Feather name="clock" size={12} color={Colors.light.textSecondary} />
+              <ThemedText style={styles.timestampText}>
+                Assinado em: {timestamp}
+              </ThemedText>
+            </View>
+          ) : null}
           <Pressable
             onPress={() => {
               setPaths([]);
-              onSignatureCapture("");
+              setTimestamp("");
+              onSignatureCapture("", "");
             }}
             style={styles.removeBtn}
           >
@@ -231,6 +258,17 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.lg,
     borderWidth: 1,
     overflow: "hidden",
+  },
+  timestampContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginTop: Spacing.xs,
+    paddingHorizontal: Spacing.xs,
+  },
+  timestampText: {
+    fontSize: 12,
+    color: Colors.light.textSecondary,
   },
   removeBtn: {
     position: "absolute",
