@@ -8,8 +8,8 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  Text,
 } from "react-native";
-import { Image } from "expo-image";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -22,7 +22,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { ThemedText } from "@/components/ThemedText";
-import { Colors, Spacing, BorderRadius, Typography } from "@/constants/theme";
+import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 import { useAuth } from "@/hooks/useAuth";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -83,7 +83,7 @@ export default function LoginScreen() {
             styles.content,
             {
               paddingTop: insets.top + Spacing["3xl"],
-              paddingBottom: insets.bottom + Spacing["3xl"],
+              paddingBottom: insets.bottom + Spacing.lg,
             },
           ]}
         >
@@ -97,8 +97,14 @@ export default function LoginScreen() {
               lightColor="#FFFFFF"
               darkColor="#FFFFFF"
             >
-              Bem-vindo ao MapeIA
+              Bem-vindo ao
             </ThemedText>
+            
+            {/* MapeIA with colors */}
+            <View style={styles.logoTextContainer}>
+              <Text style={styles.logoTextBlue}>Mape</Text>
+              <Text style={styles.logoTextGreen}>IA</Text>
+            </View>
             
             <ThemedText
               style={styles.subtitleText}
@@ -211,20 +217,36 @@ export default function LoginScreen() {
             </Pressable>
           </Animated.View>
 
-          {/* Logo Centered */}
-          <Animated.View
-            entering={FadeIn.duration(800).delay(400)}
-            style={styles.logoContainer}
-          >
-            <Image
-              source={require("../../assets/images/logo.png")}
-              style={styles.logo}
-              contentFit="contain"
-            />
-          </Animated.View>
+          {/* Spacer */}
+          <View style={styles.spacer} />
 
-          {/* Bottom Spacer */}
-          <View style={styles.bottomSpacer} />
+          {/* Footer */}
+          <Animated.View
+            entering={FadeIn.duration(800).delay(600)}
+            style={styles.footerContainer}
+          >
+            <ThemedText
+              style={styles.footerText}
+              lightColor="rgba(255,255,255,0.6)"
+              darkColor="rgba(255,255,255,0.6)"
+            >
+              desenvolvido por
+            </ThemedText>
+            <ThemedText
+              style={styles.footerCompany}
+              lightColor="rgba(255,255,255,0.8)"
+              darkColor="rgba(255,255,255,0.8)"
+            >
+              EcoBrasil Consultoria Ambiental
+            </ThemedText>
+            <ThemedText
+              style={styles.footerCnpj}
+              lightColor="rgba(255,255,255,0.5)"
+              darkColor="rgba(255,255,255,0.5)"
+            >
+              CNPJ 11.253.635/0001-17
+            </ThemedText>
+          </Animated.View>
         </View>
       </KeyboardAvoidingView>
     </ImageBackground>
@@ -251,10 +273,32 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   welcomeText: {
-    fontSize: 28,
-    fontWeight: "700",
+    fontSize: 22,
+    fontWeight: "500",
     textAlign: "center",
     marginBottom: Spacing.xs,
+  },
+  logoTextContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: Spacing.sm,
+  },
+  logoTextBlue: {
+    fontSize: 48,
+    fontWeight: "800",
+    color: "#1E3A5F",
+    textShadowColor: "rgba(255,255,255,0.3)",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
+  },
+  logoTextGreen: {
+    fontSize: 48,
+    fontWeight: "800",
+    color: "#8DC63F",
+    textShadowColor: "rgba(0,0,0,0.3)",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
   subtitleText: {
     fontSize: 16,
@@ -315,16 +359,23 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textDecorationLine: "underline",
   },
-  logoContainer: {
-    alignItems: "center",
-    justifyContent: "center",
+  spacer: {
     flex: 1,
   },
-  logo: {
-    width: 340,
-    height: 140,
+  footerContainer: {
+    alignItems: "center",
+    paddingBottom: Spacing.md,
   },
-  bottomSpacer: {
-    height: Spacing["4xl"],
+  footerText: {
+    fontSize: 12,
+    marginBottom: Spacing.xs,
+  },
+  footerCompany: {
+    fontSize: 13,
+    fontWeight: "600",
+    marginBottom: Spacing.xs,
+  },
+  footerCnpj: {
+    fontSize: 11,
   },
 });
