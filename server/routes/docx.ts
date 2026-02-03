@@ -24,6 +24,39 @@ interface UsoSolo {
   unidade: string;
 }
 
+interface EmbargoCheck {
+  level: "LOW" | "MEDIUM" | "HIGH";
+  hasEmbargoRisk: boolean;
+  isInsideProtectedArea?: boolean;
+  protectedAreaName?: string;
+  protectionLevel?: string;
+  reasons?: string[];
+  recommendations?: string[];
+}
+
+interface ComplianceRisk {
+  tipo: string;
+  nivel: string;
+  descricao: string;
+  fundamentacaoLegal?: string;
+}
+
+interface ComplianceAnalysis {
+  conformidadeGeral: "CONFORME" | "PARCIALMENTE_CONFORME" | "NAO_CONFORME";
+  pontuacao: number;
+  riscos?: ComplianceRisk[];
+  recomendacoes?: string[];
+  resumoExecutivo?: string;
+}
+
+interface CARInfo {
+  codigo?: string;
+  municipio?: string;
+  uf?: string;
+  area_total?: number;
+  situacao?: string;
+}
+
 interface VistoriaData {
   id: string;
   numero_notificacao?: string;
@@ -49,6 +82,9 @@ interface VistoriaData {
   usos_solo?: UsoSolo[];
   croqui_imagem?: string;
   assinatura_uri?: string;
+  embargoCheck?: EmbargoCheck;
+  complianceAnalysis?: ComplianceAnalysis;
+  carInfo?: CARInfo;
 }
 
 function formatDate(dateStr: string): string {
@@ -72,6 +108,24 @@ function createSectionHeader(text: string): Paragraph {
     ],
     shading: {
       fill: "002855",
+    },
+    spacing: { before: 300, after: 100 },
+    alignment: AlignmentType.LEFT,
+  });
+}
+
+function createColoredSectionHeader(text: string, color: string): Paragraph {
+  return new Paragraph({
+    children: [
+      new TextRun({
+        text: text,
+        bold: true,
+        color: "FFFFFF",
+        size: 22,
+      }),
+    ],
+    shading: {
+      fill: color,
     },
     spacing: { before: 300, after: 100 },
     alignment: AlignmentType.LEFT,
@@ -540,6 +594,217 @@ async function generateWordDocument(vistoria: VistoriaData): Promise<Buffer> {
       rows: coordRows,
     })
   );
+
+  // CAR Section
+  if (vistoria.carInfo) {
+    sections.push(
+      createSectionHeader("CADASTRO AMBIENTAL RURAL (CAR)"),
+      new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        rows: [
+          new TableRow({
+            children: [
+              new TableCell({
+                children: [new Paragraph({ children: [new TextRun({ text: "Código CAR:", bold: true, size: 20 })] })],
+                width: { size: 20, type: WidthType.PERCENTAGE },
+              }),
+              new TableCell({
+                children: [new Paragraph({ children: [new TextRun({ text: vistoria.carInfo.codigo || "-", size: 20 })] })],
+                width: { size: 30, type: WidthType.PERCENTAGE },
+              }),
+              new TableCell({
+                children: [new Paragraph({ children: [new TextRun({ text: "Situação:", bold: true, size: 20 })] })],
+                width: { size: 15, type: WidthType.PERCENTAGE },
+              }),
+              new TableCell({
+                children: [new Paragraph({ children: [new TextRun({ text: vistoria.carInfo.situacao || "-", size: 20 })] })],
+                width: { size: 35, type: WidthType.PERCENTAGE },
+              }),
+            ],
+          }),
+          new TableRow({
+            children: [
+              new TableCell({
+                children: [new Paragraph({ children: [new TextRun({ text: "Município:", bold: true, size: 20 })] })],
+              }),
+              new TableCell({
+                children: [new Paragraph({ children: [new TextRun({ text: vistoria.carInfo.municipio || "-", size: 20 })] })],
+              }),
+              new TableCell({
+                children: [new Paragraph({ children: [new TextRun({ text: "Área Total:", bold: true, size: 20 })] })],
+              }),
+              new TableCell({
+                children: [new Paragraph({ children: [new TextRun({ text: vistoria.carInfo.area_total ? `${vistoria.carInfo.area_total.toFixed(2)} ha` : "-", size: 20 })] })],
+              }),
+            ],
+          }),
+        ],
+      })
+    );
+  }
+
+  // Embargo Section
+  if (vistoria.embargoCheck) {
+    const embargoColor = vistoria.embargoCheck.level === 'HIGH' ? 'C62828' : vistoria.embargoCheck.level === 'MEDIUM' ? 'F9A825' : '2E7D32';
+    const embargoLabel = vistoria.embargoCheck.level === 'HIGH' ? 'ALTO' : vistoria.embargoCheck.level === 'MEDIUM' ? 'MÉDIO' : 'BAIXO';
+    
+    sections.push(
+      createColoredSectionHeader(`ANÁLISE DE EMBARGO - RISCO ${embargoLabel}`, embargoColor),
+      new Paragraph({
+        children: [
+          new TextRun({ text: "Dentro de Área Protegida: ", bold: true, size: 20 }),
+          new TextRun({ text: vistoria.embargoCheck.isInsideProtectedArea ? "SIM" : "NÃO", size: 20 }),
+        ],
+        spacing: { after: 100 },
+      })
+    );
+    
+    if (vistoria.embargoCheck.protectedAreaName) {
+      sections.push(
+        new Paragraph({
+          children: [
+            new TextRun({ text: "Nome da Área: ", bold: true, size: 20 }),
+            new TextRun({ text: vistoria.embargoCheck.protectedAreaName, size: 20 }),
+          ],
+          spacing: { after: 100 },
+        })
+      );
+    }
+    
+    if (vistoria.embargoCheck.reasons && vistoria.embargoCheck.reasons.length > 0) {
+      sections.push(
+        new Paragraph({
+          children: [new TextRun({ text: "Motivos:", bold: true, size: 20 })],
+          spacing: { before: 100 },
+        })
+      );
+      vistoria.embargoCheck.reasons.forEach(reason => {
+        sections.push(
+          new Paragraph({
+            children: [new TextRun({ text: `• ${reason}`, size: 20 })],
+            indent: { left: 360 },
+          })
+        );
+      });
+    }
+    
+    if (vistoria.embargoCheck.recommendations && vistoria.embargoCheck.recommendations.length > 0) {
+      sections.push(
+        new Paragraph({
+          children: [new TextRun({ text: "Recomendações:", bold: true, size: 20 })],
+          spacing: { before: 100 },
+        })
+      );
+      vistoria.embargoCheck.recommendations.forEach(rec => {
+        sections.push(
+          new Paragraph({
+            children: [new TextRun({ text: `• ${rec}`, size: 20 })],
+            indent: { left: 360 },
+          })
+        );
+      });
+    }
+  }
+
+  // Compliance Analysis Section
+  if (vistoria.complianceAnalysis) {
+    const complianceColor = vistoria.complianceAnalysis.conformidadeGeral === 'CONFORME' ? '2E7D32' : vistoria.complianceAnalysis.conformidadeGeral === 'PARCIALMENTE_CONFORME' ? 'F9A825' : 'C62828';
+    const complianceLabel = vistoria.complianceAnalysis.conformidadeGeral === 'CONFORME' ? 'CONFORME' : vistoria.complianceAnalysis.conformidadeGeral === 'PARCIALMENTE_CONFORME' ? 'PARCIALMENTE CONFORME' : 'NÃO CONFORME';
+    
+    sections.push(
+      createColoredSectionHeader(`ANÁLISE DE CONFORMIDADE AMBIENTAL - ${complianceLabel} (${vistoria.complianceAnalysis.pontuacao}%)`, complianceColor)
+    );
+    
+    if (vistoria.complianceAnalysis.resumoExecutivo) {
+      sections.push(
+        new Paragraph({
+          children: [
+            new TextRun({ text: "Resumo Executivo: ", bold: true, size: 20 }),
+            new TextRun({ text: vistoria.complianceAnalysis.resumoExecutivo, size: 20 }),
+          ],
+          spacing: { after: 200 },
+        })
+      );
+    }
+    
+    if (vistoria.complianceAnalysis.riscos && vistoria.complianceAnalysis.riscos.length > 0) {
+      sections.push(
+        new Paragraph({
+          children: [new TextRun({ text: "Riscos Identificados:", bold: true, size: 20 })],
+          spacing: { before: 100 },
+        })
+      );
+      
+      const riskRows = [
+        new TableRow({
+          children: [
+            new TableCell({
+              children: [new Paragraph({ children: [new TextRun({ text: "Nível", bold: true, size: 18 })], alignment: AlignmentType.CENTER })],
+              shading: { fill: "002855" },
+              width: { size: 15, type: WidthType.PERCENTAGE },
+            }),
+            new TableCell({
+              children: [new Paragraph({ children: [new TextRun({ text: "Tipo", bold: true, size: 18, color: "FFFFFF" })], alignment: AlignmentType.CENTER })],
+              shading: { fill: "002855" },
+              width: { size: 25, type: WidthType.PERCENTAGE },
+            }),
+            new TableCell({
+              children: [new Paragraph({ children: [new TextRun({ text: "Descrição", bold: true, size: 18, color: "FFFFFF" })], alignment: AlignmentType.CENTER })],
+              shading: { fill: "002855" },
+              width: { size: 60, type: WidthType.PERCENTAGE },
+            }),
+          ],
+        }),
+        ...vistoria.complianceAnalysis.riscos.map(risk => 
+          new TableRow({
+            children: [
+              new TableCell({
+                children: [new Paragraph({ 
+                  children: [new TextRun({ 
+                    text: risk.nivel, 
+                    bold: true, 
+                    size: 18,
+                    color: risk.nivel === 'CRITICO' || risk.nivel === 'ALTO' ? 'C62828' : risk.nivel === 'MEDIO' ? 'F9A825' : '2E7D32'
+                  })], 
+                  alignment: AlignmentType.CENTER 
+                })],
+              }),
+              new TableCell({
+                children: [new Paragraph({ children: [new TextRun({ text: risk.tipo, size: 18 })] })],
+              }),
+              new TableCell({
+                children: [new Paragraph({ children: [new TextRun({ text: `${risk.descricao}${risk.fundamentacaoLegal ? ` (${risk.fundamentacaoLegal})` : ''}`, size: 18 })] })],
+              }),
+            ],
+          })
+        ),
+      ];
+      
+      sections.push(
+        new Table({
+          width: { size: 100, type: WidthType.PERCENTAGE },
+          rows: riskRows,
+        })
+      );
+    }
+    
+    if (vistoria.complianceAnalysis.recomendacoes && vistoria.complianceAnalysis.recomendacoes.length > 0) {
+      sections.push(
+        new Paragraph({
+          children: [new TextRun({ text: "Recomendações:", bold: true, size: 20 })],
+          spacing: { before: 200 },
+        })
+      );
+      vistoria.complianceAnalysis.recomendacoes.forEach(rec => {
+        sections.push(
+          new Paragraph({
+            children: [new TextRun({ text: `• ${rec}`, size: 20 })],
+            indent: { left: 360 },
+          })
+        );
+      });
+    }
+  }
 
   sections.push(
     createSectionHeader("OBSERVAÇÕES GERAIS"),

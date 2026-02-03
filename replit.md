@@ -71,3 +71,9 @@ The application integrates Replit AI, leveraging OpenAI's gpt-5.2 model for vari
 -   **AI Compliance Analysis:** `/api/ai/compliance-analysis` - Uses GPT-5.2 to analyze inspection data against Brazilian legislation (Lei 12.651/2012, Lei 9.985/2000, CONAMA), returns compliance score (0-100%), risks with legal foundation, non-conformities, and recommendations
 -   **Automatic Flow:** GPS capture triggers: CAR lookup → UC proximity check → embargo detection → compliance analysis button availability
 -   **Visual Alerts:** Color-coded cards (red=HIGH/CRITICAL, yellow=MEDIUM, green=LOW) appear after GPS capture showing embargo risk status
+-   **Report Integration:** PDF and Word reports now include full environmental compliance data (CAR info, embargo risk analysis with color coding, AI compliance analysis with risk tables and recommendations)
+
+### Database Schema Changes (Feb 2026)
+
+-   **New JSONB columns in vistorias:** `car_info`, `embargo_check`, `compliance_analysis` store environmental compliance data
+-   **Field naming convention:** Database uses snake_case (car_info), API transforms to camelCase (carInfo) for frontend/reports

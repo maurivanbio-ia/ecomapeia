@@ -344,6 +344,28 @@ export default function NovaVistoriaScreen() {
         usos_solo: usosSoloData,
         croqui_imagem: mapImageUri,
         assinatura_uri: signatureUri,
+        car_info: carInfo ? {
+          codigo: carInfo.carCode,
+          municipio: carInfo.city,
+          area_total: carInfo.areaHa,
+          situacao: carInfo.status,
+        } : null,
+        embargo_check: embargoCheck ? {
+          level: embargoCheck.level,
+          hasEmbargoRisk: embargoCheck.hasEmbargoRisk,
+          isInsideProtectedArea: embargoCheck.isInsideProtectedArea,
+          protectedAreaName: embargoCheck.protectedAreaName,
+          protectionLevel: embargoCheck.protectionLevel,
+          reasons: embargoCheck.reasons,
+          recommendations: embargoCheck.recommendations,
+        } : null,
+        compliance_analysis: complianceAnalysis ? {
+          conformidadeGeral: complianceAnalysis.conformidadeGeral,
+          pontuacao: complianceAnalysis.pontuacao,
+          riscos: complianceAnalysis.riscos,
+          recomendacoes: complianceAnalysis.recomendacoes,
+          resumoExecutivo: complianceAnalysis.resumoExecutivo,
+        } : null,
       });
       return response.json();
     },

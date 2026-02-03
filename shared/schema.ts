@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, real, date, timestamp, serial } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, real, date, timestamp, serial, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -94,6 +94,10 @@ export const vistorias = pgTable("vistorias", {
   pdf_gerado_url: text("pdf_gerado_url"),
   status_upload: text("status_upload").notNull().default("offline"),
   created_at: timestamp("created_at").defaultNow(),
+  // Environmental compliance fields
+  car_info: jsonb("car_info"),
+  embargo_check: jsonb("embargo_check"),
+  compliance_analysis: jsonb("compliance_analysis"),
 });
 
 export const insertVistoriaSchema = createInsertSchema(vistorias).pick({
@@ -128,6 +132,9 @@ export const insertVistoriaSchema = createInsertSchema(vistorias).pick({
   croqui_imagem: true,
   pdf_gerado_url: true,
   status_upload: true,
+  car_info: true,
+  embargo_check: true,
+  compliance_analysis: true,
 });
 
 export type InsertVistoria = z.infer<typeof insertVistoriaSchema>;

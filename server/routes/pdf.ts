@@ -10,6 +10,39 @@ interface UsoSolo {
   unidade: string;
 }
 
+interface EmbargoCheck {
+  level: "LOW" | "MEDIUM" | "HIGH";
+  hasEmbargoRisk: boolean;
+  isInsideProtectedArea?: boolean;
+  protectedAreaName?: string;
+  protectionLevel?: string;
+  reasons?: string[];
+  recommendations?: string[];
+}
+
+interface ComplianceRisk {
+  tipo: string;
+  nivel: string;
+  descricao: string;
+  fundamentacaoLegal?: string;
+}
+
+interface ComplianceAnalysis {
+  conformidadeGeral: "CONFORME" | "PARCIALMENTE_CONFORME" | "NAO_CONFORME";
+  pontuacao: number;
+  riscos?: ComplianceRisk[];
+  recomendacoes?: string[];
+  resumoExecutivo?: string;
+}
+
+interface CARInfo {
+  codigo?: string;
+  municipio?: string;
+  uf?: string;
+  area_total?: number;
+  situacao?: string;
+}
+
 interface VistoriaData {
   id: string;
   numero_notificacao?: string;
@@ -35,6 +68,9 @@ interface VistoriaData {
   usos_solo?: UsoSolo[];
   croqui_imagem?: string;
   assinatura_uri?: string;
+  embargoCheck?: EmbargoCheck;
+  complianceAnalysis?: ComplianceAnalysis;
+  carInfo?: CARInfo;
 }
 
 function getCBALogoBase64(): string {
@@ -362,6 +398,112 @@ function generatePDFHTML(vistoria: VistoriaData): string {
       </table>
     </div>
   </div>
+
+  ${vistoria.carInfo ? `
+  <div class="section">
+    <div class="section-header">CADASTRO AMBIENTAL RURAL (CAR)</div>
+    <div class="section-content">
+      <table>
+        <tr>
+          <td style="width: 20%;"><strong>Código CAR:</strong></td>
+          <td>${vistoria.carInfo.codigo || "-"}</td>
+          <td style="width: 15%;"><strong>Situação:</strong></td>
+          <td>${vistoria.carInfo.situacao || "-"}</td>
+        </tr>
+        <tr>
+          <td><strong>Município:</strong></td>
+          <td>${vistoria.carInfo.municipio || "-"}</td>
+          <td><strong>Área Total:</strong></td>
+          <td>${vistoria.carInfo.area_total ? `${vistoria.carInfo.area_total.toFixed(2)} ha` : "-"}</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+  ` : ""}
+
+  ${vistoria.embargoCheck ? `
+  <div class="section">
+    <div class="section-header" style="background-color: ${vistoria.embargoCheck.level === 'HIGH' ? '#c62828' : vistoria.embargoCheck.level === 'MEDIUM' ? '#f9a825' : '#2e7d32'};">
+      ANÁLISE DE EMBARGO - RISCO ${vistoria.embargoCheck.level === 'HIGH' ? 'ALTO' : vistoria.embargoCheck.level === 'MEDIUM' ? 'MÉDIO' : 'BAIXO'}
+    </div>
+    <div class="section-content">
+      <table>
+        <tr>
+          <td style="width: 30%;"><strong>Dentro de Área Protegida:</strong></td>
+          <td>${vistoria.embargoCheck.isInsideProtectedArea ? 'SIM' : 'NÃO'}</td>
+        </tr>
+        ${vistoria.embargoCheck.protectedAreaName ? `
+        <tr>
+          <td><strong>Nome da Área:</strong></td>
+          <td>${vistoria.embargoCheck.protectedAreaName}</td>
+        </tr>
+        ` : ""}
+        ${vistoria.embargoCheck.protectionLevel ? `
+        <tr>
+          <td><strong>Nível de Proteção:</strong></td>
+          <td>${vistoria.embargoCheck.protectionLevel}</td>
+        </tr>
+        ` : ""}
+      </table>
+      ${vistoria.embargoCheck.reasons && vistoria.embargoCheck.reasons.length > 0 ? `
+      <p style="margin-top: 10px;"><strong>Motivos:</strong></p>
+      <ul style="margin-left: 20px;">
+        ${vistoria.embargoCheck.reasons.map(r => `<li>${r}</li>`).join('')}
+      </ul>
+      ` : ""}
+      ${vistoria.embargoCheck.recommendations && vistoria.embargoCheck.recommendations.length > 0 ? `
+      <p style="margin-top: 10px;"><strong>Recomendações:</strong></p>
+      <ul style="margin-left: 20px;">
+        ${vistoria.embargoCheck.recommendations.map(r => `<li>${r}</li>`).join('')}
+      </ul>
+      ` : ""}
+    </div>
+  </div>
+  ` : ""}
+
+  ${vistoria.complianceAnalysis ? `
+  <div class="section">
+    <div class="section-header" style="background-color: ${vistoria.complianceAnalysis.conformidadeGeral === 'CONFORME' ? '#2e7d32' : vistoria.complianceAnalysis.conformidadeGeral === 'PARCIALMENTE_CONFORME' ? '#f9a825' : '#c62828'};">
+      ANÁLISE DE CONFORMIDADE AMBIENTAL - ${vistoria.complianceAnalysis.conformidadeGeral === 'CONFORME' ? 'CONFORME' : vistoria.complianceAnalysis.conformidadeGeral === 'PARCIALMENTE_CONFORME' ? 'PARCIALMENTE CONFORME' : 'NÃO CONFORME'} (${vistoria.complianceAnalysis.pontuacao}%)
+    </div>
+    <div class="section-content">
+      ${vistoria.complianceAnalysis.resumoExecutivo ? `
+      <p style="margin-bottom: 15px;"><strong>Resumo Executivo:</strong> ${vistoria.complianceAnalysis.resumoExecutivo}</p>
+      ` : ""}
+      
+      ${vistoria.complianceAnalysis.riscos && vistoria.complianceAnalysis.riscos.length > 0 ? `
+      <p><strong>Riscos Identificados:</strong></p>
+      <table style="margin-top: 10px;">
+        <thead>
+          <tr>
+            <th style="width: 20%;">Nível</th>
+            <th style="width: 25%;">Tipo</th>
+            <th>Descrição</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${vistoria.complianceAnalysis.riscos.map(r => `
+          <tr>
+            <td style="text-align: center; background-color: ${r.nivel === 'CRITICO' || r.nivel === 'ALTO' ? '#ffebee' : r.nivel === 'MEDIO' ? '#fff8e1' : '#e8f5e9'};">
+              <strong style="color: ${r.nivel === 'CRITICO' || r.nivel === 'ALTO' ? '#c62828' : r.nivel === 'MEDIO' ? '#f9a825' : '#2e7d32'};">${r.nivel}</strong>
+            </td>
+            <td>${r.tipo}</td>
+            <td>${r.descricao}${r.fundamentacaoLegal ? ` <em>(${r.fundamentacaoLegal})</em>` : ''}</td>
+          </tr>
+          `).join('')}
+        </tbody>
+      </table>
+      ` : ""}
+      
+      ${vistoria.complianceAnalysis.recomendacoes && vistoria.complianceAnalysis.recomendacoes.length > 0 ? `
+      <p style="margin-top: 15px;"><strong>Recomendações:</strong></p>
+      <ul style="margin-left: 20px;">
+        ${vistoria.complianceAnalysis.recomendacoes.map(r => `<li>${r}</li>`).join('')}
+      </ul>
+      ` : ""}
+    </div>
+  </div>
+  ` : ""}
 
   <div class="section">
     <div class="section-header">OBSERVAÇÕES GERAIS</div>

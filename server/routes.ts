@@ -137,8 +137,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const usosSolo = await storage.getUsosSolo(vistoria.id);
       const fotos = await storage.getFotos(vistoria.id);
 
-      return res.json({
+      // Transform snake_case database fields to camelCase for frontend/reports
+      const vistoriaWithCamelCase = {
         ...vistoria,
+        carInfo: vistoria.car_info,
+        embargoCheck: vistoria.embargo_check,
+        complianceAnalysis: vistoria.compliance_analysis,
+      };
+
+      return res.json({
+        ...vistoriaWithCamelCase,
         coordenadas,
         usosSolo,
         fotos,
