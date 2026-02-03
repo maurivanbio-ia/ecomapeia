@@ -1,5 +1,5 @@
-import React from "react";
-import { View, StyleSheet, Pressable, Alert, Platform } from "react-native";
+import React, { useState } from "react";
+import { View, StyleSheet, Pressable, Alert, Platform, Modal, Linking, ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
@@ -19,6 +19,8 @@ import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/hooks/useAuth";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 
+type LanguageOption = "Português" | "English" | "Español";
+
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export default function ProfileScreen() {
@@ -27,6 +29,41 @@ export default function ProfileScreen() {
   const tabBarHeight = useBottomTabBarHeight();
   const { theme } = useTheme();
   const { user, logout } = useAuth();
+
+  const [selectedLanguage, setSelectedLanguage] = useState<LanguageOption>("Português");
+  const [languageModalVisible, setLanguageModalVisible] = useState(false);
+  const [aboutModalVisible, setAboutModalVisible] = useState(false);
+
+  const handleLanguageSelect = (language: LanguageOption) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setSelectedLanguage(language);
+    setLanguageModalVisible(false);
+  };
+
+  const handleNotifications = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    
+    if (Platform.OS === "web") {
+      Alert.alert(
+        "Notificações",
+        "Para gerenciar notificações no navegador, acesse as configurações do seu navegador."
+      );
+    } else {
+      try {
+        await Linking.openSettings();
+      } catch (error) {
+        Alert.alert(
+          "Erro",
+          "Não foi possível abrir as configurações do dispositivo."
+        );
+      }
+    }
+  };
+
+  const handleAbout = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setAboutModalVisible(true);
+  };
 
   const handleLogout = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -99,22 +136,22 @@ export default function ProfileScreen() {
             <SettingsItem
               icon="bell"
               label="Notificações"
-              onPress={() => {}}
+              onPress={handleNotifications}
               theme={theme}
             />
             <View style={[styles.divider, { backgroundColor: theme.border }]} />
             <SettingsItem
               icon="globe"
               label="Idioma"
-              value="Português"
-              onPress={() => {}}
+              value={selectedLanguage}
+              onPress={() => setLanguageModalVisible(true)}
               theme={theme}
             />
             <View style={[styles.divider, { backgroundColor: theme.border }]} />
             <SettingsItem
               icon="info"
               label="Sobre o App"
-              onPress={() => {}}
+              onPress={handleAbout}
               theme={theme}
             />
           </View>
@@ -139,6 +176,131 @@ export default function ProfileScreen() {
           </ThemedText>
         </Animated.View>
       </KeyboardAwareScrollViewCompat>
+
+      {/* Language Selection Modal */}
+      <Modal
+        visible={languageModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setLanguageModalVisible(false)}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setLanguageModalVisible(false)}
+        >
+          <View style={[styles.modalContent, { backgroundColor: theme.backgroundDefault }]}>
+            <ThemedText style={styles.modalTitle}>Selecione o Idioma</ThemedText>
+            
+            {(["Português", "English", "Español"] as LanguageOption[]).map((lang) => (
+              <Pressable
+                key={lang}
+                style={[
+                  styles.languageOption,
+                  selectedLanguage === lang && { backgroundColor: Colors.light.accent + "20" },
+                ]}
+                onPress={() => handleLanguageSelect(lang)}
+              >
+                <ThemedText style={styles.languageText}>{lang}</ThemedText>
+                {selectedLanguage === lang ? (
+                  <Feather name="check" size={20} color={Colors.light.accent} />
+                ) : null}
+              </Pressable>
+            ))}
+
+            <Pressable
+              style={styles.modalCloseButton}
+              onPress={() => setLanguageModalVisible(false)}
+            >
+              <ThemedText style={styles.modalCloseText}>Fechar</ThemedText>
+            </Pressable>
+          </View>
+        </Pressable>
+      </Modal>
+
+      {/* About App Modal */}
+      <Modal
+        visible={aboutModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setAboutModalVisible(false)}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setAboutModalVisible(false)}
+        >
+          <View style={[styles.aboutModalContent, { backgroundColor: theme.backgroundDefault }]}>
+            <ScrollView showsVerticalScrollIndicator={false}>
+              <View style={styles.aboutHeader}>
+                <View style={[styles.aboutLogoContainer, { backgroundColor: Colors.light.primary }]}>
+                  <Feather name="map-pin" size={40} color="#FFFFFF" />
+                </View>
+                <ThemedText style={styles.aboutAppName}>MapeIA</ThemedText>
+                <ThemedText style={styles.aboutVersion}>Versão 1.0.0</ThemedText>
+              </View>
+
+              <View style={styles.aboutSection}>
+                <ThemedText style={styles.aboutSectionTitle}>Sobre o Aplicativo</ThemedText>
+                <ThemedText style={styles.aboutText}>
+                  O MapeIA é uma plataforma profissional de vistorias ambientais desenvolvida para técnicos de campo que trabalham em áreas remotas de reservatórios hidrelétricos.
+                </ThemedText>
+                <ThemedText style={styles.aboutText}>
+                  O aplicativo substitui formulários de papel por uma solução digital com capacidade offline, captura de fotos, mapeamento de polígonos por coordenadas UTM e geração automatizada de relatórios em PDF e Word.
+                </ThemedText>
+              </View>
+
+              <View style={styles.aboutSection}>
+                <ThemedText style={styles.aboutSectionTitle}>Funcionalidades</ThemedText>
+                <View style={styles.featureItem}>
+                  <Feather name="wifi-off" size={16} color={Colors.light.accent} />
+                  <ThemedText style={styles.featureText}>Modo offline com sincronização</ThemedText>
+                </View>
+                <View style={styles.featureItem}>
+                  <Feather name="camera" size={16} color={Colors.light.accent} />
+                  <ThemedText style={styles.featureText}>Captura de fotos com legendas</ThemedText>
+                </View>
+                <View style={styles.featureItem}>
+                  <Feather name="map" size={16} color={Colors.light.accent} />
+                  <ThemedText style={styles.featureText}>Mapeamento de polígonos UTM</ThemedText>
+                </View>
+                <View style={styles.featureItem}>
+                  <Feather name="navigation" size={16} color={Colors.light.accent} />
+                  <ThemedText style={styles.featureText}>Captura automática de GPS</ThemedText>
+                </View>
+                <View style={styles.featureItem}>
+                  <Feather name="file-text" size={16} color={Colors.light.accent} />
+                  <ThemedText style={styles.featureText}>Geração de relatórios PDF e Word</ThemedText>
+                </View>
+              </View>
+
+              <View style={styles.aboutSection}>
+                <ThemedText style={styles.aboutSectionTitle}>Desenvolvido por</ThemedText>
+                <View style={styles.developerInfo}>
+                  <ThemedText style={styles.companyName}>
+                    EcoBrasil Consultoria Ambiental
+                  </ThemedText>
+                  <ThemedText style={styles.developerName}>
+                    por Maurivan Vaz Ribeiro
+                  </ThemedText>
+                  <ThemedText 
+                    style={styles.cnpjText}
+                    lightColor={Colors.light.textSecondary}
+                    darkColor={Colors.dark.textSecondary}
+                  >
+                    CNPJ: 11.253.635/0001-17
+                  </ThemedText>
+                </View>
+              </View>
+            </ScrollView>
+
+            <Pressable
+              style={[styles.aboutCloseButton, { backgroundColor: Colors.light.accent }]}
+              onPress={() => setAboutModalVisible(false)}
+            >
+              <ThemedText style={styles.aboutCloseText}>Fechar</ThemedText>
+            </Pressable>
+          </View>
+        </Pressable>
+      </Modal>
     </ThemedView>
   );
 }
@@ -319,5 +481,125 @@ const styles = StyleSheet.create({
   },
   versionText: {
     fontSize: 12,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: Spacing.xl,
+  },
+  modalContent: {
+    width: "100%",
+    maxWidth: 340,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.xl,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    textAlign: "center",
+    marginBottom: Spacing.xl,
+  },
+  languageOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: Spacing.lg,
+    paddingHorizontal: Spacing.md,
+    borderRadius: BorderRadius.md,
+    marginBottom: Spacing.sm,
+  },
+  languageText: {
+    fontSize: 16,
+  },
+  modalCloseButton: {
+    marginTop: Spacing.lg,
+    paddingVertical: Spacing.md,
+    alignItems: "center",
+  },
+  modalCloseText: {
+    fontSize: 16,
+    color: Colors.light.textSecondary,
+  },
+  aboutModalContent: {
+    width: "100%",
+    maxWidth: 380,
+    maxHeight: "85%",
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.xl,
+  },
+  aboutHeader: {
+    alignItems: "center",
+    marginBottom: Spacing.xl,
+  },
+  aboutLogoContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: Spacing.md,
+  },
+  aboutAppName: {
+    fontSize: 28,
+    fontWeight: "800",
+  },
+  aboutVersion: {
+    fontSize: 14,
+    color: Colors.light.textSecondary,
+  },
+  aboutSection: {
+    marginBottom: Spacing.xl,
+  },
+  aboutSectionTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    marginBottom: Spacing.md,
+  },
+  aboutText: {
+    fontSize: 14,
+    lineHeight: 22,
+    marginBottom: Spacing.sm,
+  },
+  featureItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+    marginBottom: Spacing.sm,
+  },
+  featureText: {
+    fontSize: 14,
+  },
+  developerInfo: {
+    alignItems: "center",
+    padding: Spacing.lg,
+    backgroundColor: Colors.light.accent + "10",
+    borderRadius: BorderRadius.md,
+  },
+  companyName: {
+    fontSize: 16,
+    fontWeight: "700",
+    textAlign: "center",
+  },
+  developerName: {
+    fontSize: 14,
+    marginTop: Spacing.xs,
+    textAlign: "center",
+  },
+  cnpjText: {
+    fontSize: 12,
+    marginTop: Spacing.sm,
+  },
+  aboutCloseButton: {
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.md,
+    alignItems: "center",
+    marginTop: Spacing.md,
+  },
+  aboutCloseText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#FFFFFF",
   },
 });
