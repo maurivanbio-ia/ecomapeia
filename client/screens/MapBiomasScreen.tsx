@@ -53,7 +53,11 @@ export default function MapBiomasScreen() {
         ) : null}
         
         {/* Painel MapBiomas Alerta - Desmatamento */}
-        <MapBiomasPanel theme={theme} />
+        <MapBiomasPanel 
+          theme={theme} 
+          latitude={latitude} 
+          longitude={longitude} 
+        />
         
         {/* Painel MapBiomas Fogo - Queimadas */}
         <FireHotspotsPanel 

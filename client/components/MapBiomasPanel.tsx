@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -25,26 +25,102 @@ import {
   getAlertSeverity,
   getAlertSeverityColor,
 } from "@/lib/mapbiomasUtils";
+import { getApiUrl } from "@/lib/query-client";
 
 interface MapBiomasPanelProps {
   theme: any;
   onAlertSelect?: (alertCode: number) => void;
+  latitude?: number;
+  longitude?: number;
 }
 
-type SearchMode = "code" | "inspection";
+type SearchMode = "code" | "inspection" | "coordinates";
 
-export function MapBiomasPanel({ theme, onAlertSelect }: MapBiomasPanelProps) {
-  const [searchMode, setSearchMode] = useState<SearchMode>("code");
+interface LocationInfo {
+  municipio: string | null;
+  estado: string | null;
+  geocodeSuccess: boolean;
+}
+
+export function MapBiomasPanel({ theme, onAlertSelect, latitude, longitude }: MapBiomasPanelProps) {
+  const [searchMode, setSearchMode] = useState<SearchMode>(latitude && longitude ? "coordinates" : "code");
   const [isLoading, setIsLoading] = useState(false);
   const [alertCode, setAlertCode] = useState("");
   const [alert, setAlert] = useState<MapBiomasAlert | null>(null);
   const [alerts, setAlerts] = useState<MapBiomasAlert[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [selectedVistoria, setSelectedVistoria] = useState<any>(null);
+  const [locationInfo, setLocationInfo] = useState<LocationInfo | null>(null);
+  const [autoSearchDone, setAutoSearchDone] = useState(false);
 
   const { data: vistorias = [] } = useQuery<any[]>({
     queryKey: ["/api/vistorias"],
   });
+
+  // Auto-search when coordinates are provided
+  useEffect(() => {
+    if (latitude && longitude && !autoSearchDone) {
+      handleSearchByCoordinates();
+      setAutoSearchDone(true);
+    }
+  }, [latitude, longitude]);
+
+  const handleSearchByCoordinates = async () => {
+    if (!latitude || !longitude) {
+      setError("Coordenadas não disponíveis");
+      return;
+    }
+
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setIsLoading(true);
+    setError(null);
+    setAlert(null);
+    setAlerts([]);
+    setLocationInfo(null);
+
+    try {
+      const apiUrl = getApiUrl();
+      const url = new URL("/api/mapbiomas/alerts-by-coordinates", apiUrl);
+      url.searchParams.append("latitude", latitude.toString());
+      url.searchParams.append("longitude", longitude.toString());
+
+      const response = await fetch(url.toString());
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setLocationInfo({
+          municipio: data.location?.municipio || null,
+          estado: data.location?.estado || null,
+          geocodeSuccess: data.location?.geocodeSuccess || false
+        });
+
+        if (data.alerts && data.alerts.length > 0) {
+          const mappedAlerts: MapBiomasAlert[] = data.alerts.map((a: any) => ({
+            alertCode: a.alertCode,
+            detectedAt: a.detectedAt,
+            publishedAt: a.publishedAt,
+            areaHa: a.areaHa,
+            statusName: a.statusName,
+            biome: a.biome,
+            state: a.state,
+            city: a.city,
+            source: a.source
+          }));
+          setAlerts(mappedAlerts);
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        } else {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+        }
+      } else {
+        throw new Error(data.error || "Falha ao buscar alertas");
+      }
+    } catch (err: any) {
+      setError(err.message || "Erro ao consultar alertas por coordenadas");
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSearchByCode = async () => {
     const code = parseInt(alertCode, 10);
@@ -112,6 +188,9 @@ export function MapBiomasPanel({ theme, onAlertSelect }: MapBiomasPanelProps) {
     setError(null);
     setSelectedVistoria(null);
     setAlertCode("");
+    if (mode !== "coordinates") {
+      setLocationInfo(null);
+    }
   };
 
   const severity = alert ? getAlertSeverity(alert.areaHa) : null;
@@ -171,6 +250,35 @@ export function MapBiomasPanel({ theme, onAlertSelect }: MapBiomasPanelProps) {
             Por Vistoria
           </ThemedText>
         </Pressable>
+        {latitude && longitude ? (
+          <Pressable
+            onPress={() => {
+              handleModeChange("coordinates");
+              if (!autoSearchDone) {
+                handleSearchByCoordinates();
+                setAutoSearchDone(true);
+              }
+            }}
+            style={[
+              styles.modeTab,
+              { backgroundColor: searchMode === "coordinates" ? "#2E7D32" : theme.border + "40" },
+            ]}
+          >
+            <Feather
+              name="map-pin"
+              size={14}
+              color={searchMode === "coordinates" ? "#FFFFFF" : theme.tabIconDefault}
+            />
+            <ThemedText
+              style={[
+                styles.modeTabText,
+                { color: searchMode === "coordinates" ? "#FFFFFF" : theme.text },
+              ]}
+            >
+              Por GPS
+            </ThemedText>
+          </Pressable>
+        ) : null}
       </View>
 
       {searchMode === "code" ? (
@@ -206,6 +314,56 @@ export function MapBiomasPanel({ theme, onAlertSelect }: MapBiomasPanelProps) {
               )}
             </Pressable>
           </View>
+        </>
+      ) : searchMode === "coordinates" ? (
+        <>
+          {/* Location Info Card */}
+          {locationInfo ? (
+            <Animated.View entering={FadeIn} style={[styles.locationCard, { backgroundColor: "#E8F5E9" }]}>
+              <View style={styles.locationHeader}>
+                <View style={[styles.locationIcon, { backgroundColor: "#2E7D32" + "20" }]}>
+                  <Feather name="map-pin" size={18} color="#2E7D32" />
+                </View>
+                <View style={styles.locationInfo}>
+                  <ThemedText style={styles.locationMunicipio}>
+                    {locationInfo.municipio || "Município não identificado"}
+                  </ThemedText>
+                  {locationInfo.estado ? (
+                    <ThemedText style={styles.locationEstado}>{locationInfo.estado}</ThemedText>
+                  ) : null}
+                </View>
+              </View>
+              <View style={styles.locationCoords}>
+                <Feather name="navigation" size={12} color="#666" />
+                <ThemedText style={styles.locationCoordsText}>
+                  {latitude?.toFixed(6)}, {longitude?.toFixed(6)}
+                </ThemedText>
+              </View>
+            </Animated.View>
+          ) : null}
+
+          <ThemedText style={styles.description}>
+            Buscando automaticamente alertas de desmatamento na região das coordenadas GPS capturadas.
+          </ThemedText>
+
+          {/* Refresh Button */}
+          <Pressable
+            onPress={handleSearchByCoordinates}
+            disabled={isLoading}
+            style={[
+              styles.refreshButton,
+              { backgroundColor: "#2E7D32", opacity: isLoading ? 0.7 : 1 }
+            ]}
+          >
+            {isLoading ? (
+              <ActivityIndicator size="small" color="#FFFFFF" />
+            ) : (
+              <>
+                <Feather name="refresh-cw" size={16} color="#FFFFFF" />
+                <ThemedText style={styles.refreshButtonText}>Atualizar Busca</ThemedText>
+              </>
+            )}
+          </Pressable>
         </>
       ) : (
         <>
@@ -783,5 +941,58 @@ const styles = StyleSheet.create({
   statValueCompact: {
     fontSize: 12,
     fontWeight: "500",
+  },
+  locationCard: {
+    padding: Spacing.md,
+    borderRadius: BorderRadius.md,
+    marginBottom: Spacing.md,
+  },
+  locationHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: Spacing.xs,
+  },
+  locationIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  locationInfo: {
+    marginLeft: Spacing.sm,
+    flex: 1,
+  },
+  locationMunicipio: {
+    fontSize: 15,
+    fontWeight: "700",
+  },
+  locationEstado: {
+    fontSize: 12,
+    color: Colors.light.textSecondary,
+  },
+  locationCoords: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: Spacing.xs,
+    gap: 4,
+  },
+  locationCoordsText: {
+    fontSize: 11,
+    color: "#666",
+  },
+  refreshButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: Spacing.md,
+    borderRadius: BorderRadius.md,
+    gap: Spacing.sm,
+    marginTop: Spacing.sm,
+  },
+  refreshButtonText: {
+    color: "#FFFFFF",
+    fontWeight: "600",
+    fontSize: 14,
   },
 });

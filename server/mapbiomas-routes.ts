@@ -698,6 +698,134 @@ router.post("/car-by-coordinates", async (req: Request, res: Response) => {
   }
 });
 
+// Busca alertas por coordenadas (geocodificação reversa + consulta)
+router.get("/alerts-by-coordinates", async (req: Request, res: Response) => {
+  try {
+    const { latitude, longitude } = req.query;
+    const token = process.env.MAPBIOMAS_API_TOKEN;
+
+    if (!token) {
+      return res.status(400).json({ error: "Token da API MapBiomas não configurado" });
+    }
+
+    if (!latitude || !longitude) {
+      return res.status(400).json({ error: "Latitude e longitude são obrigatórios" });
+    }
+
+    const lat = parseFloat(latitude as string);
+    const lng = parseFloat(longitude as string);
+
+    // Geocodificação reversa usando Nominatim (OpenStreetMap)
+    let municipio = "";
+    let estado = "";
+    let geocodeSuccess = false;
+
+    try {
+      const geocodeUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&accept-language=pt-BR`;
+      const geocodeResponse = await fetch(geocodeUrl, {
+        headers: {
+          'User-Agent': 'MapeIA-App/1.0',
+          'Accept': 'application/json'
+        },
+        signal: AbortSignal.timeout(8000)
+      });
+
+      if (geocodeResponse.ok) {
+        const geocodeData = await geocodeResponse.json();
+        const address = geocodeData.address;
+        
+        // Nominatim retorna em diferentes formatos dependendo da localização
+        municipio = address?.city || address?.town || address?.municipality || address?.village || address?.county || "";
+        estado = address?.state || "";
+        geocodeSuccess = true;
+      }
+    } catch (geocodeError) {
+      console.log("Geocoding failed, will search by proximity:", geocodeError);
+    }
+
+    if (!municipio) {
+      return res.json({
+        success: true,
+        location: {
+          latitude: lat,
+          longitude: lng,
+          municipio: null,
+          estado: null,
+          geocodeSuccess: false
+        },
+        alerts: [],
+        message: "Não foi possível identificar o município. Use a busca manual."
+      });
+    }
+
+    // Busca alertas no município identificado
+    const query = `
+      query AlertsByTerritory($territoryNames: [String!]!) {
+        alerts(territoryNames: $territoryNames, limit: 20) {
+          alertCode
+          detectedAt
+          publishedAt
+          areaHa
+          statusName
+          crossedBiomes
+          crossedStates
+          crossedCities
+          sources
+        }
+      }
+    `;
+
+    const response = await fetch(MAPBIOMAS_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({ 
+        query, 
+        variables: { territoryNames: [municipio] } 
+      })
+    });
+
+    const data = await response.json();
+    let alerts: any[] = [];
+
+    if (!data.errors && data.data?.alerts) {
+      alerts = data.data.alerts.map((alert: any) => ({
+        alertCode: alert.alertCode,
+        detectedAt: alert.detectedAt,
+        publishedAt: alert.publishedAt,
+        areaHa: alert.areaHa,
+        statusName: alert.statusName,
+        biome: alert.crossedBiomes?.[0] || "N/A",
+        state: alert.crossedStates?.[0] || estado,
+        city: alert.crossedCities?.[0] || municipio,
+        source: alert.sources?.[0] || "MapBiomas"
+      }));
+    }
+
+    res.json({
+      success: true,
+      location: {
+        latitude: lat,
+        longitude: lng,
+        municipio,
+        estado,
+        geocodeSuccess
+      },
+      alerts,
+      alertCount: alerts.length,
+      message: alerts.length > 0 
+        ? `${alerts.length} alerta(s) encontrado(s) em ${municipio}` 
+        : `Nenhum alerta recente em ${municipio}`
+    });
+
+  } catch (error) {
+    console.error("Error searching alerts by coordinates:", error);
+    res.status(500).json({ error: "Falha ao buscar alertas por coordenadas" });
+  }
+});
+
 // MapBiomas Fogo - Consulta de focos de calor e histórico de queimadas
 router.get("/fire/hotspots", async (req: Request, res: Response) => {
   try {
