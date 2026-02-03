@@ -4,10 +4,14 @@ import * as bcrypt from "bcryptjs";
 import { storage } from "./storage";
 import { loginSchema, registerSchema } from "@shared/schema";
 import { registerChatRoutes } from "./replit_integrations/chat";
+import pdfRoutes from "./routes/pdf";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Register AI chat routes
   registerChatRoutes(app);
+  
+  // Register PDF routes
+  app.use("/api/pdf", pdfRoutes);
   // Auth routes
   app.post("/api/auth/login", async (req: Request, res: Response) => {
     try {

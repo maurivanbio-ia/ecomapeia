@@ -3,12 +3,15 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import VistoriasScreen from "@/screens/VistoriasScreen";
 import NovaVistoriaScreen from "@/screens/NovaVistoriaScreen";
+import DetalhesVistoriaScreen from "@/screens/DetalhesVistoriaScreen";
+import MapaGeralScreen from "@/screens/MapaGeralScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 
 export type VistoriasStackParamList = {
   VistoriasList: undefined;
   NovaVistoria: undefined;
-  EditarVistoria: { id: string };
+  DetalhesVistoria: { vistoriaId: string };
+  MapaGeral: undefined;
 };
 
 const Stack = createNativeStackNavigator<VistoriasStackParamList>();
@@ -30,6 +33,20 @@ export default function VistoriasStackNavigator() {
         component={NovaVistoriaScreen}
         options={{
           title: "Nova Vistoria",
+        }}
+      />
+      <Stack.Screen
+        name="DetalhesVistoria"
+        component={DetalhesVistoriaScreen}
+        options={{
+          title: "Detalhes da Vistoria",
+        }}
+      />
+      <Stack.Screen
+        name="MapaGeral"
+        component={MapaGeralScreen}
+        options={{
+          title: "Mapa das Propriedades",
         }}
       />
     </Stack.Navigator>
