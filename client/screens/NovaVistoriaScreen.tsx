@@ -416,6 +416,13 @@ export default function NovaVistoriaScreen() {
           direcao_vento: weatherData.direcaoVento,
           nebulosidade: weatherData.nebulosidade,
         } : null,
+        track_points: trackPoints.length > 0 ? trackPoints.map(p => ({
+          lat: p.latitude,
+          lon: p.longitude,
+          alt: p.altitude,
+          acc: p.accuracy,
+          ts: p.timestamp,
+        })) : null,
       });
       return response.json();
     },
