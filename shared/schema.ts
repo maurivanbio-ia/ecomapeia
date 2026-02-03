@@ -217,3 +217,106 @@ export const registerSchema = z.object({
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;
+
+// Teams table for team management
+export const equipes = pgTable("equipes", {
+  id: serial("id").primaryKey(),
+  nome: text("nome").notNull(),
+  descricao: text("descricao"),
+  responsavel_id: varchar("responsavel_id").references(() => usuarios.id),
+  created_at: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+});
+
+export const insertEquipeSchema = createInsertSchema(equipes).pick({
+  nome: true,
+  descricao: true,
+  responsavel_id: true,
+});
+
+export type InsertEquipe = z.infer<typeof insertEquipeSchema>;
+export type Equipe = typeof equipes.$inferSelect;
+
+// Team members junction table
+export const membros_equipe = pgTable("membros_equipe", {
+  id: serial("id").primaryKey(),
+  equipe_id: integer("equipe_id").references(() => equipes.id).notNull(),
+  usuario_id: varchar("usuario_id").references(() => usuarios.id).notNull(),
+  role: text("role").default("membro"),
+  joined_at: timestamp("joined_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+});
+
+export type MembroEquipe = typeof membros_equipe.$inferSelect;
+
+// Notifications table
+export const notificacoes = pgTable("notificacoes", {
+  id: serial("id").primaryKey(),
+  usuario_id: varchar("usuario_id").references(() => usuarios.id).notNull(),
+  titulo: text("titulo").notNull(),
+  mensagem: text("mensagem").notNull(),
+  tipo: text("tipo").default("info"), // info, warning, success, error
+  lida: integer("lida").default(0),
+  vistoria_id: varchar("vistoria_id").references(() => vistorias.id),
+  created_at: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+});
+
+export const insertNotificacaoSchema = createInsertSchema(notificacoes).pick({
+  usuario_id: true,
+  titulo: true,
+  mensagem: true,
+  tipo: true,
+  vistoria_id: true,
+});
+
+export type InsertNotificacao = z.infer<typeof insertNotificacaoSchema>;
+export type Notificacao = typeof notificacoes.$inferSelect;
+
+// Vistoria assignment table (for team task assignment)
+export const atribuicoes_vistoria = pgTable("atribuicoes_vistoria", {
+  id: serial("id").primaryKey(),
+  vistoria_id: varchar("vistoria_id").references(() => vistorias.id).notNull(),
+  usuario_id: varchar("usuario_id").references(() => usuarios.id).notNull(),
+  atribuido_por: varchar("atribuido_por").references(() => usuarios.id),
+  prazo: date("prazo"),
+  status: text("status").default("pendente"), // pendente, em_andamento, concluida
+  created_at: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+});
+
+export type AtribuicaoVistoria = typeof atribuicoes_vistoria.$inferSelect;
+
+// Videos table for video recording feature
+export const videos = pgTable("videos", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  vistoria_id: varchar("vistoria_id").references(() => vistorias.id).notNull(),
+  uri: text("uri").notNull(),
+  duracao: real("duracao"), // duration in seconds
+  legenda: text("legenda"),
+  ordem: integer("ordem").default(1),
+  created_at: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+});
+
+export const insertVideoSchema = createInsertSchema(videos).pick({
+  vistoria_id: true,
+  uri: true,
+  duracao: true,
+  legenda: true,
+  ordem: true,
+});
+
+export type InsertVideo = z.infer<typeof insertVideoSchema>;
+export type Video = typeof videos.$inferSelect;
+
+// Weather conditions for inspection
+export const condicoes_climaticas = pgTable("condicoes_climaticas", {
+  id: serial("id").primaryKey(),
+  vistoria_id: varchar("vistoria_id").references(() => vistorias.id).notNull(),
+  temperatura: real("temperatura"),
+  umidade: real("umidade"),
+  precipitacao: real("precipitacao"),
+  vento: real("vento"),
+  descricao: text("descricao"),
+  captured_at: timestamp("captured_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+});
+
+export type CondicaoClimatica = typeof condicoes_climaticas.$inferSelect;

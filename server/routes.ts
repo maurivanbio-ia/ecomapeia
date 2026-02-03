@@ -10,6 +10,8 @@ import aiRoutes from "./ai-routes";
 import mapbiomasRoutes from "./mapbiomas-routes";
 import environmentalRoutes from "./environmental-routes";
 import conservationRoutes from "./conservation-routes";
+import featuresRoutes from "./features-routes";
+import teamRoutes from "./team-routes";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Register AI chat routes
@@ -26,6 +28,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Register Conservation Units and Indigenous Lands APIs
   app.use("/api/conservation", conservationRoutes);
+  
+  // Register Features routes (weather, APP, satellite, export, OCR)
+  app.use("/api/features", featuresRoutes);
+  
+  // Register Team and Notification routes
+  app.use("/api/team", teamRoutes);
   
   // Register PDF routes
   app.use("/api/pdf", pdfRoutes);
