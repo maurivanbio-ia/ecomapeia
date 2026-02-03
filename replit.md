@@ -77,3 +77,26 @@ The application integrates Replit AI, leveraging OpenAI's gpt-5.2 model for vari
 
 -   **New JSONB columns in vistorias:** `car_info`, `embargo_check`, `compliance_analysis` store environmental compliance data
 -   **Field naming convention:** Database uses snake_case (car_info), API transforms to camelCase (carInfo) for frontend/reports
+
+### Advanced Features (Feb 2026)
+
+-   **Weather Integration:** Real-time weather data via Open-Meteo API (free, no key required) displayed during inspections
+-   **APP Calculator:** Automatic APP width calculation per Lei 12.651/2012 based on water body dimensions
+-   **Satellite Comparison:** INPE DETER integration for temporal satellite imagery comparison
+-   **Document Scanner:** OCR capability using OpenAI Vision for document digitization
+-   **Video Recording:** 60-second video capture with expo-camera for field documentation
+-   **Team Management:** Equipes screen with team creation, member assignment, and vistoria delegation
+-   **Notifications:** In-app notification system for vistoria updates and team assignments
+-   **Analytics Dashboard:** Visual analytics with charts (pie/bar), export to CSV/Excel
+-   **Property History:** Track and search vistorias by property with historical data
+-   **Navigation Updates:** Quick action buttons on VistoriasScreen for Dashboard, Equipes, and Histórico
+
+### New API Endpoints
+
+-   `/api/features/weather` - Real-time weather data by coordinates
+-   `/api/features/app-calculator` - APP width calculation
+-   `/api/features/satellite-comparison` - INPE satellite imagery
+-   `/api/features/document-ocr` - Document text extraction
+-   `/api/features/export/:format` - CSV/Excel export
+-   `/api/team/*` - Team management (create, list, members, assign vistorias)
+-   `/api/notifications/*` - Notification CRUD and status updates

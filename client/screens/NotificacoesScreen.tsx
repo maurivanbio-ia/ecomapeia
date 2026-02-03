@@ -7,7 +7,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { Colors, Spacing } from "@/constants/theme";
 import { getApiUrl } from "@/lib/query-client";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 import * as Haptics from "expo-haptics";
 
 interface Notificacao {
