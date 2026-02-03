@@ -315,17 +315,10 @@ export default function ProfileScreen() {
                 <ThemedText style={styles.aboutSectionTitle}>{t.developedBy}</ThemedText>
                 <View style={styles.developerInfo}>
                   <ThemedText style={styles.companyName}>
-                    EcoBrasil Consultoria Ambiental
+                    EcoIA - Inteligência Ambiental
                   </ThemedText>
                   <ThemedText style={styles.developerName}>
                     {t.by} Maurivan Vaz Ribeiro
-                  </ThemedText>
-                  <ThemedText 
-                    style={styles.cnpjText}
-                    lightColor={Colors.light.textSecondary}
-                    darkColor={Colors.dark.textSecondary}
-                  >
-                    CNPJ: 11.253.635/0001-17
                   </ThemedText>
                 </View>
               </View>
@@ -650,10 +643,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginTop: Spacing.xs,
     textAlign: "center",
-  },
-  cnpjText: {
-    fontSize: 12,
-    marginTop: Spacing.sm,
   },
   aboutCloseButton: {
     paddingVertical: Spacing.md,

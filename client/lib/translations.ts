@@ -78,7 +78,7 @@ const translations: Record<Language, Translations> = {
     featurePolygon: "Mapeamento de polígonos UTM",
     featureGPS: "Captura automática de GPS",
     featureReports: "Geração de relatórios PDF e Word",
-    developedBy: "Desenvolvido por",
+    developedBy: "Desenvolvido pela",
     by: "por",
     
     notificationsTitle: "Notificações",
