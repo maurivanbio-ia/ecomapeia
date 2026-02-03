@@ -203,6 +203,18 @@ export default function NovaVistoriaScreen() {
     state?: string;
   } | null>(null);
   const [loadingCAR, setLoadingCAR] = useState(false);
+  const [ucInfo, setUcInfo] = useState<{
+    name: string;
+    category: string;
+    categoryName: string;
+    distanceKm: number;
+    isInside: boolean;
+    state?: string;
+    biome?: string;
+    restrictionType?: string;
+    areaKm2?: number;
+  } | null>(null);
+  const [loadingUC, setLoadingUC] = useState(false);
 
   const polygonCoordinates = useMemo(() => {
     const zoneMatch = formData.zona_utm.match(/(\d+)([A-Za-z])/);
@@ -376,6 +388,38 @@ export default function NovaVistoriaScreen() {
     }
   };
 
+  const fetchUCByCoordinates = async (latitude: number, longitude: number) => {
+    setLoadingUC(true);
+    try {
+      const response = await fetch(
+        new URL(`/api/conservation/ucs/nearest?lat=${latitude}&lon=${longitude}&limit=1`, getApiUrl()).toString()
+      );
+      const data = await response.json();
+      
+      if (data.success && data.nearestUCs && data.nearestUCs.length > 0) {
+        const nearest = data.nearestUCs[0];
+        setUcInfo({
+          name: nearest.name,
+          category: nearest.category,
+          categoryName: nearest.categoryName,
+          distanceKm: nearest.distanceKm,
+          isInside: nearest.isInside || false,
+          state: nearest.state,
+          biome: nearest.biome,
+          restrictionType: nearest.restrictionType,
+          areaKm2: nearest.areaKm2,
+        });
+        return nearest;
+      }
+      return null;
+    } catch (error) {
+      console.error("Error fetching UC:", error);
+      return null;
+    } finally {
+      setLoadingUC(false);
+    }
+  };
+
   const captureGPSPoint = async () => {
     setCapturingGPS(true);
     try {
@@ -402,15 +446,12 @@ export default function NovaVistoriaScreen() {
         const lng = utm.longitude;
         
         if (lat && lng) {
-          const carCode = await fetchCARByCoordinates(lat, lng);
-          if (carCode) {
-            Alert.alert(
-              "Coordenada Capturada",
-              `E: ${utm.easting.toFixed(2)}\nN: ${utm.northing.toFixed(2)}\n\nCódigo CAR encontrado:\n${carCode}`
-            );
-          } else {
-            Alert.alert("Sucesso", `Coordenada capturada!\nE: ${utm.easting.toFixed(2)}\nN: ${utm.northing.toFixed(2)}\n\nNenhum CAR encontrado nesta localização.`);
-          }
+          fetchCARByCoordinates(lat, lng);
+          fetchUCByCoordinates(lat, lng);
+          Alert.alert(
+            "Coordenada Capturada",
+            `E: ${utm.easting.toFixed(2)}\nN: ${utm.northing.toFixed(2)}\n\nBuscando CAR e UC mais próxima...`
+          );
         } else {
           Alert.alert("Sucesso", `Coordenada capturada!\nE: ${utm.easting.toFixed(2)}\nN: ${utm.northing.toFixed(2)}`);
         }
@@ -810,6 +851,44 @@ export default function NovaVistoriaScreen() {
               <ActivityIndicator size="small" color={Colors.light.accent} />
               <ThemedText style={{ marginLeft: Spacing.sm, color: theme.tabIconDefault }}>
                 Buscando código CAR no MapBiomas...
+              </ThemedText>
+            </View>
+          ) : null}
+
+          {ucInfo ? (
+            <View style={[styles.carInfoCard, { 
+              backgroundColor: ucInfo.isInside ? Colors.light.warning + "20" : Colors.light.success + "15", 
+              borderColor: ucInfo.isInside ? Colors.light.warning : Colors.light.success 
+            }]}>
+              <View style={styles.carInfoHeader}>
+                <Feather name="shield" size={18} color={ucInfo.isInside ? Colors.light.warning : Colors.light.success} />
+                <ThemedText style={[styles.carInfoTitle, { color: ucInfo.isInside ? Colors.light.warning : Colors.light.success }]}>
+                  {ucInfo.isInside ? "Dentro de Unidade de Conservação" : "UC Mais Próxima"}
+                </ThemedText>
+              </View>
+              <ThemedText style={styles.carCode}>{ucInfo.name}</ThemedText>
+              <ThemedText style={[styles.carDetails, { color: theme.tabIconDefault }]}>
+                {ucInfo.categoryName} ({ucInfo.category})
+              </ThemedText>
+              <ThemedText style={[styles.carDetails, { color: theme.tabIconDefault }]}>
+                Distância: {ucInfo.distanceKm.toFixed(1)} km
+              </ThemedText>
+              {ucInfo.restrictionType ? (
+                <ThemedText style={[styles.carDetails, { color: theme.tabIconDefault }]}>
+                  Tipo: {ucInfo.restrictionType}
+                </ThemedText>
+              ) : null}
+              {ucInfo.biome ? (
+                <ThemedText style={[styles.carDetails, { color: theme.tabIconDefault }]}>
+                  Bioma: {ucInfo.biome}
+                </ThemedText>
+              ) : null}
+            </View>
+          ) : loadingUC ? (
+            <View style={[styles.carInfoCard, { backgroundColor: theme.backgroundSecondary }]}>
+              <ActivityIndicator size="small" color={Colors.light.success} />
+              <ThemedText style={{ marginLeft: Spacing.sm, color: theme.tabIconDefault }}>
+                Buscando Unidade de Conservação mais próxima...
               </ThemedText>
             </View>
           ) : null}
