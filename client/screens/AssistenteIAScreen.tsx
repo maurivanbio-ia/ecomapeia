@@ -20,7 +20,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { useTheme } from "@/hooks/useTheme";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
-import { streamFieldAssistant } from "@/lib/aiUtils";
+import { getFieldAssistantResponse } from "@/lib/aiUtils";
 
 interface Message {
   id: string;
@@ -74,15 +74,14 @@ export default function AssistenteIAScreen() {
     setMessages((prev) => [...prev, assistantMessage]);
 
     try {
-      for await (const chunk of streamFieldAssistant(text.trim())) {
-        setMessages((prev) =>
-          prev.map((msg) =>
-            msg.id === assistantMessageId
-              ? { ...msg, content: msg.content + chunk }
-              : msg
-          )
-        );
-      }
+      const response = await getFieldAssistantResponse(text.trim());
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === assistantMessageId
+            ? { ...msg, content: response }
+            : msg
+        )
+      );
     } catch (error) {
       setMessages((prev) =>
         prev.map((msg) =>

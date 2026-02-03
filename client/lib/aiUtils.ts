@@ -147,10 +147,10 @@ export async function autoFillForm(
   return data.suggestions;
 }
 
-export async function* streamFieldAssistant(
+export async function getFieldAssistantResponse(
   question: string,
   context?: Record<string, unknown>
-): AsyncGenerator<string, void, unknown> {
+): Promise<string> {
   const response = await fetch(new URL("/api/ai/field-assistant", API_BASE).toString(), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -161,38 +161,8 @@ export async function* streamFieldAssistant(
     throw new Error("Failed to get assistant response");
   }
 
-  const reader = response.body?.getReader();
-  if (!reader) {
-    throw new Error("No response body");
-  }
-
-  const decoder = new TextDecoder();
-  let buffer = "";
-
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-
-    buffer += decoder.decode(value, { stream: true });
-    const lines = buffer.split("\n");
-    buffer = lines.pop() || "";
-
-    for (const line of lines) {
-      if (line.startsWith("data: ")) {
-        try {
-          const data = JSON.parse(line.slice(6));
-          if (data.content) {
-            yield data.content;
-          }
-          if (data.done) {
-            return;
-          }
-        } catch {
-          // Ignore parse errors
-        }
-      }
-    }
-  }
+  const data = await response.json();
+  return data.response || "";
 }
 
 export function getRiskColor(risk: "baixo" | "medio" | "alto"): string {

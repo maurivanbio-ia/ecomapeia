@@ -277,11 +277,7 @@ router.post("/field-assistant", async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Question is required" });
     }
 
-    res.setHeader("Content-Type", "text/event-stream");
-    res.setHeader("Cache-Control", "no-cache");
-    res.setHeader("Connection", "keep-alive");
-
-    const stream = await openai.chat.completions.create({
+    const response = await openai.chat.completions.create({
       model: "gpt-5.2",
       messages: [
         {
@@ -403,22 +399,13 @@ Pergunta: ${question}`
         }
       ],
       max_completion_tokens: 1500,
-      stream: true,
     });
 
-    for await (const chunk of stream) {
-      const content = chunk.choices[0]?.delta?.content || "";
-      if (content) {
-        res.write(`data: ${JSON.stringify({ content })}\n\n`);
-      }
-    }
-
-    res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
-    res.end();
+    const content = response.choices[0]?.message?.content || "";
+    res.json({ success: true, response: content });
   } catch (error) {
     console.error("Error with field assistant:", error);
-    res.write(`data: ${JSON.stringify({ error: "Failed to get response" })}\n\n`);
-    res.end();
+    res.status(500).json({ error: "Failed to get response" });
   }
 });
 
