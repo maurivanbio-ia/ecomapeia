@@ -90,6 +90,12 @@ The application integrates Replit AI, leveraging OpenAI's gpt-5.2 model for vari
 -   **Analytics Dashboard:** Visual analytics with charts (pie/bar), export to CSV/Excel
 -   **Property History:** Track and search vistorias by property with historical data
 -   **Navigation Updates:** Quick action buttons on VistoriasScreen for Dashboard, Equipes, and Histórico
+-   **GPS Trajectory Tracking:** Continuous location monitoring during inspections with useGPSTracking hook (5-second/5-meter intervals), tracks distance traveled, elapsed time, and stores full trajectory path
+-   **KMZ/KML Export:** Export property polygon and inspector's trajectory for Google Earth visualization via `/api/kmz/export/:vistoriaId`
+
+### Database Fields for GPS Tracking
+
+-   **track_points JSONB:** Stores GPS trajectory data with each inspection including: lat, lon, alt (altitude), acc (accuracy), ts (timestamp)
 
 ### New API Endpoints
 
