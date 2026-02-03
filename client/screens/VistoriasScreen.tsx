@@ -52,7 +52,7 @@ export default function VistoriasScreen() {
   const [searchQuery, setSearchQuery] = useState("");
 
   const { data: vistorias = [], isLoading, refetch, isRefetching } = useQuery<Vistoria[]>({
-    queryKey: ["/api/vistorias", { usuario_id: user?.id }],
+    queryKey: [`/api/vistorias?usuario_id=${user?.id}`],
     enabled: !!user?.id,
   });
 

@@ -103,7 +103,7 @@ export default function NovaVistoriaScreen() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/vistorias"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/vistorias?usuario_id=${user?.id}`] });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       Alert.alert("Sucesso", "Vistoria criada com sucesso!", [
         { text: "OK", onPress: () => navigation.goBack() },
