@@ -116,7 +116,7 @@ export default function DetalhesVistoriaScreen() {
         if (await Sharing.isAvailableAsync()) {
           await Sharing.shareAsync(uri, {
             mimeType: "application/pdf",
-            dialogTitle: "Compartilhar Relatório",
+            dialogTitle: "Compartilhar Relatório PDF",
           });
         }
       }
@@ -124,7 +124,53 @@ export default function DetalhesVistoriaScreen() {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (error) {
       console.error("Error generating PDF:", error);
-      Alert.alert("Erro", "Não foi possível gerar o relatório.");
+      Alert.alert("Erro", "Não foi possível gerar o relatório PDF.");
+    }
+  };
+
+  const generateWord = async () => {
+    if (!vistoria) return;
+
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      
+      const apiUrl = getApiUrl();
+      const url = new URL("/api/docx/generate", apiUrl);
+      
+      const response = await fetch(url.toString(), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(vistoria),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate Word document");
+      }
+
+      if (Platform.OS === "web") {
+        const blob = await response.blob();
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = downloadUrl;
+        link.download = `RO-NOT-ITU_${vistoria.numero_notificacao?.replace(/[^a-zA-Z0-9]/g, "_") || vistoria.id}.docx`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(downloadUrl);
+      } else {
+        Alert.alert(
+          "Documento Word",
+          "O documento Word está disponível para download na versão web. Acesse a aplicação pelo navegador para baixar o arquivo.",
+          [{ text: "OK" }]
+        );
+      }
+      
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch (error) {
+      console.error("Error generating Word document:", error);
+      Alert.alert("Erro", "Não foi possível gerar o documento Word.");
     }
   };
 
@@ -219,7 +265,14 @@ export default function DetalhesVistoriaScreen() {
             style={[styles.actionBtn, { backgroundColor: Colors.light.primary }]}
           >
             <Feather name="file-text" size={18} color="#FFFFFF" />
-            <ThemedText style={styles.actionBtnText}>Gerar PDF</ThemedText>
+            <ThemedText style={styles.actionBtnText}>PDF</ThemedText>
+          </Pressable>
+          <Pressable
+            onPress={generateWord}
+            style={[styles.actionBtn, { backgroundColor: Colors.light.accent }]}
+          >
+            <Feather name="file" size={18} color="#FFFFFF" />
+            <ThemedText style={styles.actionBtnText}>Word</ThemedText>
           </Pressable>
         </View>
 
@@ -361,6 +414,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "flex-end",
     marginBottom: Spacing.lg,
+    gap: Spacing.sm,
   },
   actionBtn: {
     flexDirection: "row",

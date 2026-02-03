@@ -1,6 +1,14 @@
 import { Router, Request, Response } from "express";
+import * as fs from "fs";
+import * as path from "path";
 
 const router = Router();
+
+interface UsoSolo {
+  tipo: string;
+  valor: string;
+  unidade: string;
+}
 
 interface VistoriaData {
   id: string;
@@ -8,6 +16,8 @@ interface VistoriaData {
   setor?: string;
   margem?: string;
   municipio?: string;
+  uf?: string;
+  localizacao?: string;
   proprietario: string;
   loteamento_condominio?: string;
   tipo_inspecao: string;
@@ -19,38 +29,83 @@ interface VistoriaData {
   emissao_notificacao?: string;
   reincidente?: string;
   observacoes?: string;
+  observacoes_usos?: string;
   fotos?: Array<{ uri: string; legenda: string }>;
   coordenadas_utm?: Array<{ e: string; n: string }>;
+  usos_solo?: UsoSolo[];
+  croqui_imagem?: string;
   assinatura_uri?: string;
 }
 
+function getCBALogoBase64(): string {
+  try {
+    const logoPath = path.join(__dirname, "../assets/cba_logo.png");
+    if (fs.existsSync(logoPath)) {
+      const logoBuffer = fs.readFileSync(logoPath);
+      return `data:image/png;base64,${logoBuffer.toString("base64")}`;
+    }
+  } catch (error) {
+    console.error("Error loading CBA logo:", error);
+  }
+  return "";
+}
+
+function formatDate(dateStr: string): string {
+  if (!dateStr) return "-";
+  const parts = dateStr.split("-");
+  if (parts.length === 3) {
+    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+  }
+  return dateStr;
+}
+
 function generatePDFHTML(vistoria: VistoriaData): string {
+  const logoBase64 = getCBALogoBase64();
+  
+  const usosSoloHTML = vistoria.usos_solo?.length
+    ? vistoria.usos_solo
+        .map(
+          (uso) => `
+          <tr>
+            <td style="width: 60%;">${uso.tipo}</td>
+            <td style="text-align: center;">${uso.valor || "-"}</td>
+            <td style="text-align: center;">${uso.unidade}</td>
+          </tr>
+        `
+        )
+        .join("")
+    : `<tr><td colspan="3" style="text-align: center;">Nenhum uso identificado</td></tr>`;
+
+  const coordenadasHTML = vistoria.coordenadas_utm?.length
+    ? vistoria.coordenadas_utm
+        .map(
+          (coord, idx) => `
+          <tr>
+            <td style="text-align: center;">${idx + 1}</td>
+            <td style="text-align: center;">${coord.e}</td>
+            <td style="text-align: center;">${coord.n}</td>
+          </tr>
+        `
+        )
+        .join("")
+    : `<tr><td colspan="3" style="text-align: center;">-</td></tr>`;
+
   const fotosHTML = vistoria.fotos?.length
     ? vistoria.fotos
         .map(
           (foto, idx) => `
-        <div class="foto-item">
-          <img src="${foto.uri}" alt="Foto ${idx + 1}" />
-          <p class="legenda">${foto.legenda || `Foto ${idx + 1}`}</p>
-        </div>
-      `
+          <div class="foto-item">
+            <img src="${foto.uri}" alt="Foto ${idx + 1}" />
+            <p class="foto-legenda">${foto.legenda || `Registro Fotográfico ${idx + 1}`}</p>
+          </div>
+        `
         )
         .join("")
-    : "<p>Nenhuma foto registrada</p>";
+    : `<p style="text-align: center; color: #666;">Nenhum registro fotográfico</p>`;
 
-  const coordenadasHTML = vistoria.coordenadas_utm?.length
-    ? `<table class="coords-table">
-        <thead><tr><th>Ponto</th><th>E (Leste)</th><th>N (Norte)</th></tr></thead>
-        <tbody>
-          ${vistoria.coordenadas_utm
-            .map(
-              (coord, idx) =>
-                `<tr><td>${idx + 1}</td><td>${coord.e}</td><td>${coord.n}</td></tr>`
-            )
-            .join("")}
-        </tbody>
-      </table>`
-    : "<p>Nenhuma coordenada registrada</p>";
+  const croquiHTML = vistoria.croqui_imagem
+    ? `<img src="${vistoria.croqui_imagem}" alt="Croqui" class="croqui-image" />`
+    : `<p style="text-align: center; color: #666; padding: 40px;">Croqui não disponível</p>`;
 
   return `
 <!DOCTYPE html>
@@ -58,117 +113,162 @@ function generatePDFHTML(vistoria: VistoriaData): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Relatório de Vistoria - ${vistoria.proprietario}</title>
+  <title>RO-NOT-ITU - ${vistoria.numero_notificacao || "Vistoria"}</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { 
-      font-family: 'Segoe UI', Arial, sans-serif; 
-      line-height: 1.6; 
-      color: #333;
+      font-family: Arial, sans-serif; 
+      font-size: 11pt;
+      line-height: 1.4; 
+      color: #000;
       padding: 20px;
+      max-width: 210mm;
+      margin: 0 auto;
     }
     .header {
-      text-align: center;
-      border-bottom: 3px solid #1E3A5F;
-      padding-bottom: 20px;
-      margin-bottom: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid #000;
+      padding-bottom: 15px;
+      margin-bottom: 20px;
     }
-    .header h1 {
-      color: #1E3A5F;
-      font-size: 24px;
+    .logo {
+      height: 60px;
+      max-width: 180px;
+      object-fit: contain;
+    }
+    .header-title {
+      text-align: center;
+      flex: 1;
+      margin: 0 20px;
+    }
+    .header-title h1 {
+      font-size: 14pt;
+      font-weight: bold;
       margin-bottom: 5px;
     }
-    .header .subtitle {
-      color: #666;
-      font-size: 14px;
+    .header-title h2 {
+      font-size: 12pt;
+      font-weight: normal;
+      color: #333;
+    }
+    .doc-code {
+      font-size: 10pt;
+      text-align: right;
     }
     .section {
-      margin-bottom: 25px;
+      margin-bottom: 20px;
       page-break-inside: avoid;
     }
-    .section-title {
-      background: #1E3A5F;
+    .section-header {
+      background: #002855;
       color: white;
-      padding: 8px 15px;
-      font-size: 14px;
+      padding: 6px 12px;
       font-weight: bold;
-      margin-bottom: 15px;
+      font-size: 10pt;
+      margin-bottom: 0;
     }
-    .field-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
+    .section-content {
+      border: 1px solid #ccc;
+      border-top: none;
+      padding: 12px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 6px 10px;
+      text-align: left;
+      font-size: 10pt;
+    }
+    th {
+      background: #e8e8e8;
+      font-weight: bold;
+    }
+    .field-row {
+      display: flex;
       gap: 15px;
+      margin-bottom: 8px;
     }
     .field {
-      margin-bottom: 10px;
+      flex: 1;
     }
     .field-label {
-      font-size: 11px;
-      color: #666;
-      text-transform: uppercase;
+      font-weight: bold;
+      font-size: 9pt;
+      color: #333;
       margin-bottom: 3px;
     }
     .field-value {
-      font-size: 14px;
-      font-weight: 500;
-      color: #333;
-      padding: 5px 0;
+      font-size: 10pt;
+      padding: 4px 0;
       border-bottom: 1px solid #ddd;
     }
-    .full-width { grid-column: span 2; }
-    .coords-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 12px;
-    }
-    .coords-table th, .coords-table td {
-      border: 1px solid #ddd;
-      padding: 8px;
+    .croqui-section {
       text-align: center;
+      padding: 15px;
     }
-    .coords-table th {
-      background: #f5f5f5;
-      font-weight: bold;
+    .croqui-image {
+      max-width: 100%;
+      max-height: 300px;
+      border: 1px solid #ccc;
     }
     .fotos-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 15px;
+      margin-top: 10px;
     }
     .foto-item {
       text-align: center;
     }
     .foto-item img {
       max-width: 100%;
-      max-height: 200px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
+      max-height: 180px;
+      border: 1px solid #ccc;
     }
-    .legenda {
-      font-size: 12px;
-      color: #666;
+    .foto-legenda {
+      font-size: 9pt;
+      color: #333;
       margin-top: 5px;
+      font-style: italic;
     }
     .signature-section {
       margin-top: 40px;
-      padding-top: 20px;
-      border-top: 1px solid #ddd;
+      display: flex;
+      justify-content: space-around;
+      padding-top: 30px;
+    }
+    .signature-box {
+      text-align: center;
+      width: 200px;
     }
     .signature-line {
-      border-top: 1px solid #333;
-      width: 300px;
-      margin: 50px auto 10px;
+      border-top: 1px solid #000;
+      margin-bottom: 5px;
     }
     .signature-label {
-      text-align: center;
-      font-size: 12px;
-      color: #666;
+      font-size: 9pt;
+    }
+    .signature-image {
+      max-width: 180px;
+      max-height: 60px;
+      margin-bottom: 5px;
     }
     .footer {
-      margin-top: 40px;
+      margin-top: 30px;
       text-align: center;
-      font-size: 10px;
-      color: #999;
+      font-size: 8pt;
+      color: #666;
+      border-top: 1px solid #ccc;
+      padding-top: 10px;
+    }
+    .obs-text {
+      min-height: 40px;
+      white-space: pre-wrap;
     }
     @media print {
       body { padding: 0; }
@@ -178,119 +278,122 @@ function generatePDFHTML(vistoria: VistoriaData): string {
 </head>
 <body>
   <div class="header">
-    <h1>RELATÓRIO DE VISTORIA AMBIENTAL</h1>
-    <p class="subtitle">UHE Itupararanga - Cadastramento de Propriedade</p>
-  </div>
-
-  <div class="section">
-    <div class="section-title">IDENTIFICAÇÃO</div>
-    <div class="field-grid">
-      <div class="field">
-        <div class="field-label">Nº Notificação</div>
-        <div class="field-value">${vistoria.numero_notificacao || "-"}</div>
-      </div>
-      <div class="field">
-        <div class="field-label">Setor</div>
-        <div class="field-value">${vistoria.setor || "-"}</div>
-      </div>
-      <div class="field">
-        <div class="field-label">Margem</div>
-        <div class="field-value">${vistoria.margem || "-"}</div>
-      </div>
-      <div class="field">
-        <div class="field-label">Município</div>
-        <div class="field-value">${vistoria.municipio || "-"}</div>
-      </div>
+    ${logoBase64 ? `<img src="${logoBase64}" class="logo" alt="CBA Logo" />` : `<div style="width: 180px;"></div>`}
+    <div class="header-title">
+      <h1>RELATÓRIO DE OCORRÊNCIA - NOTIFICAÇÃO</h1>
+      <h2>UHE Itupararanga</h2>
+    </div>
+    <div class="doc-code">
+      <strong>${vistoria.numero_notificacao || "-"}</strong>
     </div>
   </div>
 
   <div class="section">
-    <div class="section-title">PROPRIETÁRIO</div>
-    <div class="field-grid">
-      <div class="field full-width">
-        <div class="field-label">Nome do Proprietário</div>
-        <div class="field-value">${vistoria.proprietario}</div>
-      </div>
-      <div class="field full-width">
-        <div class="field-label">Loteamento / Condomínio</div>
-        <div class="field-value">${vistoria.loteamento_condominio || "-"}</div>
-      </div>
+    <div class="section-header">01 – IDENTIFICAÇÃO PROPRIEDADE</div>
+    <div class="section-content">
+      <table>
+        <tr>
+          <td style="width: 15%;"><strong>Localização:</strong></td>
+          <td style="width: 35%;">${vistoria.localizacao || "-"}</td>
+          <td style="width: 15%;"><strong>Município:</strong></td>
+          <td style="width: 20%;">${vistoria.municipio || "-"}</td>
+          <td style="width: 7%;"><strong>UF:</strong></td>
+          <td style="width: 8%;">${vistoria.uf || "SP"}</td>
+        </tr>
+        <tr>
+          <td><strong>Setor:</strong></td>
+          <td>${vistoria.setor || "-"}</td>
+          <td><strong>Data:</strong></td>
+          <td>${formatDate(vistoria.data_vistoria)}</td>
+          <td colspan="2"></td>
+        </tr>
+      </table>
     </div>
   </div>
 
   <div class="section">
-    <div class="section-title">INSPEÇÃO</div>
-    <div class="field-grid">
-      <div class="field">
-        <div class="field-label">Tipo de Inspeção</div>
-        <div class="field-value">${vistoria.tipo_inspecao}</div>
-      </div>
-      <div class="field">
-        <div class="field-label">Data da Vistoria</div>
-        <div class="field-value">${vistoria.data_vistoria}</div>
-      </div>
+    <div class="section-header">02 – IDENTIFICAÇÃO PROPRIETÁRIO</div>
+    <div class="section-content">
+      <table>
+        <tr>
+          <td style="width: 20%;"><strong>Proprietário/Caseiro:</strong></td>
+          <td>${vistoria.proprietario || "-"}</td>
+        </tr>
+      </table>
     </div>
   </div>
 
   <div class="section">
-    <div class="section-title">COORDENADAS UTM (Zona ${vistoria.zona_utm || "23K"})</div>
-    ${coordenadasHTML}
-  </div>
-
-  <div class="section">
-    <div class="section-title">INTERVENÇÃO</div>
-    <div class="field-grid">
-      <div class="field">
-        <div class="field-label">Tipo de Intervenção</div>
-        <div class="field-value">${vistoria.tipo_intervencao || "-"}</div>
-      </div>
-      <div class="field">
-        <div class="field-label">Intervenção</div>
-        <div class="field-value">${vistoria.intervencao || "-"}</div>
-      </div>
-      <div class="field full-width">
-        <div class="field-label">Detalhamento</div>
-        <div class="field-value">${vistoria.detalhamento_intervencao || "-"}</div>
-      </div>
+    <div class="section-header">03 – USOS ENCONTRADOS</div>
+    <div class="section-content">
+      <table>
+        <thead>
+          <tr>
+            <th>Tipo de Uso</th>
+            <th style="width: 20%;">Quantidade</th>
+            <th style="width: 15%;">Unidade</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${usosSoloHTML}
+        </tbody>
+      </table>
+      ${vistoria.observacoes_usos ? `<p style="margin-top: 10px;"><strong>Observação:</strong> ${vistoria.observacoes_usos}</p>` : ""}
     </div>
   </div>
 
   <div class="section">
-    <div class="section-title">NOTIFICAÇÃO</div>
-    <div class="field-grid">
-      <div class="field">
-        <div class="field-label">Emissão de Notificação</div>
-        <div class="field-value">${vistoria.emissao_notificacao || "-"}</div>
+    <div class="section-header">CROQUI DA ÁREA (Coordenadas UTM - Zona ${vistoria.zona_utm || "23K"})</div>
+    <div class="section-content">
+      <div class="croqui-section">
+        ${croquiHTML}
       </div>
-      <div class="field">
-        <div class="field-label">Reincidente</div>
-        <div class="field-value">${vistoria.reincidente || "-"}</div>
-      </div>
+      <table style="margin-top: 15px;">
+        <thead>
+          <tr>
+            <th style="width: 15%;">Ponto</th>
+            <th>E (Leste)</th>
+            <th>N (Norte)</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${coordenadasHTML}
+        </tbody>
+      </table>
     </div>
   </div>
 
   <div class="section">
-    <div class="section-title">OBSERVAÇÕES</div>
-    <div class="field full-width">
-      <div class="field-value" style="min-height: 60px;">${vistoria.observacoes || "-"}</div>
+    <div class="section-header">OBSERVAÇÕES GERAIS</div>
+    <div class="section-content">
+      <p class="obs-text">${vistoria.observacoes || "Sem observações adicionais."}</p>
     </div>
   </div>
 
   <div class="section">
-    <div class="section-title">REGISTRO FOTOGRÁFICO</div>
-    <div class="fotos-grid">
-      ${fotosHTML}
+    <div class="section-header">REGISTROS FOTOGRÁFICOS</div>
+    <div class="section-content">
+      <div class="fotos-grid">
+        ${fotosHTML}
+      </div>
     </div>
   </div>
 
   <div class="signature-section">
-    <div class="signature-line"></div>
-    <p class="signature-label">Assinatura do Responsável Técnico</p>
+    <div class="signature-box">
+      ${vistoria.assinatura_uri ? `<img src="${vistoria.assinatura_uri}" class="signature-image" alt="Assinatura" />` : ""}
+      <div class="signature-line"></div>
+      <div class="signature-label">Responsável Técnico</div>
+    </div>
+    <div class="signature-box">
+      <div class="signature-line" style="margin-top: 60px;"></div>
+      <div class="signature-label">Proprietário / Caseiro</div>
+    </div>
   </div>
 
   <div class="footer">
-    <p>Documento gerado automaticamente pelo sistema MapeIA</p>
-    <p>Data de geração: ${new Date().toLocaleString("pt-BR")}</p>
+    <p>EcoBrasil Consultoria Ambiental - CBA</p>
+    <p>Documento gerado pelo sistema MapeIA em ${new Date().toLocaleString("pt-BR")}</p>
   </div>
 </body>
 </html>
