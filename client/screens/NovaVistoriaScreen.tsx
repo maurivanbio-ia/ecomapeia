@@ -1,13 +1,11 @@
-import React, { useState, useMemo, useRef } from "react";
+import React, { useState, useMemo } from "react";
 import {
   View,
   StyleSheet,
   TextInput,
   Pressable,
   Alert,
-  Platform,
   Image,
-  Dimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
@@ -16,9 +14,6 @@ import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigation } from "@react-navigation/native";
-import MapView, { Polygon, Marker, PROVIDER_DEFAULT } from "react-native-maps";
-import * as FileSystem from "expo-file-system";
-import { captureRef } from "react-native-view-shot";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
@@ -27,6 +22,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 import { apiRequest } from "@/lib/query-client";
 import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollViewCompat";
+import MapPolygonView from "@/components/MapPolygonView";
 
 const MARGEM_OPTIONS = ["DIREITA", "ESQUERDA"];
 const TIPO_INSPECAO_OPTIONS = ["CADASTRAMENTO", "MONITORAMENTO", "FISCALIZAÇÃO"];
@@ -131,8 +127,6 @@ export default function NovaVistoriaScreen() {
   const { user } = useAuth();
   const navigation = useNavigation();
   const queryClient = useQueryClient();
-  const mapRef = useRef<MapView>(null);
-  const mapContainerRef = useRef<View>(null);
 
   const today = new Date().toISOString().split("T")[0];
 
@@ -219,26 +213,10 @@ export default function NovaVistoriaScreen() {
     };
   }, [polygonCoordinates]);
 
-  const captureMapImage = async () => {
-    if (polygonCoordinates.length < 3) {
-      Alert.alert("Aviso", "Adicione pelo menos 3 pontos para gerar o polígono.");
-      return;
-    }
-
-    try {
-      if (mapContainerRef.current) {
-        const uri = await captureRef(mapContainerRef, {
-          format: "png",
-          quality: 1,
-        });
-        setMapImageUri(uri);
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        Alert.alert("Sucesso", "Imagem do mapa capturada!");
-      }
-    } catch (error) {
-      console.error("Error capturing map:", error);
-      Alert.alert("Erro", "Não foi possível capturar a imagem do mapa.");
-    }
+  const handleMapImageCaptured = (uri: string) => {
+    setMapImageUri(uri);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    Alert.alert("Sucesso", "Imagem do mapa capturada!");
   };
 
   const createVistoria = useMutation({
@@ -598,47 +576,12 @@ export default function NovaVistoriaScreen() {
           {polygonCoordinates.length >= 3 ? (
             <View style={styles.mapSection}>
               <ThemedText style={styles.subLabel}>Visualização do Polígono</ThemedText>
-              <View ref={mapContainerRef} collapsable={false} style={styles.mapContainer}>
-                <MapView
-                  ref={mapRef}
-                  style={styles.map}
-                  provider={PROVIDER_DEFAULT}
-                  region={mapRegion}
-                  scrollEnabled={true}
-                  zoomEnabled={true}
-                  mapType="satellite"
-                >
-                  <Polygon
-                    coordinates={polygonCoordinates}
-                    strokeColor={Colors.light.accent}
-                    fillColor="rgba(141, 198, 63, 0.3)"
-                    strokeWidth={3}
-                  />
-                  {polygonCoordinates.map((coord, idx) => (
-                    <Marker
-                      key={idx}
-                      coordinate={coord}
-                      title={`Ponto ${idx + 1}`}
-                      pinColor={Colors.light.primary}
-                    />
-                  ))}
-                </MapView>
-              </View>
-
-              <Pressable
-                onPress={captureMapImage}
-                style={[styles.captureMapBtn, { backgroundColor: Colors.light.primary }]}
-              >
-                <Feather name="camera" size={18} color="#FFFFFF" />
-                <ThemedText style={styles.captureMapText}>Gerar Imagem do Mapa</ThemedText>
-              </Pressable>
-
-              {mapImageUri ? (
-                <View style={styles.mapPreview}>
-                  <ThemedText style={styles.subLabel}>Imagem Capturada</ThemedText>
-                  <Image source={{ uri: mapImageUri }} style={styles.mapImage} />
-                </View>
-              ) : null}
+              <MapPolygonView
+                polygonCoordinates={polygonCoordinates}
+                mapRegion={mapRegion}
+                onMapImageCaptured={handleMapImageCaptured}
+                mapImageUri={mapImageUri}
+              />
             </View>
           ) : (
             <View style={styles.mapPlaceholder}>
@@ -880,37 +823,6 @@ const styles = StyleSheet.create({
   },
   mapSection: {
     marginTop: Spacing.lg,
-  },
-  mapContainer: {
-    borderRadius: BorderRadius.lg,
-    overflow: "hidden",
-    height: 250,
-  },
-  map: {
-    width: "100%",
-    height: "100%",
-  },
-  captureMapBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: Spacing.md,
-    borderRadius: BorderRadius.md,
-    marginTop: Spacing.md,
-    gap: Spacing.sm,
-  },
-  captureMapText: {
-    color: "#FFFFFF",
-    fontWeight: "600",
-  },
-  mapPreview: {
-    marginTop: Spacing.lg,
-  },
-  mapImage: {
-    width: "100%",
-    height: 200,
-    borderRadius: BorderRadius.lg,
-    resizeMode: "cover",
   },
   mapPlaceholder: {
     alignItems: "center",
