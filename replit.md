@@ -41,7 +41,7 @@ Preferred communication style: Simple, everyday language.
 - Path aliases (`@/` for client, `@shared/` for shared code) for clean imports
 - Keyboard-aware components with platform-specific handling
 - Safe area aware layouts for proper insets on all devices
-- Tab-based navigation with 3 main sections: Home, Inspections, Profile
+- Tab-based navigation with 4 main sections: Home, Inspections, IA (AI Assistant), Profile
 
 ### Backend Architecture
 
@@ -122,11 +122,20 @@ Preferred communication style: Simple, everyday language.
 
 ### AI Integration (Replit OpenAI)
 
-**Status:** Installed and configured
-- Uses Replit AI Integrations for OpenAI access
+**Status:** Installed and configured with 6 environmental analysis features
+- Uses Replit AI Integrations for OpenAI access (gpt-5.2 model)
 - Environment variables auto-configured: `AI_INTEGRATIONS_OPENAI_API_KEY`, `AI_INTEGRATIONS_OPENAI_BASE_URL`
 
-**AI Features Available:**
+**Environmental AI Features (server/ai-routes.ts):**
+- `/api/ai/analyze-photo` - Photo analysis for vegetation/irregularities
+- `/api/ai/suggest-description` - Auto-fill field suggestions
+- `/api/ai/generate-report-summary` - Technical report generation
+- `/api/ai/transcribe-audio` - Voice note transcription
+- `/api/ai/validate-coordinates` - Polygon validation and area calculation
+- `/api/ai/field-assistant` - Streaming chatbot for environmental questions
+- `/api/ai/auto-fill-form` - Form auto-completion from analysis
+
+**Generic AI Features:**
 - `/api/conversations` - CRUD endpoints for AI chat conversations
 - `/api/conversations/:id/messages` - Send messages and get AI responses (streaming via SSE)
 - `/api/generate-image` - Generate images using GPT-Image-1 model
@@ -136,6 +145,7 @@ Preferred communication style: Simple, everyday language.
 - `messages` - Stores chat messages with role (user/assistant) and content
 
 **Integration Files:**
+- `server/ai-routes.ts` - Environmental AI analysis routes
 - `server/replit_integrations/chat/` - Chat routes and storage
 - `server/replit_integrations/image/` - Image generation routes
 - `server/replit_integrations/audio/` - Audio/voice capabilities (optional)
@@ -299,8 +309,66 @@ Preferred communication style: Simple, everyday language.
 - Portuguese, English, Spanish
 - LanguageContext with persistent storage
 
+### AI Environmental Analysis (NEW - February 2026)
+
+**6 Major AI Features Implemented:**
+
+1. **AI Photo Analysis:**
+   - Automatic vegetation type detection (mata ciliar, pastagem, cultivo, etc.)
+   - Irregularity identification (desmatamento, erosão, construções irregulares)
+   - Land use classification
+   - Risk assessment (baixo/médio/alto)
+   - Component: `client/components/AIPhotoAnalysis.tsx`
+
+2. **AI Field Assistant (Chatbot):**
+   - Streaming chat interface for technical questions
+   - Environmental legislation expertise (Código Florestal, CONAMA)
+   - APP procedures and identification guidance
+   - Quick question shortcuts for common queries
+   - Screen: `client/screens/AssistenteIAScreen.tsx`
+
+3. **AI Report Generation:**
+   - Executive summary generation
+   - Technical conclusions automation
+   - Recommendations list
+   - Final assessment with area classification
+   - Component: `client/components/AIReportGenerator.tsx`
+
+4. **Audio Transcription:**
+   - Voice note to text conversion
+   - Portuguese language support
+   - Integration with VoiceNoteRecorder
+
+5. **Coordinate Validation:**
+   - Polygon validity checking
+   - Area calculation in hectares
+   - UTM zone verification
+   - Overlap and consistency alerts
+
+6. **Auto-Fill Suggestions:**
+   - Context-aware field suggestions
+   - Based on photo analysis results
+   - Technical language for reports
+
+**AI API Endpoints:**
+- `POST /api/ai/analyze-photo` - Photo analysis with vision
+- `POST /api/ai/suggest-description` - Field suggestions
+- `POST /api/ai/generate-report-summary` - Report generation
+- `POST /api/ai/transcribe-audio` - Audio transcription
+- `POST /api/ai/validate-coordinates` - Coordinate validation
+- `POST /api/ai/field-assistant` - Streaming chat (SSE)
+- `POST /api/ai/auto-fill-form` - Form auto-completion
+
+**AI Navigation:**
+- New "IA" tab in main navigation (between Vistorias and Profile)
+- IAStackNavigator: `client/navigation/IAStackNavigator.tsx`
+
+**AI Utilities:**
+- All AI functions: `client/lib/aiUtils.ts`
+- Helper functions for risk colors and status display
+
 ### Future Integrations (Planned)
 
 - Photo storage with cloud upload
-- AI-powered inspection suggestions and analysis
 - Full offline-first sync with conflict resolution
+- Expanded AI capabilities for geospatial analysis
