@@ -439,6 +439,105 @@ router.get("/areas-embargadas", async (req: Request, res: Response) => {
   }
 });
 
+router.post("/check-embargo", async (req: Request, res: Response) => {
+  try {
+    const { lat, lon, carCode } = req.body;
+
+    if (!lat || !lon) {
+      return res.status(400).json({ error: "Coordenadas são obrigatórias" });
+    }
+
+    const latitude = parseFloat(String(lat));
+    const longitude = parseFloat(String(lon));
+
+    const data = loadUCsData();
+    const ucAnalysis: any[] = [];
+    let isInsideProtectedArea = false;
+    let protectedAreaName = "";
+    let protectionLevel = "";
+
+    if (data) {
+      for (const feature of data.features) {
+        const geometry = feature.geometry;
+        if (!geometry || !geometry.coordinates) continue;
+
+        const restriction = feature.properties.RESTR;
+        const isProtecaoIntegral = restriction === "PROT_INT";
+        
+        let isInside = false;
+        if (geometry.type === "Polygon") {
+          isInside = isPointInPolygon(latitude, longitude, geometry.coordinates[0]);
+        } else if (geometry.type === "MultiPolygon") {
+          for (const polygon of geometry.coordinates) {
+            if (isPointInPolygon(latitude, longitude, polygon[0])) {
+              isInside = true;
+              break;
+            }
+          }
+        }
+
+        if (isInside) {
+          isInsideProtectedArea = true;
+          protectedAreaName = feature.properties.NOM_UC || feature.properties.Name || "";
+          protectionLevel = isProtecaoIntegral ? "INTEGRAL" : "SUSTENTAVEL";
+          
+          ucAnalysis.push({
+            name: protectedAreaName,
+            category: feature.properties.CATEG,
+            restriction: restriction,
+            restrictionType: getRestrictionType(restriction || ""),
+            severity: isProtecaoIntegral ? "CRITICAL" : "WARNING",
+            message: isProtecaoIntegral 
+              ? "Área de Proteção Integral - Atividades restritas"
+              : "Área de Uso Sustentável - Verificar regulamentação",
+          });
+        }
+      }
+    }
+
+    const embargoRisk = {
+      level: isInsideProtectedArea && protectionLevel === "INTEGRAL" ? "HIGH" : 
+             isInsideProtectedArea ? "MEDIUM" : "LOW",
+      hasEmbargoRisk: isInsideProtectedArea,
+      reasons: [] as string[],
+    };
+
+    if (isInsideProtectedArea) {
+      embargoRisk.reasons.push(`Localizado dentro de ${protectedAreaName}`);
+      if (protectionLevel === "INTEGRAL") {
+        embargoRisk.reasons.push("Área de Proteção Integral possui restrições severas");
+      }
+    }
+
+    res.json({
+      success: true,
+      coordinates: { lat: latitude, lon: longitude },
+      carCode: carCode || null,
+      embargoRisk,
+      protectedAreas: ucAnalysis,
+      isInsideProtectedArea,
+      protectedAreaName,
+      protectionLevel,
+      recommendations: isInsideProtectedArea ? [
+        "Verificar autorização ambiental específica para a área",
+        "Consultar órgão ambiental competente",
+        protectionLevel === "INTEGRAL" 
+          ? "Atividades em UC de Proteção Integral requerem autorização especial"
+          : "Verificar Plano de Manejo da UC",
+      ] : [
+        "Área fora de Unidades de Conservação federais/estaduais cadastradas",
+        "Verificar possível existência de áreas protegidas municipais",
+      ],
+    });
+  } catch (error) {
+    console.error("Error checking embargo:", error);
+    res.status(500).json({
+      error: "Erro ao verificar sobreposição com áreas embargadas",
+      details: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+});
+
 router.get("/stats", async (req: Request, res: Response) => {
   try {
     const data = loadUCsData();

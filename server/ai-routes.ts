@@ -473,4 +473,147 @@ Sugira valores para preencher o formulário automaticamente.`
   }
 });
 
+router.post("/compliance-analysis", async (req: Request, res: Response) => {
+  try {
+    const { 
+      coordinates, 
+      ucInfo, 
+      carInfo, 
+      embargoCheck,
+      propertyType,
+      landUse,
+      observations 
+    } = req.body;
+
+    if (!coordinates) {
+      return res.status(400).json({ error: "Coordenadas são obrigatórias" });
+    }
+
+    const contextData = {
+      coordinates,
+      ucInfo: ucInfo || null,
+      carInfo: carInfo || null,
+      embargoCheck: embargoCheck || null,
+      propertyType: propertyType || "Não especificado",
+      landUse: landUse || "Não especificado",
+      observations: observations || "",
+    };
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-5.2",
+      messages: [
+        {
+          role: "system",
+          content: `Você é um especialista em legislação ambiental brasileira, focado em:
+- Lei 12.651/2012 (Código Florestal)
+- Lei 9.985/2000 (SNUC - Sistema Nacional de Unidades de Conservação)
+- Resoluções CONAMA aplicáveis
+- Legislação sobre APP (Área de Preservação Permanente)
+- Regulamentação de reservatórios hidrelétricos
+
+Analise os dados da vistoria e produza um relatório de conformidade ambiental.
+Identifique:
+1. Possíveis não-conformidades legais
+2. Riscos ambientais
+3. Recomendações de regularização
+4. Nível de conformidade geral
+
+Responda SEMPRE em JSON com a estrutura:
+{
+  "conformidadeGeral": "CONFORME" | "PARCIALMENTE_CONFORME" | "NAO_CONFORME",
+  "pontuacao": número de 0 a 100,
+  "riscos": [
+    {
+      "tipo": "string",
+      "nivel": "BAIXO" | "MEDIO" | "ALTO" | "CRITICO",
+      "descricao": "string",
+      "fundamentacaoLegal": "string"
+    }
+  ],
+  "naoConformidades": [
+    {
+      "item": "string",
+      "descricao": "string",
+      "acaoCorretiva": "string",
+      "prazoSugerido": "string"
+    }
+  ],
+  "pontosFavoraveis": ["array de strings"],
+  "recomendacoes": ["array de strings"],
+  "resumoExecutivo": "string com até 200 palavras"
+}`
+        },
+        {
+          role: "user",
+          content: `Analise a conformidade ambiental desta vistoria:
+
+COORDENADAS: Lat ${contextData.coordinates.lat}, Lon ${contextData.coordinates.lon}
+
+UNIDADE DE CONSERVAÇÃO:
+${contextData.ucInfo ? `
+- Nome: ${contextData.ucInfo.name}
+- Categoria: ${contextData.ucInfo.categoryName || contextData.ucInfo.category}
+- Está dentro da UC: ${contextData.ucInfo.isInside ? "SIM" : "NÃO"}
+- Distância: ${contextData.ucInfo.distanceKm} km
+- Tipo de restrição: ${contextData.ucInfo.restrictionType}
+` : "Nenhuma UC identificada nas proximidades"}
+
+CAR (Cadastro Ambiental Rural):
+${contextData.carInfo ? `
+- Código: ${contextData.carInfo.code}
+- Propriedade: ${contextData.carInfo.propertyName}
+- Município: ${contextData.carInfo.municipality}
+` : "CAR não identificado"}
+
+VERIFICAÇÃO DE EMBARGO:
+${contextData.embargoCheck ? `
+- Nível de risco: ${contextData.embargoCheck.level}
+- Dentro de área protegida: ${contextData.embargoCheck.isInsideProtectedArea ? "SIM" : "NÃO"}
+- Razões: ${contextData.embargoCheck.reasons?.join(", ") || "Nenhuma"}
+` : "Verificação não realizada"}
+
+TIPO DE PROPRIEDADE: ${contextData.propertyType}
+USO DO SOLO: ${contextData.landUse}
+OBSERVAÇÕES DE CAMPO: ${contextData.observations}`
+        }
+      ],
+      max_completion_tokens: 2000,
+    });
+
+    const content = response.choices[0]?.message?.content || "";
+    
+    try {
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        const analysis = JSON.parse(jsonMatch[0]);
+        res.json({ 
+          success: true, 
+          analysis,
+          timestamp: new Date().toISOString(),
+          source: "IA - Análise de Conformidade Ambiental"
+        });
+      } else {
+        res.json({ 
+          success: true, 
+          analysis: { 
+            conformidadeGeral: "INDETERMINADO",
+            resumoExecutivo: content 
+          } 
+        });
+      }
+    } catch {
+      res.json({ 
+        success: true, 
+        analysis: { 
+          conformidadeGeral: "INDETERMINADO",
+          resumoExecutivo: content 
+        } 
+      });
+    }
+  } catch (error) {
+    console.error("Error in compliance analysis:", error);
+    res.status(500).json({ error: "Erro ao realizar análise de conformidade" });
+  }
+});
+
 export default router;
