@@ -26,7 +26,7 @@ interface EnvironmentalDataPanelProps {
   onClose?: () => void;
 }
 
-type TabType = "summary" | "inpe" | "ana" | "sibbr";
+type TabType = "summary" | "inpe" | "ana" | "sibbr" | "ucs" | "tis";
 
 interface AnalysisData {
   vegetation?: { ndvi: number; health: string };
@@ -82,6 +82,8 @@ export function EnvironmentalDataPanel({
     { key: "inpe" as TabType, icon: "alert-triangle" as const, label: "INPE" },
     { key: "ana" as TabType, icon: "droplet" as const, label: "ANA" },
     { key: "sibbr" as TabType, icon: "feather" as const, label: "SiBBr" },
+    { key: "ucs" as TabType, icon: "shield" as const, label: "UCs" },
+    { key: "tis" as TabType, icon: "users" as const, label: "TIs" },
   ];
 
   const getNDVIColor = (value: number): string => {
@@ -235,6 +237,90 @@ export function EnvironmentalDataPanel({
     </View>
   );
 
+  const renderUCs = () => (
+    <View style={styles.tabContent}>
+      <View style={[styles.sourceCard, { backgroundColor: colors.backgroundSecondary }]}>
+        <Feather name="shield" size={16} color={colors.primary} />
+        <Text style={[styles.sourceText, { color: colors.textSecondary }]}>
+          ICMBio / CNUC - Unidades de Conservação
+        </Text>
+      </View>
+      <View style={[styles.card, { backgroundColor: colors.backgroundSecondary }]}>
+        <Text style={[styles.cardTitle, { color: colors.text }]}>Tipos de Unidades de Conservação</Text>
+        <Text style={[styles.cardSubtitle, { color: colors.primary }]}>Proteção Integral</Text>
+        <Text style={[styles.cardValue, { color: colors.textSecondary }]}>
+          • PARNA - Parque Nacional
+        </Text>
+        <Text style={[styles.cardValue, { color: colors.textSecondary }]}>
+          • REBIO - Reserva Biológica
+        </Text>
+        <Text style={[styles.cardValue, { color: colors.textSecondary }]}>
+          • ESEC - Estação Ecológica
+        </Text>
+        <Text style={[styles.cardSubtitle, { color: colors.primary, marginTop: Spacing.sm }]}>Uso Sustentável</Text>
+        <Text style={[styles.cardValue, { color: colors.textSecondary }]}>
+          • FLONA - Floresta Nacional
+        </Text>
+        <Text style={[styles.cardValue, { color: colors.textSecondary }]}>
+          • APA - Área de Proteção Ambiental
+        </Text>
+        <Text style={[styles.cardValue, { color: colors.textSecondary }]}>
+          • RESEX - Reserva Extrativista
+        </Text>
+      </View>
+      <View style={[styles.card, { backgroundColor: colors.backgroundSecondary }]}>
+        <Text style={[styles.cardTitle, { color: colors.text }]}>Endpoints Disponíveis</Text>
+        <Text style={[styles.cardValue, { color: colors.textSecondary }]}>
+          • /api/conservation/ucs - Listar UCs
+        </Text>
+        <Text style={[styles.cardValue, { color: colors.textSecondary }]}>
+          • /api/conservation/ucs/nearest - UC mais próxima
+        </Text>
+        <Text style={[styles.cardValue, { color: colors.textSecondary }]}>
+          • /api/conservation/stats - Estatísticas
+        </Text>
+      </View>
+    </View>
+  );
+
+  const renderTIs = () => (
+    <View style={styles.tabContent}>
+      <View style={[styles.sourceCard, { backgroundColor: colors.backgroundSecondary }]}>
+        <Feather name="users" size={16} color={colors.primary} />
+        <Text style={[styles.sourceText, { color: colors.textSecondary }]}>
+          FUNAI - Terras Indígenas
+        </Text>
+      </View>
+      <View style={[styles.card, { backgroundColor: colors.backgroundSecondary }]}>
+        <Text style={[styles.cardTitle, { color: colors.text }]}>Dados de Terras Indígenas</Text>
+        <Text style={[styles.cardValue, { color: colors.textSecondary }]}>
+          • Limites de Terras Indígenas
+        </Text>
+        <Text style={[styles.cardValue, { color: colors.textSecondary }]}>
+          • Informações etnográficas
+        </Text>
+        <Text style={[styles.cardValue, { color: colors.textSecondary }]}>
+          • Situação fundiária
+        </Text>
+        <Text style={[styles.cardValue, { color: colors.textSecondary }]}>
+          • População e grupos étnicos
+        </Text>
+      </View>
+      <View style={[styles.card, { backgroundColor: colors.backgroundSecondary }]}>
+        <Text style={[styles.cardTitle, { color: colors.text }]}>Endpoints Disponíveis</Text>
+        <Text style={[styles.cardValue, { color: colors.textSecondary }]}>
+          • /api/conservation/tis - Listar TIs
+        </Text>
+        <Text style={[styles.cardValue, { color: colors.textSecondary }]}>
+          • /api/conservation/tis/nearest - TI mais próxima
+        </Text>
+        <Text style={[styles.cardValue, { color: colors.textSecondary }]}>
+          • /api/conservation/areas-embargadas - Embargos
+        </Text>
+      </View>
+    </View>
+  );
+
   return (
     <View style={[styles.container, { backgroundColor: colors.backgroundDefault }]}>
       <View style={[styles.header, { backgroundColor: colors.backgroundSecondary }]}>
@@ -302,6 +388,8 @@ export function EnvironmentalDataPanel({
           {activeTab === "inpe" && renderINPE()}
           {activeTab === "ana" && renderANA()}
           {activeTab === "sibbr" && renderSiBBr()}
+          {activeTab === "ucs" && renderUCs()}
+          {activeTab === "tis" && renderTIs()}
         </ScrollView>
       )}
     </View>
@@ -380,6 +468,11 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 16,
     fontWeight: "600",
+  },
+  cardSubtitle: {
+    fontSize: 14,
+    fontWeight: "600",
+    marginTop: Spacing.xs,
   },
   cardValue: {
     fontSize: 14,
