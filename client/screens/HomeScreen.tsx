@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   StyleSheet,
   ScrollView,
   Pressable,
   RefreshControl,
+  Alert,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
@@ -19,6 +20,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { useNavigation } from "@react-navigation/native";
 import type { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
@@ -27,10 +29,20 @@ import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/hooks/useAuth";
 import { Colors, Spacing, BorderRadius, Shadows } from "@/constants/theme";
 import type { MainTabParamList } from "@/navigation/MainTabNavigator";
+import { getPendingCount, syncPendingVistorias } from "@/lib/offlineStorage";
+import { apiRequest } from "@/lib/query-client";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 type NavigationProp = BottomTabNavigationProp<MainTabParamList>;
+
+interface Vistoria {
+  id: string;
+  proprietario: string;
+  data_vistoria: string;
+  status_upload: string;
+  tipo_intervencao?: string;
+}
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
@@ -39,20 +51,65 @@ export default function HomeScreen() {
   const { theme, isDark } = useTheme();
   const { user } = useAuth();
   const navigation = useNavigation<NavigationProp>();
+  const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = React.useState(false);
+  const [pendingCount, setPendingCount] = useState(0);
+  const [syncing, setSyncing] = useState(false);
+
+  const { data: vistorias = [], refetch } = useQuery<Vistoria[]>({
+    queryKey: [`/api/vistorias?usuario_id=${user?.id}`],
+    enabled: !!user?.id,
+  });
+
+  useEffect(() => {
+    getPendingCount().then(setPendingCount);
+  }, []);
+
+  const syncedCount = vistorias.filter((v) => v.status_upload === "synced").length;
+  const totalCount = vistorias.length + pendingCount;
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 1000);
-  }, []);
+    Promise.all([refetch(), getPendingCount().then(setPendingCount)]).finally(
+      () => setRefreshing(false)
+    );
+  }, [refetch]);
 
   const handleNewVistoria = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     navigation.navigate("VistoriasTab");
   };
 
-  const handleSyncPending = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  const handleSyncPending = async () => {
+    if (pendingCount === 0) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      Alert.alert("Sincronização", "Não há vistorias pendentes para sincronizar.");
+      return;
+    }
+
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setSyncing(true);
+
+    try {
+      const result = await syncPendingVistorias(async (data) => {
+        await apiRequest("POST", "/api/vistorias", data);
+      });
+      
+      await refetch();
+      const newPending = await getPendingCount();
+      setPendingCount(newPending);
+      
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      Alert.alert(
+        "Sincronização Concluída",
+        `${result.synced} vistoria(s) sincronizada(s).${result.errors > 0 ? ` ${result.errors} erro(s).` : ""}`
+      );
+    } catch (error) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      Alert.alert("Erro", "Falha na sincronização. Tente novamente.");
+    } finally {
+      setSyncing(false);
+    }
   };
 
   return (
@@ -95,7 +152,7 @@ export default function HomeScreen() {
               <View style={styles.statsRow}>
                 <View style={styles.statItem}>
                   <ThemedText style={styles.statNumber} lightColor="#FFFFFF" darkColor="#FFFFFF">
-                    0
+                    {totalCount}
                   </ThemedText>
                   <ThemedText style={styles.statLabel} lightColor="rgba(255,255,255,0.8)" darkColor="rgba(255,255,255,0.8)">
                     Vistorias
@@ -104,10 +161,19 @@ export default function HomeScreen() {
                 <View style={styles.statDivider} />
                 <View style={styles.statItem}>
                   <ThemedText style={styles.statNumber} lightColor="#FFFFFF" darkColor="#FFFFFF">
-                    0
+                    {pendingCount}
                   </ThemedText>
                   <ThemedText style={styles.statLabel} lightColor="rgba(255,255,255,0.8)" darkColor="rgba(255,255,255,0.8)">
                     Pendentes
+                  </ThemedText>
+                </View>
+                <View style={styles.statDivider} />
+                <View style={styles.statItem}>
+                  <ThemedText style={styles.statNumber} lightColor="#FFFFFF" darkColor="#FFFFFF">
+                    {syncedCount}
+                  </ThemedText>
+                  <ThemedText style={styles.statLabel} lightColor="rgba(255,255,255,0.8)" darkColor="rgba(255,255,255,0.8)">
+                    Sincronizados
                   </ThemedText>
                 </View>
               </View>
@@ -142,19 +208,60 @@ export default function HomeScreen() {
         {/* Recent Inspections */}
         <Animated.View entering={FadeInDown.duration(500).delay(300)}>
           <ThemedText style={styles.sectionTitle}>Vistorias Recentes</ThemedText>
-          <View style={[styles.emptyState, { backgroundColor: theme.backgroundDefault }]}>
-            <Feather name="clipboard" size={48} color={theme.tabIconDefault} />
-            <ThemedText style={styles.emptyTitle}>
-              Nenhuma vistoria cadastrada
-            </ThemedText>
-            <ThemedText
-              style={styles.emptySubtitle}
-              lightColor={Colors.light.textSecondary}
-              darkColor={Colors.dark.textSecondary}
-            >
-              Comece criando uma nova vistoria
-            </ThemedText>
-          </View>
+          {vistorias.length > 0 ? (
+            <View style={styles.recentList}>
+              {vistorias.slice(0, 3).map((vistoria) => (
+                <View
+                  key={vistoria.id}
+                  style={[
+                    styles.recentCard,
+                    { backgroundColor: theme.backgroundDefault, borderColor: theme.border },
+                  ]}
+                >
+                  <View style={styles.recentCardContent}>
+                    <View style={styles.recentCardHeader}>
+                      <ThemedText style={styles.recentCardTitle} numberOfLines={1}>
+                        {vistoria.proprietario}
+                      </ThemedText>
+                      <View
+                        style={[
+                          styles.syncBadge,
+                          {
+                            backgroundColor:
+                              vistoria.status_upload === "synced"
+                                ? Colors.light.accent
+                                : Colors.light.warning,
+                          },
+                        ]}
+                      >
+                        <ThemedText style={styles.syncBadgeText}>
+                          {vistoria.status_upload === "synced" ? "Sincronizado" : "Pendente"}
+                        </ThemedText>
+                      </View>
+                    </View>
+                    <ThemedText style={styles.recentCardDate}>
+                      {new Date(vistoria.data_vistoria).toLocaleDateString("pt-BR")}
+                    </ThemedText>
+                  </View>
+                  <Feather name="chevron-right" size={20} color={theme.tabIconDefault} />
+                </View>
+              ))}
+            </View>
+          ) : (
+            <View style={[styles.emptyState, { backgroundColor: theme.backgroundDefault }]}>
+              <Feather name="clipboard" size={48} color={theme.tabIconDefault} />
+              <ThemedText style={styles.emptyTitle}>
+                Nenhuma vistoria cadastrada
+              </ThemedText>
+              <ThemedText
+                style={styles.emptySubtitle}
+                lightColor={Colors.light.textSecondary}
+                darkColor={Colors.dark.textSecondary}
+              >
+                Comece criando uma nova vistoria
+              </ThemedText>
+            </View>
+          )}
         </Animated.View>
       </ScrollView>
     </ThemedView>
@@ -302,5 +409,43 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginTop: Spacing.sm,
     textAlign: "center",
+  },
+  recentList: {
+    gap: Spacing.md,
+  },
+  recentCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+  },
+  recentCardContent: {
+    flex: 1,
+  },
+  recentCardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+    marginBottom: Spacing.xs,
+  },
+  recentCardTitle: {
+    fontSize: 15,
+    fontWeight: "600",
+    flex: 1,
+  },
+  recentCardDate: {
+    fontSize: 13,
+    color: Colors.light.textSecondary,
+  },
+  syncBadge: {
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 2,
+    borderRadius: BorderRadius.sm,
+  },
+  syncBadgeText: {
+    color: "#FFFFFF",
+    fontSize: 11,
+    fontWeight: "600",
   },
 });

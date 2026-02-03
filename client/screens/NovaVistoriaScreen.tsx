@@ -6,6 +6,7 @@ import {
   Pressable,
   Alert,
   Image,
+  ActivityIndicator,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
@@ -23,6 +24,10 @@ import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 import { apiRequest } from "@/lib/query-client";
 import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollViewCompat";
 import MapPolygonView from "@/components/MapPolygonView";
+import DatePickerField from "@/components/DatePickerField";
+import SignatureCapture from "@/components/SignatureCapture";
+import { captureCurrentUTM, requestLocationPermission } from "@/lib/gpsUtils";
+import { saveVistoriaOffline } from "@/lib/offlineStorage";
 
 const MARGEM_OPTIONS = ["DIREITA", "ESQUERDA"];
 const TIPO_INSPECAO_OPTIONS = ["CADASTRAMENTO", "MONITORAMENTO", "FISCALIZAÇÃO"];
@@ -157,6 +162,8 @@ export default function NovaVistoriaScreen() {
 
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [mapImageUri, setMapImageUri] = useState<string | null>(null);
+  const [signatureUri, setSignatureUri] = useState<string | null>(null);
+  const [capturingGPS, setCapturingGPS] = useState(false);
 
   const polygonCoordinates = useMemo(() => {
     const zoneMatch = formData.zona_utm.match(/(\d+)([A-Za-z])/);
@@ -276,6 +283,39 @@ export default function NovaVistoriaScreen() {
       ...prev,
       { id: Date.now().toString(), e: "", n: "" },
     ]);
+  };
+
+  const captureGPSPoint = async () => {
+    setCapturingGPS(true);
+    try {
+      const hasPermission = await requestLocationPermission();
+      if (!hasPermission) {
+        Alert.alert("Permissão Necessária", "Precisamos de acesso à localização para capturar coordenadas GPS.");
+        return;
+      }
+
+      const utm = await captureCurrentUTM();
+      if (utm) {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        updateField("zona_utm", `${utm.zone}${utm.zoneLetter}`);
+        setUtmPoints((prev) => [
+          ...prev,
+          {
+            id: Date.now().toString(),
+            e: utm.easting.toFixed(2),
+            n: utm.northing.toFixed(2),
+          },
+        ]);
+        Alert.alert("Sucesso", `Coordenada capturada!\nE: ${utm.easting.toFixed(2)}\nN: ${utm.northing.toFixed(2)}`);
+      } else {
+        Alert.alert("Erro", "Não foi possível obter a localização atual.");
+      }
+    } catch (error) {
+      console.error("Error capturing GPS:", error);
+      Alert.alert("Erro", "Erro ao capturar localização GPS.");
+    } finally {
+      setCapturingGPS(false);
+    }
   };
 
   const removeUtmPoint = (id: string) => {
@@ -480,7 +520,11 @@ export default function NovaVistoriaScreen() {
             <Feather name="clipboard" size={18} /> Inspeção
           </ThemedText>
           {renderSelect("Tipo de Inspeção", "tipo_inspecao", TIPO_INSPECAO_OPTIONS)}
-          {renderInput("Data da Vistoria", "data_vistoria", "YYYY-MM-DD")}
+          <DatePickerField
+            label="Data da Vistoria"
+            value={formData.data_vistoria}
+            onChange={(date) => updateField("data_vistoria", date)}
+          />
         </View>
 
         <View
@@ -563,15 +607,32 @@ export default function NovaVistoriaScreen() {
             </View>
           ))}
 
-          <Pressable
-            onPress={addUtmPoint}
-            style={[styles.addPointBtn, { borderColor: Colors.light.primary }]}
-          >
-            <Feather name="plus" size={18} color={Colors.light.primary} />
-            <ThemedText style={{ color: Colors.light.primary, marginLeft: Spacing.xs }}>
-              Adicionar Ponto
-            </ThemedText>
-          </Pressable>
+          <View style={styles.utmButtons}>
+            <Pressable
+              onPress={captureGPSPoint}
+              disabled={capturingGPS}
+              style={[styles.gpsBtn, { backgroundColor: Colors.light.accent }]}
+            >
+              {capturingGPS ? (
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              ) : (
+                <Feather name="navigation" size={18} color="#FFFFFF" />
+              )}
+              <ThemedText style={styles.gpsBtnText}>
+                {capturingGPS ? "Capturando..." : "Capturar GPS"}
+              </ThemedText>
+            </Pressable>
+
+            <Pressable
+              onPress={addUtmPoint}
+              style={[styles.addPointBtn, { borderColor: Colors.light.primary }]}
+            >
+              <Feather name="plus" size={18} color={Colors.light.primary} />
+              <ThemedText style={{ color: Colors.light.primary, marginLeft: Spacing.xs }}>
+                Adicionar Manual
+              </ThemedText>
+            </Pressable>
+          </View>
 
           {polygonCoordinates.length >= 3 ? (
             <View style={styles.mapSection}>
@@ -705,6 +766,21 @@ export default function NovaVistoriaScreen() {
           {renderInput("Observações Gerais", "observacoes", "Observações adicionais...", { multiline: true })}
         </View>
 
+        <View
+          style={[
+            styles.section,
+            { backgroundColor: theme.backgroundDefault, borderColor: theme.border },
+          ]}
+        >
+          <ThemedText style={styles.sectionTitle}>
+            <Feather name="edit-2" size={18} /> Assinatura
+          </ThemedText>
+          <SignatureCapture
+            onSignatureCapture={setSignatureUri}
+            signatureUri={signatureUri}
+          />
+        </View>
+
         <Pressable
           onPress={handleSubmit}
           disabled={createVistoria.isPending}
@@ -811,7 +887,26 @@ const styles = StyleSheet.create({
   removePointBtn: {
     padding: Spacing.sm,
   },
+  utmButtons: {
+    flexDirection: "row",
+    gap: Spacing.md,
+    marginTop: Spacing.sm,
+  },
+  gpsBtn: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.md,
+    gap: Spacing.sm,
+  },
+  gpsBtnText: {
+    color: "#FFFFFF",
+    fontWeight: "600",
+  },
   addPointBtn: {
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -819,7 +914,6 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.md,
     borderWidth: 1,
     borderStyle: "dashed",
-    marginTop: Spacing.sm,
   },
   mapSection: {
     marginTop: Spacing.lg,

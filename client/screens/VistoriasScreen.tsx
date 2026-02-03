@@ -94,6 +94,7 @@ export default function VistoriasScreen() {
         ]}
         onPress={() => {
           Haptics.selectionAsync();
+          navigation.navigate("DetalhesVistoria", { vistoriaId: item.id });
         }}
       >
         <View style={styles.cardHeader}>
