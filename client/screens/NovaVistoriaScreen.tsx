@@ -96,6 +96,9 @@ interface Photo {
   id: string;
   uri: string;
   legenda: string;
+  saved: boolean;
+  timestamp?: string;
+  coordinates?: string;
 }
 
 interface LatLng {
@@ -758,12 +761,16 @@ export default function NovaVistoriaScreen() {
   };
 
   const handleWatermarkProcessed = (id: string, newUri: string) => {
+    const watermarkData = pendingWatermark?.watermarkData;
     setPhotos((prev) => [
       ...prev,
       {
         id,
         uri: newUri,
         legenda: "",
+        saved: false,
+        timestamp: watermarkData?.timestamp,
+        coordinates: watermarkData?.coordinates,
       },
     ]);
     setPendingWatermark(null);
@@ -778,11 +785,28 @@ export default function NovaVistoriaScreen() {
           id,
           uri: pendingWatermark.uri,
           legenda: "",
+          saved: false,
+          timestamp: pendingWatermark.watermarkData?.timestamp,
+          coordinates: pendingWatermark.watermarkData?.coordinates,
         },
       ]);
     }
     setPendingWatermark(null);
     setProcessingPhoto(false);
+  };
+
+  const savePhoto = (id: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setPhotos((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, saved: true } : p))
+    );
+  };
+
+  const editPhoto = (id: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setPhotos((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, saved: false } : p))
+    );
   };
 
   const pickFromGallery = async () => {
@@ -805,6 +829,7 @@ export default function NovaVistoriaScreen() {
         id: Date.now().toString() + Math.random(),
         uri: asset.uri,
         legenda: "",
+        saved: false,
       }));
       setPhotos((prev) => [...prev, ...newPhotos]);
     }
@@ -1398,36 +1423,84 @@ export default function NovaVistoriaScreen() {
           {photos.length > 0 ? (
             <View style={styles.photosGrid}>
               {photos.map((photo, index) => (
-                <View
-                  key={photo.id}
-                  style={[
-                    styles.photoCard,
-                    { backgroundColor: theme.backgroundDefault, borderColor: theme.border },
-                  ]}
-                >
-                  <View style={styles.photoHeader}>
-                    <ThemedText style={styles.photoNumber}>Foto {index + 1}</ThemedText>
-                    <Pressable onPress={() => removePhoto(photo.id)}>
-                      <Feather name="trash-2" size={18} color="#FF4444" />
+                photo.saved ? (
+                  <View
+                    key={photo.id}
+                    style={[
+                      styles.photoCardCompact,
+                      { backgroundColor: theme.backgroundDefault, borderColor: theme.border },
+                    ]}
+                  >
+                    <Image source={{ uri: photo.uri }} style={styles.photoThumbnailCompact} />
+                    <View style={styles.photoCompactInfo}>
+                      <ThemedText style={styles.photoNumberCompact}>Foto {index + 1}</ThemedText>
+                      <ThemedText style={styles.photoLegendaCompact} numberOfLines={1}>
+                        {photo.legenda || "Sem legenda"}
+                      </ThemedText>
+                    </View>
+                    <View style={styles.photoCompactActions}>
+                      <Pressable onPress={() => editPhoto(photo.id)} style={styles.compactActionBtn}>
+                        <Feather name="edit-2" size={16} color={Colors.light.accent} />
+                      </Pressable>
+                      <Pressable onPress={() => removePhoto(photo.id)} style={styles.compactActionBtn}>
+                        <Feather name="trash-2" size={16} color="#FF4444" />
+                      </Pressable>
+                    </View>
+                  </View>
+                ) : (
+                  <View
+                    key={photo.id}
+                    style={[
+                      styles.photoCard,
+                      { backgroundColor: theme.backgroundDefault, borderColor: theme.border },
+                    ]}
+                  >
+                    <View style={styles.photoHeader}>
+                      <ThemedText style={styles.photoNumber}>Foto {index + 1}</ThemedText>
+                      <Pressable onPress={() => removePhoto(photo.id)}>
+                        <Feather name="trash-2" size={18} color="#FF4444" />
+                      </Pressable>
+                    </View>
+                    <View style={styles.photoThumbnailWrapper}>
+                      <Image source={{ uri: photo.uri }} style={styles.photoThumbnail} />
+                      {photo.timestamp ? (
+                        <>
+                          <View style={styles.watermarkBrand}>
+                            <ThemedText style={styles.watermarkEco}>Eco</ThemedText>
+                            <ThemedText style={styles.watermarkMape}>Mape</ThemedText>
+                            <ThemedText style={styles.watermarkIA}>IA</ThemedText>
+                          </View>
+                          <View style={styles.watermarkInfo}>
+                            <ThemedText style={styles.watermarkTimestamp}>{photo.timestamp}</ThemedText>
+                            <ThemedText style={styles.watermarkCoords}>{photo.coordinates}</ThemedText>
+                          </View>
+                        </>
+                      ) : null}
+                    </View>
+                    <TextInput
+                      style={[
+                        styles.legendaInput,
+                        {
+                          backgroundColor: theme.backgroundDefault,
+                          borderColor: theme.border,
+                          color: theme.text,
+                        },
+                      ]}
+                      placeholder="Digite a legenda da foto..."
+                      placeholderTextColor={theme.tabIconDefault}
+                      value={photo.legenda}
+                      onChangeText={(value) => updatePhotoLegenda(photo.id, value)}
+                      multiline
+                    />
+                    <Pressable
+                      onPress={() => savePhoto(photo.id)}
+                      style={[styles.savePhotoBtn, { backgroundColor: Colors.light.primary }]}
+                    >
+                      <Feather name="check" size={16} color="#FFFFFF" />
+                      <ThemedText style={styles.savePhotoBtnText}>Salvar Foto</ThemedText>
                     </Pressable>
                   </View>
-                  <Image source={{ uri: photo.uri }} style={styles.photoThumbnail} />
-                  <TextInput
-                    style={[
-                      styles.legendaInput,
-                      {
-                        backgroundColor: theme.backgroundDefault,
-                        borderColor: theme.border,
-                        color: theme.text,
-                      },
-                    ]}
-                    placeholder="Digite a legenda da foto..."
-                    placeholderTextColor={theme.tabIconDefault}
-                    value={photo.legenda}
-                    onChangeText={(value) => updatePhotoLegenda(photo.id, value)}
-                    multiline
-                  />
-                </View>
+                )
               ))}
             </View>
           ) : (
@@ -1778,11 +1851,64 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: Colors.light.primary,
   },
+  photoThumbnailWrapper: {
+    position: "relative",
+    width: "100%",
+    height: 180,
+    borderRadius: BorderRadius.md,
+    overflow: "hidden",
+  },
   photoThumbnail: {
     width: "100%",
     height: 180,
     borderRadius: BorderRadius.md,
     resizeMode: "cover",
+  },
+  watermarkBrand: {
+    position: "absolute",
+    top: 8,
+    left: 8,
+    flexDirection: "row",
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+  },
+  watermarkEco: {
+    color: "#4ADE80",
+    fontSize: 12,
+    fontWeight: "800",
+  },
+  watermarkMape: {
+    color: "#60A5FA",
+    fontSize: 12,
+    fontWeight: "800",
+  },
+  watermarkIA: {
+    color: "#FBBF24",
+    fontSize: 12,
+    fontWeight: "800",
+  },
+  watermarkInfo: {
+    position: "absolute",
+    bottom: 8,
+    right: 8,
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+  },
+  watermarkTimestamp: {
+    color: "#FFFFFF",
+    fontSize: 10,
+    fontWeight: "600",
+    textAlign: "right",
+  },
+  watermarkCoords: {
+    color: "#FFFFFF",
+    fontSize: 9,
+    textAlign: "right",
+    marginTop: 1,
   },
   legendaInput: {
     borderWidth: 1,
@@ -1793,6 +1919,56 @@ const styles = StyleSheet.create({
     marginTop: Spacing.sm,
     minHeight: 60,
     textAlignVertical: "top",
+  },
+  savePhotoBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: Spacing.xs,
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    borderRadius: BorderRadius.md,
+    marginTop: Spacing.sm,
+  },
+  savePhotoBtnText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  photoCardCompact: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: Spacing.sm,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    marginBottom: Spacing.xs,
+  },
+  photoThumbnailCompact: {
+    width: 50,
+    height: 50,
+    borderRadius: BorderRadius.sm,
+    resizeMode: "cover",
+  },
+  photoCompactInfo: {
+    flex: 1,
+    marginLeft: Spacing.sm,
+  },
+  photoNumberCompact: {
+    fontWeight: "600",
+    fontSize: 13,
+    color: Colors.light.primary,
+  },
+  photoLegendaCompact: {
+    fontSize: 12,
+    opacity: 0.7,
+    marginTop: 2,
+  },
+  photoCompactActions: {
+    flexDirection: "row",
+    gap: Spacing.sm,
+  },
+  compactActionBtn: {
+    padding: Spacing.xs,
   },
   noPhotos: {
     alignItems: "center",
