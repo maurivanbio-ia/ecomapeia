@@ -61,6 +61,7 @@ interface FormData {
   loteamento_condominio: string;
   tipo_inspecao: string;
   data_vistoria: string;
+  hora_vistoria: string;
   comodatario: string;
   contrato_vigente: string;
   zona_utm: string;
@@ -71,6 +72,15 @@ interface FormData {
   reincidente: string;
   observacoes: string;
   observacoes_usos: string;
+}
+
+interface WeatherData {
+  temperatura: number;
+  umidade: number;
+  condicoes: string;
+  velocidadeVento: number;
+  direcaoVento: string;
+  nebulosidade: number;
 }
 
 interface UTMPoint {
@@ -146,7 +156,9 @@ export default function NovaVistoriaScreen() {
   const navigation = useNavigation();
   const queryClient = useQueryClient();
 
-  const today = new Date().toISOString().split("T")[0];
+  const now = new Date();
+  const today = now.toISOString().split("T")[0];
+  const currentTime = now.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 
   const [formData, setFormData] = useState<FormData>({
     numero_notificacao: "",
@@ -160,6 +172,7 @@ export default function NovaVistoriaScreen() {
     loteamento_condominio: "",
     tipo_inspecao: "CADASTRAMENTO",
     data_vistoria: today,
+    hora_vistoria: currentTime,
     comodatario: "NÃO",
     contrato_vigente: "NÃO",
     zona_utm: "23K",
@@ -171,6 +184,9 @@ export default function NovaVistoriaScreen() {
     observacoes: "",
     observacoes_usos: "",
   });
+  
+  const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
+  const [loadingWeather, setLoadingWeather] = useState(false);
 
   const [usosSolo, setUsosSolo] = useState<UsoSolo[]>([
     { tipo: "Acesso", valor: "", unidade: "m²", checked: false },
@@ -204,6 +220,7 @@ export default function NovaVistoriaScreen() {
     areaHa?: number;
     city?: string;
     state?: string;
+    status?: string;
   } | null>(null);
   const [loadingCAR, setLoadingCAR] = useState(false);
   const [ucInfo, setUcInfo] = useState<{
@@ -366,6 +383,14 @@ export default function NovaVistoriaScreen() {
           recomendacoes: complianceAnalysis.recomendacoes,
           resumoExecutivo: complianceAnalysis.resumoExecutivo,
         } : null,
+        weather_data: weatherData ? {
+          temperatura: weatherData.temperatura,
+          umidade: weatherData.umidade,
+          condicoes: weatherData.condicoes,
+          velocidade_vento: weatherData.velocidadeVento,
+          direcao_vento: weatherData.direcaoVento,
+          nebulosidade: weatherData.nebulosidade,
+        } : null,
       });
       return response.json();
     },
@@ -515,8 +540,8 @@ export default function NovaVistoriaScreen() {
             ucInfo,
             carInfo,
             embargoCheck,
-            propertyType: formData.tipo_propriedade,
-            landUse: formData.uso_solo,
+            propertyType: formData.tipo_inspecao,
+            landUse: formData.tipo_intervencao,
             observations: formData.observacoes,
           }),
         }
@@ -536,6 +561,30 @@ export default function NovaVistoriaScreen() {
     }
   };
 
+  const fetchWeatherByCoordinates = async (lat: number, lng: number) => {
+    setLoadingWeather(true);
+    try {
+      const response = await fetch(
+        new URL(`/api/features/weather?latitude=${lat}&longitude=${lng}`, getApiUrl()).toString()
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setWeatherData({
+          temperatura: data.temperatura,
+          umidade: data.umidade,
+          condicoes: data.condicoes,
+          velocidadeVento: data.velocidadeVento,
+          direcaoVento: data.direcaoVento,
+          nebulosidade: data.nebulosidade,
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching weather:", error);
+    } finally {
+      setLoadingWeather(false);
+    }
+  };
+
   const captureGPSPoint = async () => {
     setCapturingGPS(true);
     try {
@@ -544,6 +593,9 @@ export default function NovaVistoriaScreen() {
         Alert.alert("Permissão Necessária", "Precisamos de acesso à localização para capturar coordenadas GPS.");
         return;
       }
+
+      const captureTime = new Date();
+      updateField("hora_vistoria", captureTime.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }));
 
       const utm = await captureCurrentUTM();
       if (utm) {
@@ -565,9 +617,10 @@ export default function NovaVistoriaScreen() {
           fetchCARByCoordinates(lat, lng);
           fetchUCByCoordinates(lat, lng);
           checkEmbargoByCoordinates(lat, lng, carInfo?.carCode);
+          fetchWeatherByCoordinates(lat, lng);
           Alert.alert(
             "Coordenada Capturada",
-            `E: ${utm.easting.toFixed(2)}\nN: ${utm.northing.toFixed(2)}\n\nAnalisando dados ambientais...`
+            `E: ${utm.easting.toFixed(2)}\nN: ${utm.northing.toFixed(2)}\n\nAnalisando dados ambientais e clima...`
           );
         } else {
           Alert.alert("Sucesso", `Coordenada capturada!\nE: ${utm.easting.toFixed(2)}\nN: ${utm.northing.toFixed(2)}`);
@@ -757,11 +810,22 @@ export default function NovaVistoriaScreen() {
           {renderInput("Município", "municipio", "Ex: Ibiúna")}
           {renderInput("UF", "uf", "Ex: SP")}
           {renderInput("Setor", "setor", "Ex: 13")}
-          <DatePickerField
-            label="Data"
-            value={formData.data_vistoria}
-            onChange={(date) => updateField("data_vistoria", date)}
-          />
+          <View style={styles.dateTimeRow}>
+            <View style={{ flex: 1 }}>
+              <DatePickerField
+                label="Data"
+                value={formData.data_vistoria}
+                onChange={(date) => updateField("data_vistoria", date)}
+              />
+            </View>
+            <View style={styles.timeField}>
+              <ThemedText style={styles.inputLabel}>Horário</ThemedText>
+              <View style={[styles.timeDisplay, { backgroundColor: theme.backgroundSecondary, borderColor: theme.border }]}>
+                <Feather name="clock" size={18} color={Colors.light.accent} />
+                <ThemedText style={styles.timeText}>{formData.hora_vistoria}</ThemedText>
+              </View>
+            </View>
+          </View>
           {renderInput("Número da Notificação", "numero_notificacao", "Ex: RO-NOT-ITU-2025.12.16")}
         </View>
 
@@ -1060,6 +1124,49 @@ export default function NovaVistoriaScreen() {
               <ActivityIndicator size="small" color={Colors.light.warning} />
               <ThemedText style={{ marginLeft: Spacing.sm, color: theme.tabIconDefault }}>
                 Verificando sobreposição com áreas protegidas...
+              </ThemedText>
+            </View>
+          ) : null}
+
+          {weatherData ? (
+            <View style={[styles.carInfoCard, { backgroundColor: "#e3f2fd", borderColor: "#2196f3" }]}>
+              <View style={styles.carInfoHeader}>
+                <Feather name="cloud" size={18} color="#2196f3" />
+                <ThemedText style={[styles.carInfoTitle, { color: "#2196f3" }]}>
+                  Condições Climáticas
+                </ThemedText>
+              </View>
+              <View style={styles.weatherGrid}>
+                <View style={styles.weatherItem}>
+                  <Feather name="thermometer" size={16} color="#e53935" />
+                  <ThemedText style={styles.weatherValue}>{weatherData.temperatura.toFixed(1)}°C</ThemedText>
+                  <ThemedText style={[styles.weatherLabel, { color: theme.tabIconDefault }]}>Temperatura</ThemedText>
+                </View>
+                <View style={styles.weatherItem}>
+                  <Feather name="droplet" size={16} color="#2196f3" />
+                  <ThemedText style={styles.weatherValue}>{weatherData.umidade}%</ThemedText>
+                  <ThemedText style={[styles.weatherLabel, { color: theme.tabIconDefault }]}>Umidade</ThemedText>
+                </View>
+                <View style={styles.weatherItem}>
+                  <Feather name="wind" size={16} color="#607d8b" />
+                  <ThemedText style={styles.weatherValue}>{weatherData.velocidadeVento.toFixed(1)} km/h</ThemedText>
+                  <ThemedText style={[styles.weatherLabel, { color: theme.tabIconDefault }]}>Vento</ThemedText>
+                </View>
+                <View style={styles.weatherItem}>
+                  <Feather name="sun" size={16} color="#ff9800" />
+                  <ThemedText style={styles.weatherValue}>{weatherData.nebulosidade}%</ThemedText>
+                  <ThemedText style={[styles.weatherLabel, { color: theme.tabIconDefault }]}>Nebulosidade</ThemedText>
+                </View>
+              </View>
+              <ThemedText style={[styles.carDetails, { color: theme.tabIconDefault, marginTop: Spacing.xs }]}>
+                Condição: {weatherData.condicoes} | Direção do vento: {weatherData.direcaoVento}
+              </ThemedText>
+            </View>
+          ) : loadingWeather ? (
+            <View style={[styles.carInfoCard, { backgroundColor: theme.backgroundSecondary }]}>
+              <ActivityIndicator size="small" color="#2196f3" />
+              <ThemedText style={{ marginLeft: Spacing.sm, color: theme.tabIconDefault }}>
+                Buscando informações climáticas...
               </ThemedText>
             </View>
           ) : null}
@@ -1688,6 +1795,54 @@ const styles = StyleSheet.create({
   },
   riskItemDesc: {
     fontSize: 11,
+    marginTop: 2,
+  },
+  dateTimeRow: {
+    flexDirection: "row",
+    gap: Spacing.md,
+  },
+  timeField: {
+    width: 100,
+  },
+  timeDisplay: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: Spacing.xs,
+    paddingVertical: 12,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+  },
+  timeText: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    marginBottom: Spacing.xs,
+  },
+  weatherGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: Spacing.sm,
+    marginTop: Spacing.sm,
+  },
+  weatherItem: {
+    flex: 1,
+    minWidth: 70,
+    alignItems: "center",
+    padding: Spacing.sm,
+    backgroundColor: "rgba(255,255,255,0.5)",
+    borderRadius: BorderRadius.sm,
+  },
+  weatherValue: {
+    fontSize: 14,
+    fontWeight: "700",
+    marginTop: 4,
+  },
+  weatherLabel: {
+    fontSize: 10,
     marginTop: 2,
   },
 });
