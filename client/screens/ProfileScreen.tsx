@@ -732,7 +732,7 @@ export default function ProfileScreen() {
                 <View style={[styles.aboutLogoContainer, { backgroundColor: Colors.light.primary }]}>
                   <Feather name="map-pin" size={40} color="#FFFFFF" />
                 </View>
-                <ThemedText style={styles.aboutAppName}>MapeIA</ThemedText>
+                <ThemedText style={styles.aboutAppName}>EcoMapeIA</ThemedText>
                 <ThemedText style={styles.aboutVersion}>{t.version} 1.0.0</ThemedText>
               </View>
 
