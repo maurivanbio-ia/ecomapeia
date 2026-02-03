@@ -2,79 +2,8 @@ import { getApiUrl } from "@/lib/query-client";
 
 const API_BASE = getApiUrl();
 
-export interface AlertCAR {
-  id: number;
-  code: string;
-  area: number;
-  intersectionArea: number;
-  type: string;
-}
-
-export interface LegalReserve {
-  id: number;
-  areaHa: number;
-  carCode: string;
-  ruralPropertyId: string;
-  stateAcronym: string;
-  insertedAt?: string;
-  updatedAt?: string;
-  version?: number;
-  ruralProperty?: RuralPropertyBasic;
-}
-
-export interface PermanentProtectedArea {
-  id: number;
-  areaHa: number;
-  carCode: string;
-  ruralPropertyId: string;
-  stateAcronym: string;
-  insertedAt?: string;
-  updatedAt?: string;
-  version?: number;
-  ruralProperty?: RuralPropertyBasic;
-}
-
-export interface RuralPropertyBasic {
-  id: number;
-  code: string;
-  areaHa: number;
-  type: string;
-}
-
-export interface RuralProperty {
-  id: number;
-  code: string;
-  areaHa: number;
-  type: string;
-  alertAreaInCar: number;
-  alertGeometryCode?: string;
-  alertInPropertyImage?: string;
-  afterDeforestationSimplifiedImage?: string;
-  layerImage?: string;
-  propertyInStateImage?: string;
-  insertedAt?: string;
-  updatedAt?: string;
-  version?: number;
-  legalReserves?: LegalReserve[];
-  permanentProtectedAreas?: PermanentProtectedArea[];
-}
-
-export interface AlertGeometryPoint {
-  id: number;
-  number: number;
-  xCoord: string;
-  yCoord: string;
-  ruralPropertyId: number;
-}
-
-export interface ClassLabel {
-  name: string;
-  colors: string[];
-  colorsWithLabels: Record<string, string>;
-}
-
 export interface MapBiomasAlert {
-  alertCode: string;
+  alertCode: number;
   detectedAt: string;
   publishedAt: string;
   areaHa: number;
@@ -82,39 +11,17 @@ export interface MapBiomasAlert {
   biome: string;
   state: string;
   city: string;
-  cars?: AlertCAR[];
-  ruralProperties?: RuralProperty[];
-}
-
-export interface MapBiomasAlertDetail extends MapBiomasAlert {
-  statusId: number;
-  alertInsideCARAreaHa: number;
-  geometry: any;
-  images?: {
-    before?: { url: string; satellite: string; date: string };
-    after?: { url: string; satellite: string; date: string };
-  };
-  conservationUnits?: Array<{ name: string; category: string }>;
-  indigenousLands?: Array<{ name: string; ethnicName: string }>;
-  settlements?: Array<{ name: string }>;
-  quilombolaAreas?: Array<{ name: string }>;
-  alertGeometryPoints?: AlertGeometryPoint[];
-}
-
-export interface FullAnalysisSummary {
-  totalAlerts: number;
-  totalAlertAreaHa: number;
-  totalRuralProperties: number;
-  totalLegalReserveAreaHa: number;
-  totalAPPAreaHa: number;
-}
-
-export interface FullAnalysisResult {
-  summary: FullAnalysisSummary;
-  alerts: MapBiomasAlert[];
-  ruralProperties: RuralProperty[];
-  alertsTotal: number;
+  statusName: string;
   ruralPropertiesTotal: number;
+  ruralPropertiesCodes: string[];
+  legalReservesTotal: number;
+  legalReservesArea: number;
+  appTotal: number;
+  conservationUnits?: string[];
+  indigenousLands?: string[];
+  settlements?: string[];
+  quilombos?: string[];
+  geometryWkt?: string;
 }
 
 export interface Coordinate {
@@ -122,117 +29,32 @@ export interface Coordinate {
   longitude: number;
 }
 
-export async function getAlertsByLocation(
-  coordinates: Coordinate[],
-  startDate?: string,
-  endDate?: string
-): Promise<{ alerts: MapBiomasAlert[]; total: number }> {
-  const response = await fetch(new URL("/api/mapbiomas/alerts-by-location", API_BASE).toString(), {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ coordinates, startDate, endDate }),
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || error.error || "Falha ao buscar alertas");
-  }
-
-  const data = await response.json();
-  return { alerts: data.alerts, total: data.total };
-}
-
-export async function getAlertDetails(alertCode: string): Promise<MapBiomasAlertDetail | null> {
+export async function getAlertByCode(alertCode: number): Promise<MapBiomasAlert | null> {
   const response = await fetch(new URL(`/api/mapbiomas/alert/${alertCode}`, API_BASE).toString());
 
   if (!response.ok) {
-    throw new Error("Falha ao buscar detalhes do alerta");
+    const error = await response.json();
+    throw new Error(error.message || error.error || "Falha ao buscar alerta");
   }
 
   const data = await response.json();
   return data.alert;
 }
 
-export async function getRuralProperties(
-  coordinates?: Coordinate[],
-  carCode?: string
-): Promise<{ ruralProperties: RuralProperty[]; total: number } | { ruralProperty: RuralProperty | null }> {
-  const response = await fetch(new URL("/api/mapbiomas/rural-properties", API_BASE).toString(), {
+export async function searchAlert(alertCode: number): Promise<MapBiomasAlert | null> {
+  const response = await fetch(new URL("/api/mapbiomas/search", API_BASE).toString(), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ coordinates, carCode }),
+    body: JSON.stringify({ alertCode }),
   });
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.message || error.error || "Falha ao buscar propriedades rurais");
-  }
-
-  return await response.json();
-}
-
-export async function getLegalReserves(
-  coordinates?: Coordinate[],
-  carCode?: string
-): Promise<{ legalReserves: LegalReserve[]; total: number }> {
-  const response = await fetch(new URL("/api/mapbiomas/legal-reserves", API_BASE).toString(), {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ coordinates, carCode }),
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || error.error || "Falha ao buscar reservas legais");
+    throw new Error(error.message || error.error || "Falha ao buscar alerta");
   }
 
   const data = await response.json();
-  return { legalReserves: data.legalReserves, total: data.total };
-}
-
-export async function getPermanentProtectedAreas(
-  coordinates?: Coordinate[],
-  carCode?: string
-): Promise<{ permanentProtectedAreas: PermanentProtectedArea[]; total: number }> {
-  const response = await fetch(new URL("/api/mapbiomas/permanent-protected-areas", API_BASE).toString(), {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ coordinates, carCode }),
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || error.error || "Falha ao buscar APPs");
-  }
-
-  const data = await response.json();
-  return { permanentProtectedAreas: data.permanentProtectedAreas, total: data.total };
-}
-
-export async function getFullAnalysis(coordinates: Coordinate[]): Promise<FullAnalysisResult> {
-  const response = await fetch(new URL("/api/mapbiomas/full-analysis", API_BASE).toString(), {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ coordinates }),
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || error.error || "Falha ao realizar análise completa");
-  }
-
-  return await response.json();
-}
-
-export async function getClassLabels(): Promise<ClassLabel[]> {
-  const response = await fetch(new URL("/api/mapbiomas/class-labels", API_BASE).toString());
-
-  if (!response.ok) {
-    throw new Error("Falha ao buscar legendas de classes");
-  }
-
-  const data = await response.json();
-  return data.classLabels;
+  return data.alert;
 }
 
 export function getBiomeColor(biome: string): string {
@@ -255,16 +77,6 @@ export function getSourceLabel(source: string): string {
     "MAPBIOMAS": "MapBiomas",
   };
   return labels[source] || source;
-}
-
-export function getCARTypeLabel(type: string): string {
-  const labels: Record<string, string> = {
-    "IRU": "Imóvel Rural",
-    "ASS": "Assentamento",
-    "PCT": "Comunidade Tradicional",
-    "TI": "Terra Indígena",
-  };
-  return labels[type] || type;
 }
 
 export function formatArea(areaHa: number): string {
