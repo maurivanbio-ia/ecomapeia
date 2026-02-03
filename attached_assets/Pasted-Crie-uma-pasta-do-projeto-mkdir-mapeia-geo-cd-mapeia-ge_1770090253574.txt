@@ -1,0 +1,546 @@
+Crie uma pasta do projeto:
+
+mkdir mapeia_geo
+cd mapeia_geo
+
+1.2 Ambiente virtual
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+
+1.3 Dependências Python
+
+Instale o núcleo geoespacial e API:
+
+pip install fastapi uvicorn[standard] pydantic sqlalchemy psycopg2-binary
+pip install geopandas shapely pyproj rasterio fiona
+pip install celery redis
+pip install jinja2 weasyprint
+pip install python-multipart
+
+
+Se der erro com WeasyPrint no macOS, a gente troca para ReportLab, que é mais “blindado”.
+
+O que você deve ter ao final.
+. python -c "import fastapi, geopandas, shapely, pyproj" sem erro.
+
+2. Subir PostGIS e Redis com Docker
+
+Crie um arquivo docker-compose.yml na raiz:
+
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_DB: mapeia
+      POSTGRES_USER: mapeia
+      POSTGRES_PASSWORD: mapeia
+    ports:
+      - "5432:5432"
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+volumes:
+  dbdata:
+
+
+Suba:
+
+docker compose up -d
+
+
+O que você deve ter ao final.
+. PostGIS rodando na porta 5432.
+. Redis rodando na porta 6379.
+
+3. Criar a base e as tabelas no PostGIS
+
+Crie a pasta sql/ e o arquivo sql/init.sql:
+
+CREATE EXTENSION IF NOT EXISTS postgis;
+
+CREATE TABLE IF NOT EXISTS properties (
+  property_id UUID PRIMARY KEY,
+  owner_id UUID NOT NULL,
+  name TEXT NOT NULL,
+  geom GEOMETRY(MULTIPOLYGON, 4326) NOT NULL,
+  area_ha NUMERIC,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS analyses (
+  analysis_id UUID PRIMARY KEY,
+  property_id UUID NOT NULL REFERENCES properties(property_id),
+  status TEXT NOT NULL,
+  datasets_snapshot JSONB,
+  results JSONB,
+  qa_flags JSONB,
+  started_at TIMESTAMPTZ,
+  finished_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS artifacts (
+  artifact_id UUID PRIMARY KEY,
+  analysis_id UUID NOT NULL REFERENCES analyses(analysis_id),
+  type TEXT NOT NULL,
+  uri TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_properties_geom ON properties USING GIST (geom);
+
+
+Execute:
+
+psql "postgresql://mapeia:mapeia@localhost:5432/mapeia" -f sql/init.sql
+
+
+O que você deve ter ao final.
+. Tabelas criadas.
+. Extensão PostGIS habilitada.
+
+4. Estrutura do código
+
+Crie esta estrutura:
+
+mapeia_geo/
+  app/
+    main.py
+    db.py
+    models.py
+    schemas.py
+    tasks.py
+    services/
+      geo.py
+      metrics.py
+      report.py
+  tmp/
+  docker-compose.yml
+  sql/
+    init.sql
+
+5. Conexão com banco, modelos e schemas
+5.1 app/db.py
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, declarative_base
+
+DB_URL = "postgresql+psycopg2://mapeia:mapeia@localhost:5432/mapeia"
+
+engine = create_engine(DB_URL, pool_pre_ping=True)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base = declarative_base()
+
+5.2 app/models.py
+import uuid
+from sqlalchemy import Column, String, Text, DateTime, Numeric, ForeignKey
+from sqlalchemy.dialects.postgresql import UUID, JSONB
+from sqlalchemy.sql import func
+from app.db import Base
+
+class Property(Base):
+    __tablename__ = "properties"
+    property_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    owner_id = Column(UUID(as_uuid=True), nullable=False)
+    name = Column(Text, nullable=False)
+    geom = Column(String, nullable=False)
+    area_ha = Column(Numeric, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now())
+
+class Analysis(Base):
+    __tablename__ = "analyses"
+    analysis_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    property_id = Column(UUID(as_uuid=True), ForeignKey("properties.property_id"), nullable=False)
+    status = Column(Text, nullable=False)
+    datasets_snapshot = Column(JSONB, nullable=True)
+    results = Column(JSONB, nullable=True)
+    qa_flags = Column(JSONB, nullable=True)
+    started_at = Column(DateTime(timezone=True), nullable=True)
+    finished_at = Column(DateTime(timezone=True), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+class Artifact(Base):
+    __tablename__ = "artifacts"
+    artifact_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    analysis_id = Column(UUID(as_uuid=True), ForeignKey("analyses.analysis_id"), nullable=False)
+    type = Column(Text, nullable=False)
+    uri = Column(Text, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+Nota importante.
+. Para a coluna geom, aqui eu deixei como string para simplificar o início.
+. Na versão correta, vamos armazenar como geometry no PostGIS via GeoAlchemy2.
+. Se você quiser, eu já te passo a versão GeoAlchemy2 imediatamente. Só aumenta um pouco o setup.
+
+6. Serviço geoespacial mínimo com validação e área correta
+6.1 app/services/geo.py
+
+Aqui está o ponto mais crítico. Área precisa ser calculada em projeção métrica.
+
+from shapely.geometry import shape
+from shapely.validation import explain_validity
+from shapely.ops import unary_union
+from pyproj import Transformer
+
+def parse_and_fix(geom_geojson: dict):
+    g = shape(geom_geojson)
+
+    if g.is_empty:
+        raise ValueError("geometria vazia")
+
+    if not g.is_valid:
+        msg = explain_validity(g)
+        g2 = g.buffer(0)
+        if not g2.is_valid:
+            raise ValueError(f"geometria invalida: {msg}")
+        g = g2
+
+    if g.geom_type == "Polygon":
+        g = unary_union([g])
+
+    if g.geom_type != "MultiPolygon":
+        raise ValueError(f"tipo geometrico inesperado: {g.geom_type}")
+
+    return g
+
+def area_hectares_wgs84(geom_multipolygon):
+    """
+    Calcula area em hectares reprojectando para uma projeção métrica local.
+    Regra prática. usar UTM pelo centróide do polígono.
+    """
+    lon, lat = geom_multipolygon.centroid.x, geom_multipolygon.centroid.y
+    zone = int((lon + 180) / 6) + 1
+    epsg = 32700 + zone if lat < 0 else 32600 + zone
+
+    transformer = Transformer.from_crs("EPSG:4326", f"EPSG:{epsg}", always_xy=True)
+
+    def _tx(x, y, z=None):
+        return transformer.transform(x, y)
+
+    geom_proj = type(geom_multipolygon)([poly for poly in geom_multipolygon.geoms])
+    geom_proj = shapely_transform(geom_multipolygon, _tx)
+
+    area_m2 = geom_proj.area
+    return area_m2 / 10000.0
+
+def shapely_transform(geom, func):
+    try:
+        from shapely.ops import transform
+        return transform(func, geom)
+    except Exception as e:
+        raise RuntimeError(f"falha ao transformar geometria: {e}")
+
+
+O que você deve ter ao final.
+. Uma função que recebe GeoJSON, corrige, e calcula área em hectares de forma consistente.
+
+7. Métricas mínimas do primeiro MVP
+
+No MVP inicial, recomendo estas saídas já úteis para consultoria:
+
+Área total em ha.
+
+Centróide.
+
+Bounding box.
+
+Interseção com camadas vetoriais públicas que você tiver localmente.
+. Unidades de Conservação.
+. Terras Indígenas.
+. Áreas embargadas, se você tiver uma fonte pública confiável em shapefile.
+
+Um bloco de proveniência para auditoria.
+
+Depois disso, você pluga MapBiomas e INPE via raster.
+
+7.1 app/services/metrics.py
+from shapely.geometry import mapping
+
+def compute_basic_metrics(geom, area_ha: float):
+    minx, miny, maxx, maxy = geom.bounds
+    cx, cy = geom.centroid.x, geom.centroid.y
+
+    results = {
+        "property": {
+            "area_ha": float(area_ha),
+            "centroid": {"lon": float(cx), "lat": float(cy)},
+            "bbox": {"minx": float(minx), "miny": float(miny), "maxx": float(maxx), "maxy": float(maxy)},
+        },
+        "intersections": {
+            "ucs": [],
+            "tis": [],
+        },
+        "compliance": {
+            "flags": [],
+        },
+        "provenance": {
+            "datasets": [],
+        }
+    }
+    return results
+
+8. Worker Celery que processa análises
+8.1 app/tasks.py
+import os
+import json
+from celery import Celery
+from datetime import datetime, timezone
+from sqlalchemy import text
+from app.db import SessionLocal
+
+celery_app = Celery(
+    "mapeia_workers",
+    broker="redis://localhost:6379/0",
+    backend="redis://localhost:6379/0",
+)
+
+@celery_app.task(name="run_analysis")
+def run_analysis(analysis_id: str):
+    from app.services.geo import parse_and_fix, area_hectares_wgs84
+    from app.services.metrics import compute_basic_metrics
+    from app.services.report import build_pdf_report
+
+    db = SessionLocal()
+    try:
+        db.execute(text("UPDATE analyses SET status='running', started_at=now() WHERE analysis_id=:id"), {"id": analysis_id})
+
+        row = db.execute(
+            text("""
+                SELECT a.analysis_id, a.property_id, p.name, p.geom
+                FROM analyses a
+                JOIN properties p ON p.property_id = a.property_id
+                WHERE a.analysis_id = :id
+            """),
+            {"id": analysis_id},
+        ).mappings().first()
+
+        geom_geojson = json.loads(row["geom"])
+        geom = parse_and_fix(geom_geojson)
+        area_ha = area_hectares_wgs84(geom)
+
+        results = compute_basic_metrics(geom, area_ha)
+
+        pdf_path = build_pdf_report(row["property_id"], analysis_id, row["name"], results)
+
+        db.execute(
+            text("UPDATE analyses SET status='done', finished_at=now(), results=:res WHERE analysis_id=:id"),
+            {"id": analysis_id, "res": json.dumps(results)},
+        )
+        db.execute(
+            text("INSERT INTO artifacts (artifact_id, analysis_id, type, uri) VALUES (gen_random_uuid(), :aid, 'report_pdf', :uri)"),
+            {"aid": analysis_id, "uri": pdf_path},
+        )
+        db.commit()
+
+    except Exception as e:
+        db.execute(text("UPDATE analyses SET status='failed', finished_at=now(), qa_flags=:q WHERE analysis_id=:id"),
+                   {"id": analysis_id, "q": json.dumps({"error": str(e)})})
+        db.commit()
+        raise
+    finally:
+        db.close()
+
+
+Nota.
+. gen_random_uuid() exige extensão pgcrypto.
+. Se preferir, eu ajusto para UUID no Python. Mais simples no começo.
+
+9. Gerador de PDF no layout MapeIA v1
+
+Para um PDF rápido e estável, recomendo começar com ReportLab. Depois você migra para HTML se quiser.
+
+9.1 app/services/report.py
+from pathlib import Path
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+
+def build_pdf_report(property_id: str, analysis_id: str, property_name: str, results: dict):
+    out_dir = Path("tmp")
+    out_dir.mkdir(exist_ok=True)
+    pdf_path = out_dir / f"mapeia_{property_id}_{analysis_id}.pdf"
+
+    c = canvas.Canvas(str(pdf_path), pagesize=A4)
+    w, h = A4
+
+    c.setFont("Helvetica-Bold", 14)
+    c.drawString(40, h - 50, "MapeIA. Relatorio de Vistoria. Analise Automatica")
+
+    c.setFont("Helvetica", 10)
+    c.drawString(40, h - 80, f"Imovel: {property_name}")
+    c.drawString(40, h - 95, f"Area (ha): {results['property']['area_ha']:.2f}")
+
+    cx = results["property"]["centroid"]["lon"]
+    cy = results["property"]["centroid"]["lat"]
+    c.drawString(40, h - 110, f"Centroide: {cx:.6f}, {cy:.6f}")
+
+    c.setFont("Helvetica-Bold", 11)
+    c.drawString(40, h - 140, "Resumo")
+    c.setFont("Helvetica", 10)
+    c.drawString(40, h - 160, "Camadas legais e uso do solo serao adicionados na proxima etapa do pipeline.")
+
+    c.showPage()
+    c.save()
+
+    return str(pdf_path)
+
+
+Instale ReportLab:
+
+pip install reportlab
+
+
+O que você deve ter ao final.
+. Um PDF sendo gerado com área e centróide.
+
+10. API FastAPI para criar imóvel e análise
+10.1 app/schemas.py
+from pydantic import BaseModel, Field
+from uuid import UUID
+from typing import Any, Optional
+
+class PropertyCreate(BaseModel):
+    owner_id: UUID
+    name: str
+    geom_geojson: dict = Field(..., description="GeoJSON Polygon ou MultiPolygon")
+
+class AnalysisCreate(BaseModel):
+    analysis_type: str = "baseline"
+    report_template: str = "mapeia_layout_v1"
+    datasets: Optional[dict] = None
+
+class PropertyOut(BaseModel):
+    property_id: UUID
+
+class AnalysisOut(BaseModel):
+    analysis_id: UUID
+    status: str
+
+10.2 app/main.py
+import json
+import uuid
+from fastapi import FastAPI, Depends, HTTPException
+from sqlalchemy import text
+from sqlalchemy.orm import Session
+from app.db import SessionLocal
+from app.schemas import PropertyCreate, AnalysisCreate
+from app.tasks import celery_app
+
+app = FastAPI(title="MapeIA Geo API", version="1.0.0")
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+@app.post("/v1/properties")
+def create_property(payload: PropertyCreate, db: Session = Depends(get_db)):
+    pid = uuid.uuid4()
+    db.execute(
+        text("INSERT INTO properties (property_id, owner_id, name, geom) VALUES (:pid, :oid, :name, :geom)"),
+        {"pid": pid, "oid": payload.owner_id, "name": payload.name, "geom": json.dumps(payload.geom_geojson)},
+    )
+    db.commit()
+    return {"property_id": str(pid)}
+
+@app.post("/v1/properties/{property_id}/analyses")
+def create_analysis(property_id: str, payload: AnalysisCreate, db: Session = Depends(get_db)):
+    aid = uuid.uuid4()
+    db.execute(
+        text("INSERT INTO analyses (analysis_id, property_id, status, datasets_snapshot) VALUES (:aid, :pid, 'queued', :ds)"),
+        {"aid": aid, "pid": property_id, "ds": json.dumps(payload.datasets or {"defaults": True})},
+    )
+    db.commit()
+
+    celery_app.send_task("run_analysis", args=[str(aid)])
+    return {"analysis_id": str(aid), "status": "queued"}
+
+@app.get("/v1/analyses/{analysis_id}")
+def get_analysis(analysis_id: str, db: Session = Depends(get_db)):
+    row = db.execute(
+        text("SELECT analysis_id, status, results, qa_flags FROM analyses WHERE analysis_id=:id"),
+        {"id": analysis_id},
+    ).mappings().first()
+
+    if not row:
+        raise HTTPException(status_code=404, detail="analysis not found")
+
+    return {
+        "analysis_id": str(row["analysis_id"]),
+        "status": row["status"],
+        "results": row["results"],
+        "qa_flags": row["qa_flags"],
+    }
+
+11. Rodar tudo
+11.1 Subir API
+uvicorn app.main:app --reload
+
+11.2 Subir worker Celery
+
+Em outro terminal, com o mesmo venv ativado:
+
+celery -A app.tasks.celery_app worker --loglevel=INFO
+
+
+Se você manteve celery_app dentro de app/tasks.py, o comando vira:
+
+celery -A app.tasks worker --loglevel=INFO
+
+12. Teste rápido com cURL
+12.1 Criar imóvel
+curl -X POST http://127.0.0.1:8000/v1/properties \
+  -H "Content-Type: application/json" \
+  -d '{
+    "owner_id": "11111111-1111-1111-1111-111111111111",
+    "name": "Imovel Teste",
+    "geom_geojson": {
+      "type": "Polygon",
+      "coordinates": [[
+        [-51.0, -3.0],
+        [-51.0, -3.01],
+        [-50.99, -3.01],
+        [-50.99, -3.0],
+        [-51.0, -3.0]
+      ]]
+    }
+  }'
+
+12.2 Criar análise
+curl -X POST http://127.0.0.1:8000/v1/properties/SEU_PROPERTY_ID/analyses \
+  -H "Content-Type: application/json" \
+  -d '{"analysis_type":"baseline","report_template":"mapeia_layout_v1"}'
+
+12.3 Consultar status
+curl http://127.0.0.1:8000/v1/analyses/SEU_ANALYSIS_ID
+
+13. Onde entram MapBiomas e INPE
+
+Agora você tem o “esqueleto” operacional. O próximo passo é plugar datasets reais:
+
+Vetores. UC, TI, hidrografia, limites municipais.
+
+Rasters. MapBiomas por ano. PRODES. DETER.
+
+A integração técnica disso é feita em services/metrics.py com.
+. Interseções vetoriais. geopandas overlay.
+. Estatística zonal em raster. rasterio ou rasterstats.
+
+Próximo passo que eu recomendo, sem pular etapa
+
+Ajustar properties.geom para geometry real no PostGIS com GeoAlchemy2.
+
+Implementar interseção com UC e TI com shapefiles locais.
+
+Gerar mapa simples PNG do imóvel e inserir no PDF.
+
+Só então MapBiomas e INPE raster, porque raster exige organização de diretórios e versionamento.
