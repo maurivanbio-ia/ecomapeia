@@ -547,10 +547,40 @@ export function MapBiomasPanel({ theme, onAlertSelect, latitude, longitude }: Ma
         </View>
       ) : null}
 
-      {searchMode === "inspection" && alerts.length > 0 ? (
+      {/* Lista de alertas para modo "inspection" ou "coordinates" */}
+      {(searchMode === "inspection" || searchMode === "coordinates") && alerts.length > 0 ? (
         <Animated.View entering={FadeIn.duration(400)}>
+          {/* Índice Remissivo de Códigos MapBiomas */}
+          <View style={[styles.indexContainer, { backgroundColor: theme.card, borderColor: theme.border }]}>
+            <View style={styles.indexHeader}>
+              <Feather name="list" size={16} color="#2E7D32" />
+              <ThemedText style={styles.indexTitle}>
+                Índice de Códigos MapBiomas ({alerts.length})
+              </ThemedText>
+            </View>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.indexScroll}>
+              {alerts.map((a) => (
+                <Pressable
+                  key={`index-${a.alertCode}`}
+                  onPress={() => onAlertSelect?.(a.alertCode)}
+                  style={[
+                    styles.indexBadge,
+                    { 
+                      backgroundColor: getAlertSeverityColor(getAlertSeverity(a.areaHa)) + "15",
+                      borderColor: getAlertSeverityColor(getAlertSeverity(a.areaHa)),
+                    }
+                  ]}
+                >
+                  <ThemedText style={[styles.indexCode, { color: getAlertSeverityColor(getAlertSeverity(a.areaHa)) }]}>
+                    #{a.alertCode}
+                  </ThemedText>
+                </Pressable>
+              ))}
+            </ScrollView>
+          </View>
+
           <ThemedText style={styles.resultsCount}>
-            {alerts.length} alerta{alerts.length !== 1 ? "s" : ""} em {selectedVistoria?.municipio}
+            {alerts.length} alerta{alerts.length !== 1 ? "s" : ""} {searchMode === "inspection" ? `em ${selectedVistoria?.municipio}` : `na região`}
           </ThemedText>
           <ScrollView style={styles.alertsList} nestedScrollEnabled>
             {alerts.map((a, index) => {
@@ -595,18 +625,27 @@ export function MapBiomasPanel({ theme, onAlertSelect, latitude, longitude }: Ma
                     <ThemedText style={styles.alertCodeText}>#{a.alertCode}</ThemedText>
                     <ThemedText style={styles.alertDateText}>{formatDate(a.detectedAt)}</ThemedText>
                   </View>
+                  <View style={styles.alertRowCompact}>
+                    <View style={styles.locationRow}>
+                      <Feather name="map-pin" size={11} color={theme.tabIconDefault} />
+                      <ThemedText style={styles.locationText} numberOfLines={1}>
+                        {a.city}, {a.state}
+                      </ThemedText>
+                    </View>
+                    <ThemedText style={styles.sourceText}>{getSourceLabel(a.source)}</ThemedText>
+                  </View>
                   <View style={styles.statsRowCompact}>
                     <View style={styles.statItemCompact}>
                       <Feather name="home" size={12} color="#2196F3" />
-                      <ThemedText style={styles.statValueCompact}>{a.ruralPropertiesTotal}</ThemedText>
+                      <ThemedText style={styles.statValueCompact}>{a.ruralPropertiesTotal || 0}</ThemedText>
                     </View>
                     <View style={styles.statItemCompact}>
                       <Feather name="layers" size={12} color="#4CAF50" />
-                      <ThemedText style={styles.statValueCompact}>{a.legalReservesTotal}</ThemedText>
+                      <ThemedText style={styles.statValueCompact}>{a.legalReservesTotal || 0}</ThemedText>
                     </View>
                     <View style={styles.statItemCompact}>
                       <Feather name="shield" size={12} color="#FF9800" />
-                      <ThemedText style={styles.statValueCompact}>{a.appTotal}</ThemedText>
+                      <ThemedText style={styles.statValueCompact}>{a.appTotal || 0}</ThemedText>
                     </View>
                   </View>
                 </Pressable>
@@ -614,6 +653,17 @@ export function MapBiomasPanel({ theme, onAlertSelect, latitude, longitude }: Ma
             })}
           </ScrollView>
         </Animated.View>
+      ) : null}
+
+      {/* Estado vazio para modo coordinates */}
+      {searchMode === "coordinates" && alerts.length === 0 && !isLoading && !error && locationInfo ? (
+        <View style={styles.emptyState}>
+          <Feather name="check-circle" size={40} color="#4CAF50" />
+          <ThemedText style={styles.emptyTitle}>Nenhum Alerta</ThemedText>
+          <ThemedText style={styles.emptySubtitle}>
+            Não foram encontrados alertas de desmatamento na região das coordenadas.
+          </ThemedText>
+        </View>
       ) : null}
 
       {searchMode === "inspection" && selectedVistoria && alerts.length === 0 && !isLoading && !error ? (
@@ -994,5 +1044,51 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontWeight: "600",
     fontSize: 14,
+  },
+  indexContainer: {
+    borderWidth: 1,
+    borderRadius: BorderRadius.md,
+    padding: Spacing.md,
+    marginBottom: Spacing.md,
+  },
+  indexHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+    marginBottom: Spacing.sm,
+  },
+  indexTitle: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#2E7D32",
+  },
+  indexScroll: {
+    flexGrow: 0,
+  },
+  indexBadge: {
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 6,
+    borderRadius: BorderRadius.sm,
+    borderWidth: 1,
+    marginRight: Spacing.xs,
+  },
+  indexCode: {
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  locationRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    flex: 1,
+  },
+  locationText: {
+    fontSize: 11,
+    color: Colors.light.textSecondary,
+  },
+  sourceText: {
+    fontSize: 10,
+    color: Colors.light.textSecondary,
+    fontStyle: "italic",
   },
 });
