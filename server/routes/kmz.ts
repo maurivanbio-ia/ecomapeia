@@ -12,6 +12,22 @@ interface TrackPoint {
   ts?: number;
 }
 
+interface SavedTrack {
+  legenda: string;
+  color: string;
+  distance: number;
+  duration: number;
+  points: TrackPoint[];
+}
+
+function hexToKmlColor(hex: string): string {
+  const cleanHex = hex.replace("#", "");
+  const r = cleanHex.substring(0, 2);
+  const g = cleanHex.substring(2, 4);
+  const b = cleanHex.substring(4, 6);
+  return `ff${b}${g}${r}`;
+}
+
 function utmToLatLon(e: number, n: number, zone: number = 23, hemisphere: string = "S"): { lat: number; lon: number } {
   const k0 = 0.9996;
   const a = 6378137;
@@ -59,7 +75,7 @@ function generateKML(
   proprietario: string,
   dataVistoria: string,
   polygonCoords: Array<{ lat: number; lon: number }>,
-  trackPoints: TrackPoint[]
+  tracks: SavedTrack[]
 ): string {
   const polygonCoordStr = polygonCoords
     .map(c => `${c.lon},${c.lat},0`)
@@ -69,9 +85,83 @@ function generateKML(
     ? `${polygonCoords[0].lon},${polygonCoords[0].lat},0`
     : "";
   
-  const trackCoordStr = trackPoints
-    .map(p => `${p.lon},${p.lat},${p.alt || 0}`)
-    .join(" ");
+  const generateTrackStyles = () => {
+    return tracks.map((track, idx) => `
+    <Style id="trackStyle_${idx}">
+      <LineStyle>
+        <color>${hexToKmlColor(track.color)}</color>
+        <width>4</width>
+      </LineStyle>
+    </Style>
+    <Style id="startMarker_${idx}">
+      <IconStyle>
+        <color>${hexToKmlColor(track.color)}</color>
+        <scale>1.2</scale>
+        <Icon>
+          <href>http://maps.google.com/mapfiles/kml/paddle/go.png</href>
+        </Icon>
+      </IconStyle>
+    </Style>
+    <Style id="endMarker_${idx}">
+      <IconStyle>
+        <color>${hexToKmlColor(track.color)}</color>
+        <scale>1.2</scale>
+        <Icon>
+          <href>http://maps.google.com/mapfiles/kml/paddle/stop.png</href>
+        </Icon>
+      </IconStyle>
+    </Style>`).join("\n");
+  };
+
+  const generateTrackPlacemarks = () => {
+    return tracks.map((track, idx) => {
+      if (track.points.length === 0) return "";
+      
+      const trackCoordStr = track.points
+        .map(p => `${p.lon},${p.lat},${p.alt || 0}`)
+        .join(" ");
+      
+      const distanceKm = (track.distance / 1000).toFixed(2);
+      const durationMin = Math.floor(track.duration / 60);
+      
+      return `
+      <Folder>
+        <name>${track.legenda}</name>
+        <description>Distância: ${distanceKm} km | Duração: ${durationMin} min</description>
+        
+        <Placemark>
+          <name>${track.legenda} - Início</name>
+          <description>Ponto inicial do trajeto</description>
+          <styleUrl>#startMarker_${idx}</styleUrl>
+          <Point>
+            <coordinates>${track.points[0].lon},${track.points[0].lat},${track.points[0].alt || 0}</coordinates>
+          </Point>
+        </Placemark>
+        
+        <Placemark>
+          <name>${track.legenda}</name>
+          <description>Distância: ${distanceKm} km | Duração: ${durationMin} min</description>
+          <styleUrl>#trackStyle_${idx}</styleUrl>
+          <LineString>
+            <tessellate>1</tessellate>
+            <altitudeMode>clampToGround</altitudeMode>
+            <coordinates>${trackCoordStr}</coordinates>
+          </LineString>
+        </Placemark>
+        
+        ${track.points.length > 1 ? `
+        <Placemark>
+          <name>${track.legenda} - Fim</name>
+          <description>Ponto final do trajeto</description>
+          <styleUrl>#endMarker_${idx}</styleUrl>
+          <Point>
+            <coordinates>${track.points[track.points.length - 1].lon},${track.points[track.points.length - 1].lat},${track.points[track.points.length - 1].alt || 0}</coordinates>
+          </Point>
+        </Placemark>
+        ` : ""}
+      </Folder>`;
+    }).join("\n");
+  };
   
   return `<?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2">
@@ -91,32 +181,7 @@ function generateKML(
       </PolyStyle>
     </Style>
     
-    <Style id="trackStyle">
-      <LineStyle>
-        <color>ff006bff</color>
-        <width>4</width>
-      </LineStyle>
-    </Style>
-    
-    <Style id="startMarker">
-      <IconStyle>
-        <color>ff006bff</color>
-        <scale>1.2</scale>
-        <Icon>
-          <href>http://maps.google.com/mapfiles/kml/paddle/go.png</href>
-        </Icon>
-      </IconStyle>
-    </Style>
-    
-    <Style id="endMarker">
-      <IconStyle>
-        <color>ff0000ff</color>
-        <scale>1.2</scale>
-        <Icon>
-          <href>http://maps.google.com/mapfiles/kml/paddle/stop.png</href>
-        </Icon>
-      </IconStyle>
-    </Style>
+    ${generateTrackStyles()}
     
     <Folder>
       <name>Área da Propriedade</name>
@@ -138,38 +203,9 @@ function generateKML(
     </Folder>
     
     <Folder>
-      <name>Trajeto do Inspetor</name>
-      <description>Caminho percorrido durante a vistoria</description>
-      ${trackPoints.length > 0 ? `
-      <Placemark>
-        <name>Início do Trajeto</name>
-        <description>Ponto inicial da vistoria</description>
-        <styleUrl>#startMarker</styleUrl>
-        <Point>
-          <coordinates>${trackPoints[0].lon},${trackPoints[0].lat},${trackPoints[0].alt || 0}</coordinates>
-        </Point>
-      </Placemark>
-      
-      <Placemark>
-        <name>Trajeto</name>
-        <description>Caminho percorrido pelo inspetor</description>
-        <styleUrl>#trackStyle</styleUrl>
-        <LineString>
-          <tessellate>1</tessellate>
-          <altitudeMode>clampToGround</altitudeMode>
-          <coordinates>${trackCoordStr}</coordinates>
-        </LineString>
-      </Placemark>
-      
-      <Placemark>
-        <name>Fim do Trajeto</name>
-        <description>Ponto final da vistoria</description>
-        <styleUrl>#endMarker</styleUrl>
-        <Point>
-          <coordinates>${trackPoints[trackPoints.length - 1].lon},${trackPoints[trackPoints.length - 1].lat},${trackPoints[trackPoints.length - 1].alt || 0}</coordinates>
-        </Point>
-      </Placemark>
-      ` : ""}
+      <name>Trajetos da Vistoria</name>
+      <description>${tracks.length} trajeto(s) registrado(s)</description>
+      ${generateTrackPlacemarks()}
     </Folder>
     
   </Document>
@@ -205,9 +241,22 @@ router.get("/export/:vistoriaId", async (req: Request, res: Response) => {
       }
     }
     
-    const trackPoints: TrackPoint[] = Array.isArray(vistoria.track_points)
-      ? (vistoria.track_points as TrackPoint[])
-      : [];
+    let tracks: SavedTrack[] = [];
+    
+    if (Array.isArray(vistoria.track_points) && vistoria.track_points.length > 0) {
+      const firstItem = vistoria.track_points[0] as any;
+      if (firstItem.legenda !== undefined && firstItem.points !== undefined) {
+        tracks = vistoria.track_points as SavedTrack[];
+      } else if (firstItem.lat !== undefined && firstItem.lon !== undefined) {
+        tracks = [{
+          legenda: "Trajeto da Vistoria",
+          color: "#FF6B00",
+          distance: 0,
+          duration: 0,
+          points: vistoria.track_points as TrackPoint[],
+        }];
+      }
+    }
     
     const dataVistoria = vistoria.data_vistoria
       ? new Date(vistoria.data_vistoria).toLocaleDateString("pt-BR")
@@ -218,7 +267,7 @@ router.get("/export/:vistoriaId", async (req: Request, res: Response) => {
       vistoria.proprietario || "Não informado",
       dataVistoria,
       polygonCoords,
-      trackPoints
+      tracks
     );
     
     if (format === "kml") {
