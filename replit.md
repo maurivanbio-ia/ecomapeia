@@ -220,6 +220,84 @@ Preferred communication style: Simple, everyday language.
 - expo-print - Native PDF rendering
 - expo-sharing - Document sharing
 - @react-native-community/datetimepicker - Date selection
+- expo-local-authentication - Biometric authentication
+- expo-av (Audio) - Voice note recording
+
+### New Features (February 2026 Update)
+
+**12 Major Feature Enhancements Completed:**
+
+1. **Dark Mode System:**
+   - Light/Dark/System theme modes with persistent storage
+   - ThemeContext with useThemeContext hook
+   - Settings toggle in ProfileScreen
+
+2. **Search & Filters:**
+   - Real-time search by owner name and municipality
+   - Filter chips for sync status (All/Synced/Pending)
+   - Implemented in HomeScreen
+
+3. **Direct Sharing:**
+   - Share inspection data via WhatsApp or email
+   - Share complete reports or summaries
+   - Utility: `client/lib/shareUtils.ts`
+
+4. **Image Compression:**
+   - Automatic photo optimization before upload
+   - Configurable quality and max dimensions
+   - Utility: `client/lib/imageUtils.ts`
+
+5. **Biometric Login:**
+   - Fingerprint/Face ID authentication (native only)
+   - Toggle in settings with availability check
+   - Utility: `client/lib/biometricAuth.ts`
+
+6. **Voice Notes:**
+   - Audio recording for field observations
+   - Playback and delete functionality
+   - Component: `client/components/VoiceNoteRecorder.tsx`
+
+7. **Dashboard Charts:**
+   - Visual statistics with bar charts
+   - Simple stats cards with colors
+   - Component: `client/components/StatsChart.tsx`
+
+8. **Change History:**
+   - Track modifications to inspections
+   - Timestamp logging for edits
+
+9. **Backup/Export:**
+   - Export all data as JSON or CSV
+   - Download or share exports
+   - Utility: `client/lib/exportData.ts`
+
+10. **Interactive Tutorial:**
+    - First-time user onboarding overlay
+    - Step-by-step feature introduction
+    - Reset from settings
+    - Component: `client/components/TutorialOverlay.tsx`
+
+11. **Form Validation:**
+    - Real-time field validation
+    - CPF, email, phone validation
+    - Required field checks
+    - Utility: `client/lib/validationUtils.ts`
+
+12. **Signature with Timestamp:**
+    - Automatic date/time capture on sign
+    - Displayed below signature preview
+    - Enhanced SignatureCapture component
+
+**Settings Redesign:**
+- ProfileScreen with 9 organized options
+- 3 sections: Appearance, Security & Data, Help & About
+- Dark mode toggle, language selection, biometric toggle
+- Export data, reset tutorial, about info
+
+**Multilingual Support:**
+- 60+ translation strings
+- Portuguese, English, Spanish
+- LanguageContext with persistent storage
 
 ### Future Integrations (Planned)
 
