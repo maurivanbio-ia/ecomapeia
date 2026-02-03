@@ -1,8 +1,8 @@
-# MapeIA (GeoCadastra) - Replit Configuration
+# EcoMapeIA - Replit Configuration
 
 ## Overview
 
-MapeIA (GeoCadastra) is a professional mobile application designed for environmental technicians conducting field inspections in remote hydroelectric reservoir areas. Its primary purpose is to digitize and streamline the property inspection process along reservoir margins, replacing traditional paper-based methods with an offline-capable digital solution. Key capabilities include digital form completion, photo capture with automatic synchronization, coordinate-based polygon mapping for properties, and automated PDF report generation. The project aims to improve efficiency and data accuracy for environmental monitoring in areas with limited connectivity.
+EcoMapeIA is a professional mobile application designed for environmental technicians conducting field inspections in remote hydroelectric reservoir areas. Its primary purpose is to digitize and streamline the property inspection process along reservoir margins, replacing traditional paper-based methods with an offline-capable digital solution. Key capabilities include digital form completion, photo capture with automatic synchronization, coordinate-based polygon mapping for properties, and automated PDF report generation. The project aims to improve efficiency and data accuracy for environmental monitoring in areas with limited connectivity.
 
 ## User Preferences
 

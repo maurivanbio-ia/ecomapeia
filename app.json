@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "MapeIA",
-    "slug": "mapeia",
+    "name": "EcoMapeIA",
+    "slug": "ecomapeia",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/logo.png",
