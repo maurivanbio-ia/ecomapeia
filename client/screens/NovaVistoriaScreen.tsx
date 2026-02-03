@@ -39,11 +39,20 @@ const TIPO_INTERVENCAO_OPTIONS = [
   "USOS IRREGULARES",
 ];
 
+interface UsoSolo {
+  tipo: string;
+  valor: string;
+  unidade: string;
+  checked: boolean;
+}
+
 interface FormData {
   numero_notificacao: string;
   setor: string;
   margem: string;
   municipio: string;
+  uf: string;
+  localizacao: string;
   numero_confrontante: string;
   proprietario: string;
   loteamento_condominio: string;
@@ -58,6 +67,7 @@ interface FormData {
   emissao_notificacao: string;
   reincidente: string;
   observacoes: string;
+  observacoes_usos: string;
 }
 
 interface UTMPoint {
@@ -140,6 +150,8 @@ export default function NovaVistoriaScreen() {
     setor: "",
     margem: "DIREITA",
     municipio: "",
+    uf: "SP",
+    localizacao: "",
     numero_confrontante: "",
     proprietario: "",
     loteamento_condominio: "",
@@ -154,7 +166,27 @@ export default function NovaVistoriaScreen() {
     emissao_notificacao: "NÃO",
     reincidente: "NÃO",
     observacoes: "",
+    observacoes_usos: "",
   });
+
+  const [usosSolo, setUsosSolo] = useState<UsoSolo[]>([
+    { tipo: "Acesso", valor: "", unidade: "m²", checked: false },
+    { tipo: "Edificação", valor: "", unidade: "m²", checked: false },
+    { tipo: "Píer fixo", valor: "", unidade: "m²", checked: false },
+    { tipo: "Píer Flutuante", valor: "", unidade: "m²", checked: false },
+    { tipo: "Área de Lazer", valor: "", unidade: "m²", checked: false },
+    { tipo: "Praia artificial", valor: "", unidade: "m²", checked: false },
+    { tipo: "Rampa para Embarcação", valor: "", unidade: "m²", checked: false },
+    { tipo: "Embarcações", valor: "", unidade: "und.", checked: false },
+    { tipo: "Lavoura", valor: "", unidade: "m²", checked: false },
+    { tipo: "Pastagem", valor: "", unidade: "m²", checked: false },
+    { tipo: "Avanço de cerca", valor: "", unidade: "m", checked: false },
+    { tipo: "Captação de água", valor: "", unidade: "m³", checked: false },
+    { tipo: "Plantio de exóticas", valor: "", unidade: "indivíduos", checked: false },
+    { tipo: "Área sem edificações", valor: "", unidade: "", checked: false },
+    { tipo: "Área com vegetação nativa", valor: "", unidade: "", checked: false },
+    { tipo: "Outros", valor: "", unidade: "", checked: false },
+  ]);
 
   const [utmPoints, setUtmPoints] = useState<UTMPoint[]>([
     { id: "1", e: "", n: "" },
@@ -226,6 +258,19 @@ export default function NovaVistoriaScreen() {
     Alert.alert("Sucesso", "Imagem do mapa capturada!");
   };
 
+  const toggleUsoSolo = (index: number) => {
+    Haptics.selectionAsync();
+    setUsosSolo((prev) =>
+      prev.map((uso, i) => (i === index ? { ...uso, checked: !uso.checked } : uso))
+    );
+  };
+
+  const updateUsoSoloValor = (index: number, valor: string) => {
+    setUsosSolo((prev) =>
+      prev.map((uso, i) => (i === index ? { ...uso, valor } : uso))
+    );
+  };
+
   const createVistoria = useMutation({
     mutationFn: async (data: FormData) => {
       const coordenadasUtm = utmPoints
@@ -238,12 +283,22 @@ export default function NovaVistoriaScreen() {
         ordem: idx + 1,
       }));
 
+      const usosSoloData = usosSolo
+        .filter((uso) => uso.checked)
+        .map((uso) => ({
+          tipo: uso.tipo,
+          valor: uso.valor,
+          unidade: uso.unidade,
+        }));
+
       const response = await apiRequest("POST", "/api/vistorias", {
         ...data,
         usuario_id: user?.id,
         coordenadas_utm: coordenadasUtm,
         fotos: fotosData,
+        usos_solo: usosSoloData,
         croqui_imagem: mapImageUri,
+        assinatura_uri: signatureUri,
       });
       return response.json();
     },
@@ -486,45 +541,89 @@ export default function NovaVistoriaScreen() {
           ]}
         >
           <ThemedText style={styles.sectionTitle}>
-            <Feather name="file-text" size={18} /> Identificação
+            <Feather name="file-text" size={18} /> 01 – Identificação Propriedade
           </ThemedText>
-          {renderInput("Nº Notificação", "numero_notificacao", "Ex: 0001/26")}
-          {renderInput("Setor", "setor", "Ex: 1 A 3")}
-          {renderSelect("Margem", "margem", MARGEM_OPTIONS)}
-          {renderInput("Município", "municipio", "Ex: VOTORANTIM")}
-          {renderInput("Nº Confrontante", "numero_confrontante", "Ex: 0001/26")}
-        </View>
-
-        <View
-          style={[
-            styles.section,
-            { backgroundColor: theme.backgroundDefault, borderColor: theme.border },
-          ]}
-        >
-          <ThemedText style={styles.sectionTitle}>
-            <Feather name="user" size={18} /> Proprietário
-          </ThemedText>
-          {renderInput("Proprietário *", "proprietario", "Nome do proprietário")}
-          {renderInput("Loteamento / Condomínio", "loteamento_condominio", "Nome do loteamento")}
-          {renderSelect("Comodatário", "comodatario", SIM_NAO_OPTIONS)}
-          {renderSelect("Contrato Vigente", "contrato_vigente", SIM_NAO_OPTIONS)}
-        </View>
-
-        <View
-          style={[
-            styles.section,
-            { backgroundColor: theme.backgroundDefault, borderColor: theme.border },
-          ]}
-        >
-          <ThemedText style={styles.sectionTitle}>
-            <Feather name="clipboard" size={18} /> Inspeção
-          </ThemedText>
-          {renderSelect("Tipo de Inspeção", "tipo_inspecao", TIPO_INSPECAO_OPTIONS)}
+          {renderInput("Localização", "localizacao", "Descrição da localização")}
+          {renderInput("Município", "municipio", "Ex: Ibiúna")}
+          {renderInput("UF", "uf", "Ex: SP")}
+          {renderInput("Setor", "setor", "Ex: 13")}
           <DatePickerField
-            label="Data da Vistoria"
+            label="Data"
             value={formData.data_vistoria}
             onChange={(date) => updateField("data_vistoria", date)}
           />
+          {renderInput("Número da Notificação", "numero_notificacao", "Ex: RO-NOT-ITU-2025.12.16")}
+        </View>
+
+        <View
+          style={[
+            styles.section,
+            { backgroundColor: theme.backgroundDefault, borderColor: theme.border },
+          ]}
+        >
+          <ThemedText style={styles.sectionTitle}>
+            <Feather name="user" size={18} /> 02 – Identificação Proprietário
+          </ThemedText>
+          {renderInput("Proprietário / Caseiro *", "proprietario", "Nome do proprietário ou caseiro")}
+        </View>
+
+        <View
+          style={[
+            styles.section,
+            { backgroundColor: theme.backgroundDefault, borderColor: theme.border },
+          ]}
+        >
+          <ThemedText style={styles.sectionTitle}>
+            <Feather name="layers" size={18} /> 03 – Usos Encontrados
+          </ThemedText>
+          <ThemedText style={[styles.subLabel, { marginTop: 0 }]}>
+            Marque os usos identificados e informe as quantidades
+          </ThemedText>
+          
+          <View style={styles.usosSoloGrid}>
+            {usosSolo.map((uso, index) => (
+              <View key={uso.tipo} style={styles.usoSoloItem}>
+                <Pressable
+                  onPress={() => toggleUsoSolo(index)}
+                  style={[
+                    styles.usoSoloCheck,
+                    {
+                      backgroundColor: uso.checked ? Colors.light.primary : theme.backgroundDefault,
+                      borderColor: uso.checked ? Colors.light.primary : theme.border,
+                    },
+                  ]}
+                >
+                  {uso.checked ? (
+                    <Feather name="check" size={14} color="#FFFFFF" />
+                  ) : null}
+                </Pressable>
+                <View style={styles.usoSoloContent}>
+                  <ThemedText style={styles.usoSoloLabel}>
+                    {uso.tipo} {uso.unidade ? `(${uso.unidade})` : ""}
+                  </ThemedText>
+                  {uso.checked && uso.unidade ? (
+                    <TextInput
+                      style={[
+                        styles.usoSoloInput,
+                        {
+                          backgroundColor: theme.backgroundDefault,
+                          borderColor: theme.border,
+                          color: theme.text,
+                        },
+                      ]}
+                      placeholder="Quantidade"
+                      placeholderTextColor={theme.tabIconDefault}
+                      value={uso.valor}
+                      onChangeText={(v) => updateUsoSoloValor(index, v)}
+                      keyboardType="numeric"
+                    />
+                  ) : null}
+                </View>
+              </View>
+            ))}
+          </View>
+
+          {renderInput("Observação (usos)", "observacoes_usos", "Observações sobre os usos encontrados...", { multiline: true })}
         </View>
 
         <View
@@ -978,6 +1077,44 @@ const styles = StyleSheet.create({
   noPhotos: {
     alignItems: "center",
     paddingVertical: Spacing["3xl"],
+  },
+  usosSoloGrid: {
+    marginTop: Spacing.md,
+    marginBottom: Spacing.lg,
+  },
+  usoSoloItem: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: Spacing.sm,
+    paddingVertical: Spacing.xs,
+  },
+  usoSoloCheck: {
+    width: 24,
+    height: 24,
+    borderRadius: BorderRadius.sm,
+    borderWidth: 2,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: Spacing.sm,
+  },
+  usoSoloContent: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: Spacing.sm,
+  },
+  usoSoloLabel: {
+    fontSize: 14,
+    minWidth: 150,
+  },
+  usoSoloInput: {
+    borderWidth: 1,
+    borderRadius: BorderRadius.sm,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
+    fontSize: 14,
+    width: 100,
   },
   submitButton: {
     flexDirection: "row",
