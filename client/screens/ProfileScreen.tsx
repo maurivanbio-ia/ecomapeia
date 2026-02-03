@@ -13,6 +13,10 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { ProfileStackParamList } from "@/navigation/ProfileStackNavigator";
+import { getApiUrl } from "@/lib/query-client";
 
 import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollViewCompat";
 import { ThemedText } from "@/components/ThemedText";
@@ -33,6 +37,15 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 const BIOMETRIC_ENABLED_KEY = "@mapeia_biometric_enabled";
 
+type ProfileNavigationProp = NativeStackNavigationProp<ProfileStackParamList>;
+
+interface TenantData {
+  empresa: { id: number; nome: string; cnpj: string | null } | null;
+  projetoAtual: { id: number; nome: string; codigo: string | null } | null;
+  projetosDisponiveis: any[];
+  isAdmin: boolean;
+}
+
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
@@ -41,6 +54,7 @@ export default function ProfileScreen() {
   const { themeMode, setThemeMode } = useThemeContext();
   const { user, logout } = useAuth();
   const { language, setLanguage, t } = useLanguage();
+  const navigation = useNavigation<ProfileNavigationProp>();
 
   const [languageModalVisible, setLanguageModalVisible] = useState(false);
   const [aboutModalVisible, setAboutModalVisible] = useState(false);
@@ -57,6 +71,18 @@ export default function ProfileScreen() {
 
   const { data: vistorias = [] } = useQuery<any[]>({
     queryKey: [`/api/vistorias?usuario_id=${user?.id}`],
+    enabled: !!user?.id,
+  });
+
+  const { data: tenantData } = useQuery<TenantData>({
+    queryKey: ["/api/tenant/usuarios", user?.id, "tenant"],
+    queryFn: async () => {
+      const response = await fetch(
+        new URL(`/api/tenant/usuarios/${user?.id}/tenant`, getApiUrl()).toString()
+      );
+      if (!response.ok) throw new Error("Failed to fetch tenant data");
+      return response.json();
+    },
     enabled: !!user?.id,
   });
 
@@ -250,6 +276,40 @@ export default function ProfileScreen() {
               {user?.tipo_usuario || "Fiscal"}
             </ThemedText>
           </View>
+        </Animated.View>
+
+        {/* Empresa & Projeto Card */}
+        <Animated.View entering={FadeInDown.duration(500).delay(150)}>
+          <Pressable
+            style={[styles.tenantCard, { backgroundColor: theme.backgroundDefault, borderColor: Colors.light.primary }]}
+            onPress={() => {
+              Haptics.selectionAsync();
+              navigation.navigate("SelecionarProjeto");
+            }}
+          >
+            <View style={styles.tenantCardContent}>
+              <View style={[styles.tenantIcon, { backgroundColor: Colors.light.primary }]}>
+                <Feather name="briefcase" size={20} color="#fff" />
+              </View>
+              <View style={styles.tenantInfo}>
+                {tenantData?.empresa ? (
+                  <>
+                    <ThemedText style={styles.tenantEmpresaNome}>
+                      {tenantData.empresa.nome}
+                    </ThemedText>
+                    <ThemedText style={[styles.tenantProjetoNome, { color: theme.tabIconDefault }]}>
+                      {tenantData.projetoAtual?.nome || "Nenhum projeto selecionado"}
+                    </ThemedText>
+                  </>
+                ) : (
+                  <ThemedText style={styles.tenantEmpresaNome}>
+                    Selecionar Empresa/Projeto
+                  </ThemedText>
+                )}
+              </View>
+            </View>
+            <Feather name="chevron-right" size={20} color={theme.tabIconDefault} />
+          </Pressable>
         </Animated.View>
 
         {/* Appearance Settings */}
@@ -1075,5 +1135,38 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: "#FFFFFF",
+  },
+  tenantCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.lg,
+    marginBottom: Spacing.xl,
+    borderLeftWidth: 4,
+  },
+  tenantCardContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
+  tenantIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: BorderRadius.md,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  tenantInfo: {
+    flex: 1,
+    marginLeft: Spacing.md,
+  },
+  tenantEmpresaNome: {
+    fontSize: 15,
+    fontWeight: "600",
+  },
+  tenantProjetoNome: {
+    fontSize: 13,
+    marginTop: 2,
   },
 });

@@ -100,10 +100,11 @@ export default function LoginScreen() {
               Bem-vindo ao
             </ThemedText>
             
-            {/* MapeIA with colors */}
+            {/* EcoMapeIA with colors */}
             <View style={styles.logoTextContainer}>
+              <Text style={styles.logoTextGreen}>Eco</Text>
               <Text style={styles.logoTextBlue}>Mape</Text>
-              <Text style={styles.logoTextGreen}>IA</Text>
+              <Text style={styles.logoTextPurple}>IA</Text>
             </View>
             
             <ThemedText
@@ -287,7 +288,7 @@ const styles = StyleSheet.create({
   logoTextBlue: {
     fontSize: 48,
     fontWeight: "800",
-    color: "#1E3A5F",
+    color: "#3b82f6",
     textShadowColor: "rgba(255,255,255,0.3)",
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
@@ -295,7 +296,15 @@ const styles = StyleSheet.create({
   logoTextGreen: {
     fontSize: 48,
     fontWeight: "800",
-    color: "#8DC63F",
+    color: "#22c55e",
+    textShadowColor: "rgba(0,0,0,0.3)",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
+  },
+  logoTextPurple: {
+    fontSize: 48,
+    fontWeight: "800",
+    color: "#8b5cf6",
     textShadowColor: "rgba(0,0,0,0.3)",
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
