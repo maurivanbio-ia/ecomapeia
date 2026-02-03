@@ -30,6 +30,45 @@ interface RouteParams {
   vistoriaId: string;
 }
 
+interface WeatherData {
+  temperatura?: number;
+  umidade?: number;
+  condicoes?: string;
+  velocidade_vento?: number;
+  direcao_vento?: string;
+  nebulosidade?: number;
+}
+
+interface VistoriaData {
+  id: string;
+  numero_notificacao?: string;
+  setor?: string;
+  margem?: string;
+  municipio?: string;
+  uf?: string;
+  proprietario?: string;
+  loteamento_condominio?: string;
+  tipo_inspecao?: string;
+  data_vistoria?: string;
+  hora_vistoria?: string;
+  zona_utm?: string;
+  tipo_intervencao?: string;
+  intervencao?: string;
+  detalhamento_intervencao?: string;
+  observacoes?: string;
+  status_upload?: string;
+  coordenadas_utm?: Array<{ e: string; n: string }>;
+  coordenadas?: Array<{ latitude: number; longitude: number; ordem: number }>;
+  usosSolo?: Array<{ tipo: string; valor?: string; unidade?: string }>;
+  fotos?: Array<{ uri: string; legenda?: string }>;
+  carInfo?: any;
+  embargoCheck?: any;
+  complianceAnalysis?: any;
+  horaVistoria?: string;
+  weatherData?: WeatherData;
+  weather_data?: WeatherData;
+}
+
 interface LatLng {
   latitude: number;
   longitude: number;
@@ -93,7 +132,7 @@ export default function DetalhesVistoriaScreen() {
   const [mapImageUri, setMapImageUri] = useState<string | null>(null);
   const [showMapBiomasModal, setShowMapBiomasModal] = useState(false);
 
-  const { data: vistoria, isLoading } = useQuery({
+  const { data: vistoria, isLoading } = useQuery<VistoriaData>({
     queryKey: [`/api/vistorias/${vistoriaId}`],
   });
 

@@ -1176,6 +1176,21 @@ export default function NovaVistoriaScreen() {
             </View>
           ) : null}
 
+          {polygonCoordinates.length > 0 ? (
+            <TouchableOpacity
+              style={[styles.mapBiomasButton, { backgroundColor: "#4caf50" }]}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                navigation.navigate("MapBiomas" as never);
+              }}
+            >
+              <Feather name="globe" size={18} color="#fff" />
+              <ThemedText style={styles.complianceButtonText}>
+                Consultar Alertas MapBiomas
+              </ThemedText>
+            </TouchableOpacity>
+          ) : null}
+
           {embargoCheck && polygonCoordinates.length > 0 && !loadingCompliance ? (
             <TouchableOpacity
               style={[styles.complianceButton, { backgroundColor: theme.primary }]}
@@ -1729,6 +1744,16 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   complianceButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    borderRadius: BorderRadius.md,
+    marginTop: Spacing.md,
+    gap: Spacing.sm,
+  },
+  mapBiomasButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
