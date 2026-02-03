@@ -275,6 +275,188 @@ router.get("/summary", async (req: Request, res: Response) => {
   }
 });
 
+router.post("/search-by-car", async (req: Request, res: Response) => {
+  try {
+    const { carCode } = req.body;
+    const token = process.env.MAPBIOMAS_API_TOKEN;
+
+    if (!token) {
+      return res.status(400).json({ 
+        error: "Token da API MapBiomas não configurado" 
+      });
+    }
+
+    if (!carCode) {
+      return res.status(400).json({ 
+        error: "Forneça o código CAR (carCode)" 
+      });
+    }
+
+    const query = `
+      query AlertsByCar($carCode: String!) {
+        alertsByCarCode(carCode: $carCode) {
+          alertCode
+          detectedAt
+          publishedAt
+          areaHa
+          sources
+          statusName
+          crossedBiomes
+          crossedStates
+          crossedCities
+          ruralPropertiesTotal
+          ruralPropertiesCodes
+          crossedLegalReservesTotal
+          crossedLegalReservesArea
+          crossedPermanentProtectedAreaTotal
+        }
+      }
+    `;
+
+    const response = await fetch(MAPBIOMAS_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({ query, variables: { carCode } })
+    });
+
+    const data = await response.json();
+
+    if (data.errors) {
+      console.log("MapBiomas CAR search not available, trying alternative approach");
+      return res.json({
+        success: true,
+        alerts: [],
+        message: "Busca por CAR não disponível na API. Use o código do alerta."
+      });
+    }
+
+    const alerts = data.data?.alertsByCarCode || [];
+    const formattedAlerts = alerts.map((alert: any) => ({
+      alertCode: alert.alertCode,
+      detectedAt: alert.detectedAt,
+      publishedAt: alert.publishedAt,
+      areaHa: alert.areaHa,
+      statusName: alert.statusName,
+      biome: alert.crossedBiomes?.[0] || "N/A",
+      state: alert.crossedStates?.[0] || "N/A",
+      city: alert.crossedCities?.[0] || "N/A",
+      source: alert.sources?.[0] || "MapBiomas",
+      ruralPropertiesTotal: alert.ruralPropertiesTotal || 0,
+      legalReservesTotal: alert.crossedLegalReservesTotal || 0,
+      appTotal: alert.crossedPermanentProtectedAreaTotal || 0
+    }));
+
+    res.json({
+      success: true,
+      alerts: formattedAlerts,
+      total: formattedAlerts.length
+    });
+
+  } catch (error) {
+    console.error("Error searching by CAR:", error);
+    res.status(500).json({ error: "Falha ao buscar alertas por CAR" });
+  }
+});
+
+router.post("/search-by-municipality", async (req: Request, res: Response) => {
+  try {
+    const { municipio, limit } = req.body;
+    const token = process.env.MAPBIOMAS_API_TOKEN;
+
+    if (!token) {
+      return res.status(400).json({ 
+        error: "Token da API MapBiomas não configurado" 
+      });
+    }
+
+    if (!municipio) {
+      return res.status(400).json({ 
+        error: "Forneça o nome do município" 
+      });
+    }
+
+    const query = `
+      query AlertsByMunicipality($municipio: String, $limit: Int) {
+        publishedAlerts(
+          filters: {
+            city: $municipio
+          }
+          limit: $limit
+        ) {
+          data {
+            alertCode
+            detectedAt
+            publishedAt
+            areaHa
+            sources
+            statusName
+            crossedBiomes
+            crossedStates
+            crossedCities
+            ruralPropertiesTotal
+            ruralPropertiesCodes
+            crossedLegalReservesTotal
+            crossedLegalReservesArea
+            crossedPermanentProtectedAreaTotal
+          }
+          total
+        }
+      }
+    `;
+
+    const response = await fetch(MAPBIOMAS_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({ query, variables: { municipio, limit: limit || 20 } })
+    });
+
+    const data = await response.json();
+
+    if (data.errors) {
+      console.log("MapBiomas municipality search error:", data.errors);
+      return res.json({
+        success: true,
+        alerts: [],
+        message: "Não foi possível buscar alertas por município"
+      });
+    }
+
+    const alertsData = data.data?.publishedAlerts;
+    const alerts = alertsData?.data || [];
+    
+    const formattedAlerts = alerts.map((alert: any) => ({
+      alertCode: alert.alertCode,
+      detectedAt: alert.detectedAt,
+      publishedAt: alert.publishedAt,
+      areaHa: alert.areaHa,
+      statusName: alert.statusName,
+      biome: alert.crossedBiomes?.[0] || "N/A",
+      state: alert.crossedStates?.[0] || "N/A",
+      city: alert.crossedCities?.[0] || "N/A",
+      source: alert.sources?.[0] || "MapBiomas",
+      ruralPropertiesTotal: alert.ruralPropertiesTotal || 0,
+      legalReservesTotal: alert.crossedLegalReservesTotal || 0,
+      appTotal: alert.crossedPermanentProtectedAreaTotal || 0
+    }));
+
+    res.json({
+      success: true,
+      alerts: formattedAlerts,
+      total: alertsData?.total || formattedAlerts.length
+    });
+
+  } catch (error) {
+    console.error("Error searching by municipality:", error);
+    res.status(500).json({ error: "Falha ao buscar alertas por município" });
+  }
+});
+
 router.post("/search", async (req: Request, res: Response) => {
   try {
     const { alertCode } = req.body;

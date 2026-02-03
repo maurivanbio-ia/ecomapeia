@@ -57,6 +57,38 @@ export async function searchAlert(alertCode: number): Promise<MapBiomasAlert | n
   return data.alert;
 }
 
+export async function searchAlertsByCAR(carCode: string): Promise<MapBiomasAlert[]> {
+  const response = await fetch(new URL("/api/mapbiomas/search-by-car", API_BASE).toString(), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ carCode }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || error.error || "Falha ao buscar alertas por CAR");
+  }
+
+  const data = await response.json();
+  return data.alerts || [];
+}
+
+export async function searchAlertsByMunicipality(municipio: string, limit?: number): Promise<MapBiomasAlert[]> {
+  const response = await fetch(new URL("/api/mapbiomas/search-by-municipality", API_BASE).toString(), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ municipio, limit: limit || 20 }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || error.error || "Falha ao buscar alertas por município");
+  }
+
+  const data = await response.json();
+  return data.alerts || [];
+}
+
 export function getBiomeColor(biome: string): string {
   const colors: Record<string, string> = {
     "Amazônia": "#2E7D32",
