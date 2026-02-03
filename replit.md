@@ -104,9 +104,12 @@ Preferred communication style: Simple, everyday language.
 
 **Mobile/UI:**
 - expo-image - Optimized image loading
+- expo-image-picker - Camera and gallery photo capture
 - expo-haptics - Tactile feedback
 - react-native-reanimated - Smooth animations
 - react-native-gesture-handler - Touch gestures
+- react-native-maps - Polygon visualization on satellite maps (native only)
+- react-native-view-shot - Map screenshot capture
 - @expo/vector-icons (Feather) - Icon system
 
 **Data & Networking:**
@@ -137,9 +140,28 @@ Preferred communication style: Simple, everyday language.
 - `server/replit_integrations/image/` - Image generation routes
 - `server/replit_integrations/audio/` - Audio/voice capabilities (optional)
 
-### Future Integrations (Planned per design docs)
+### Implemented Features
 
-- Map/polygon generation from coordinates
+**Photo Capture & Management:**
+- Camera capture with expo-image-picker
+- Gallery selection (multiple photos support)
+- Photo captions/legends for each image
+- Thumbnail preview with delete functionality
+
+**UTM Polygon Mapping:**
+- Multiple UTM coordinate point collection
+- UTM to Lat/Long conversion (zone 23K for São Paulo region)
+- Polygon visualization on satellite map (native only via react-native-maps)
+- Map screenshot capture for documentation
+- Web fallback shows point count with Expo Go instructions
+
+**Components:**
+- `MapPolygonView` - Platform-aware polygon display
+  - `MapPolygonView.tsx` - Native version with react-native-maps
+  - `MapPolygonView.web.tsx` - Web fallback with Expo Go guidance
+
+### Future Integrations (Planned)
+
 - PDF report generation matching existing templates
 - Photo storage with cloud upload
 - Offline-first data sync system
