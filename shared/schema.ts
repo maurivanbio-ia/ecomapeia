@@ -1,7 +1,71 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, real, date, timestamp, serial, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, real, date, timestamp, serial, jsonb, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+
+// ==========================================
+// MULTI-TENANT ARCHITECTURE - Empresas e Projetos
+// ==========================================
+
+// Empresas (Companies) table
+export const empresas = pgTable("empresas", {
+  id: serial("id").primaryKey(),
+  nome: text("nome").notNull(),
+  cnpj: text("cnpj").unique(),
+  logo_url: text("logo_url"),
+  cor_primaria: text("cor_primaria").default("#2563eb"),
+  cor_secundaria: text("cor_secundaria").default("#16a34a"),
+  endereco: text("endereco"),
+  telefone: text("telefone"),
+  email_contato: text("email_contato"),
+  ativa: boolean("ativa").default(true),
+  created_at: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+});
+
+export const insertEmpresaSchema = createInsertSchema(empresas).pick({
+  nome: true,
+  cnpj: true,
+  logo_url: true,
+  cor_primaria: true,
+  cor_secundaria: true,
+  endereco: true,
+  telefone: true,
+  email_contato: true,
+});
+
+export type InsertEmpresa = z.infer<typeof insertEmpresaSchema>;
+export type Empresa = typeof empresas.$inferSelect;
+
+// Projetos (Projects) table - cada projeto pertence a uma empresa
+export const projetos = pgTable("projetos", {
+  id: serial("id").primaryKey(),
+  empresa_id: integer("empresa_id").references(() => empresas.id).notNull(),
+  nome: text("nome").notNull(),
+  descricao: text("descricao"),
+  codigo: text("codigo"), // Ex: "UHE-ITP", "UHE-JRM"
+  localizacao: text("localizacao"),
+  area_km2: real("area_km2"),
+  reservatorio: text("reservatorio"), // Nome do reservatório
+  rio_principal: text("rio_principal"),
+  municipios: text("municipios"), // Lista de municípios
+  ativo: boolean("ativo").default(true),
+  created_at: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+});
+
+export const insertProjetoSchema = createInsertSchema(projetos).pick({
+  empresa_id: true,
+  nome: true,
+  descricao: true,
+  codigo: true,
+  localizacao: true,
+  area_km2: true,
+  reservatorio: true,
+  rio_principal: true,
+  municipios: true,
+});
+
+export type InsertProjeto = z.infer<typeof insertProjetoSchema>;
+export type Projeto = typeof projetos.$inferSelect;
 
 // AI Chat - Conversations table
 export const conversations = pgTable("conversations", {
@@ -35,7 +99,7 @@ export const insertMessageSchema = createInsertSchema(messages).omit({
 export type Message = typeof messages.$inferSelect;
 export type InsertMessage = z.infer<typeof insertMessageSchema>;
 
-// Usuario table
+// Usuario table - com vinculação à empresa
 export const usuarios = pgTable("usuarios", {
   id: varchar("id")
     .primaryKey()
@@ -44,6 +108,9 @@ export const usuarios = pgTable("usuarios", {
   email: text("email").notNull().unique(),
   tipo_usuario: text("tipo_usuario").notNull().default("Fiscal"),
   senha_hash: text("senha_hash").notNull(),
+  empresa_id: integer("empresa_id").references(() => empresas.id),
+  is_admin: boolean("is_admin").default(false), // Admin pode gerenciar múltiplas empresas
+  projeto_atual_id: integer("projeto_atual_id").references(() => projetos.id), // Projeto atualmente selecionado
   created_at: timestamp("created_at").defaultNow(),
 });
 
@@ -52,6 +119,8 @@ export const insertUsuarioSchema = createInsertSchema(usuarios).pick({
   email: true,
   tipo_usuario: true,
   senha_hash: true,
+  empresa_id: true,
+  is_admin: true,
 });
 
 export type InsertUsuario = z.infer<typeof insertUsuarioSchema>;
@@ -63,6 +132,7 @@ export const vistorias = pgTable("vistorias", {
     .primaryKey()
     .default(sql`gen_random_uuid()`),
   usuario_id: varchar("usuario_id").notNull().references(() => usuarios.id),
+  projeto_id: integer("projeto_id").references(() => projetos.id), // Vinculação ao projeto
   numero_notificacao: text("numero_notificacao"),
   setor: text("setor"),
   margem: text("margem"),
@@ -107,6 +177,7 @@ export const vistorias = pgTable("vistorias", {
 
 export const insertVistoriaSchema = createInsertSchema(vistorias).pick({
   usuario_id: true,
+  projeto_id: true,
   numero_notificacao: true,
   setor: true,
   margem: true,
@@ -226,9 +297,11 @@ export const registerSchema = z.object({
 
 export type RegisterInput = z.infer<typeof registerSchema>;
 
-// Teams table for team management
+// Teams table for team management - vinculada à empresa
 export const equipes = pgTable("equipes", {
   id: serial("id").primaryKey(),
+  empresa_id: integer("empresa_id").references(() => empresas.id),
+  projeto_id: integer("projeto_id").references(() => projetos.id),
   nome: text("nome").notNull(),
   descricao: text("descricao"),
   responsavel_id: varchar("responsavel_id").references(() => usuarios.id),
@@ -236,6 +309,8 @@ export const equipes = pgTable("equipes", {
 });
 
 export const insertEquipeSchema = createInsertSchema(equipes).pick({
+  empresa_id: true,
+  projeto_id: true,
   nome: true,
   descricao: true,
   responsavel_id: true,
