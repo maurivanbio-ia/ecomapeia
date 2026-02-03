@@ -43,6 +43,15 @@ interface CARInfo {
   situacao?: string;
 }
 
+interface WeatherData {
+  temperatura?: number;
+  umidade?: number;
+  condicoes?: string;
+  velocidade_vento?: number;
+  direcao_vento?: string;
+  nebulosidade?: number;
+}
+
 interface VistoriaData {
   id: string;
   numero_notificacao?: string;
@@ -55,6 +64,7 @@ interface VistoriaData {
   loteamento_condominio?: string;
   tipo_inspecao: string;
   data_vistoria: string;
+  hora_vistoria?: string;
   zona_utm?: string;
   tipo_intervencao?: string;
   intervencao?: string;
@@ -71,6 +81,7 @@ interface VistoriaData {
   embargoCheck?: EmbargoCheck;
   complianceAnalysis?: ComplianceAnalysis;
   carInfo?: CARInfo;
+  weather_data?: WeatherData;
 }
 
 function getCBALogoBase64(): string {
@@ -341,11 +352,38 @@ function generatePDFHTML(vistoria: VistoriaData): string {
           <td>${vistoria.setor || "-"}</td>
           <td><strong>Data:</strong></td>
           <td>${formatDate(vistoria.data_vistoria)}</td>
-          <td colspan="2"></td>
+          <td><strong>Horário:</strong></td>
+          <td>${vistoria.hora_vistoria || "-"}</td>
         </tr>
       </table>
     </div>
   </div>
+
+  ${vistoria.weather_data ? `
+  <div class="section">
+    <div class="section-header">CONDIÇÕES CLIMÁTICAS NO MOMENTO DA VISTORIA</div>
+    <div class="section-content">
+      <table>
+        <tr>
+          <td style="width: 20%;"><strong>Temperatura:</strong></td>
+          <td style="width: 13%;">${vistoria.weather_data.temperatura?.toFixed(1) || "-"}°C</td>
+          <td style="width: 17%;"><strong>Umidade Relativa:</strong></td>
+          <td style="width: 13%;">${vistoria.weather_data.umidade || "-"}%</td>
+          <td style="width: 17%;"><strong>Nebulosidade:</strong></td>
+          <td style="width: 20%;">${vistoria.weather_data.nebulosidade || "-"}%</td>
+        </tr>
+        <tr>
+          <td><strong>Vento:</strong></td>
+          <td>${vistoria.weather_data.velocidade_vento?.toFixed(1) || "-"} km/h</td>
+          <td><strong>Direção:</strong></td>
+          <td>${vistoria.weather_data.direcao_vento || "-"}</td>
+          <td><strong>Condição:</strong></td>
+          <td>${vistoria.weather_data.condicoes || "-"}</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+  ` : ""}
 
   <div class="section">
     <div class="section-header">02 – IDENTIFICAÇÃO PROPRIETÁRIO</div>

@@ -569,14 +569,19 @@ export default function NovaVistoriaScreen() {
       );
       if (response.ok) {
         const data = await response.json();
-        setWeatherData({
-          temperatura: data.temperatura,
-          umidade: data.umidade,
-          condicoes: data.condicoes,
-          velocidadeVento: data.velocidadeVento,
-          direcaoVento: data.direcaoVento,
-          nebulosidade: data.nebulosidade,
-        });
+        if (data.success && data.weather) {
+          const w = data.weather;
+          const windDirections = ["N", "NE", "L", "SE", "S", "SO", "O", "NO"];
+          const windIndex = Math.round((w.windSpeed % 360) / 45) % 8;
+          setWeatherData({
+            temperatura: w.temperature,
+            umidade: w.humidity,
+            condicoes: w.description,
+            velocidadeVento: w.windSpeed,
+            direcaoVento: windDirections[windIndex] || "N",
+            nebulosidade: w.cloudCover,
+          });
+        }
       }
     } catch (error) {
       console.error("Error fetching weather:", error);

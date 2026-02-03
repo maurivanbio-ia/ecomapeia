@@ -16,9 +16,9 @@ interface WeatherData {
   icon: string;
 }
 
-router.post("/weather", async (req: Request, res: Response) => {
+router.get("/weather", async (req: Request, res: Response) => {
   try {
-    const { latitude, longitude } = req.body;
+    const { latitude, longitude } = req.query;
 
     if (!latitude || !longitude) {
       return res.status(400).json({
