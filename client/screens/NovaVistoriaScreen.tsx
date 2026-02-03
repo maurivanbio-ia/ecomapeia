@@ -599,36 +599,49 @@ export default function NovaVistoriaScreen() {
         return;
       }
 
-      const captureTime = new Date();
-      updateField("hora_vistoria", captureTime.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }));
-
       const utm = await captureCurrentUTM();
       if (utm) {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         updateField("zona_utm", `${utm.zone}${utm.zoneLetter}`);
-        setUtmPoints((prev) => [
-          ...prev,
-          {
-            id: Date.now().toString(),
+        
+        const isFirstCapture = utmPoints.length === 1 && utmPoints[0].e === "" && utmPoints[0].n === "";
+        
+        if (isFirstCapture) {
+          const captureTime = new Date();
+          updateField("hora_vistoria", captureTime.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }));
+          
+          setUtmPoints([{
+            id: "1",
             e: utm.easting.toFixed(2),
             n: utm.northing.toFixed(2),
-          },
-        ]);
+          }]);
 
-        const lat = utm.latitude;
-        const lng = utm.longitude;
-        
-        if (lat && lng) {
-          fetchCARByCoordinates(lat, lng);
-          fetchUCByCoordinates(lat, lng);
-          checkEmbargoByCoordinates(lat, lng, carInfo?.carCode);
-          fetchWeatherByCoordinates(lat, lng);
-          Alert.alert(
-            "Coordenada Capturada",
-            `E: ${utm.easting.toFixed(2)}\nN: ${utm.northing.toFixed(2)}\n\nAnalisando dados ambientais e clima...`
-          );
+          const lat = utm.latitude;
+          const lng = utm.longitude;
+          
+          if (lat && lng) {
+            fetchCARByCoordinates(lat, lng);
+            fetchUCByCoordinates(lat, lng);
+            checkEmbargoByCoordinates(lat, lng, carInfo?.carCode);
+            fetchWeatherByCoordinates(lat, lng);
+            Alert.alert(
+              "Primeira Coordenada Capturada",
+              `E: ${utm.easting.toFixed(2)}\nN: ${utm.northing.toFixed(2)}\n\nAnalisando dados ambientais e clima...`
+            );
+          }
         } else {
-          Alert.alert("Sucesso", `Coordenada capturada!\nE: ${utm.easting.toFixed(2)}\nN: ${utm.northing.toFixed(2)}`);
+          setUtmPoints((prev) => [
+            ...prev,
+            {
+              id: Date.now().toString(),
+              e: utm.easting.toFixed(2),
+              n: utm.northing.toFixed(2),
+            },
+          ]);
+          Alert.alert(
+            `Coordenada ${utmPoints.length + 1} Capturada`,
+            `E: ${utm.easting.toFixed(2)}\nN: ${utm.northing.toFixed(2)}`
+          );
         }
       } else {
         Alert.alert("Erro", "Não foi possível obter a localização atual.");
