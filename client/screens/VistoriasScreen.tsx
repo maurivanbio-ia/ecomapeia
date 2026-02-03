@@ -18,30 +18,52 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useQuery } from "@tanstack/react-query";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { useTheme } from "@/hooks/useTheme";
+import { useAuth } from "@/hooks/useAuth";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
+import { VistoriasStackParamList } from "@/navigation/VistoriasStackNavigator";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+type NavigationProp = NativeStackNavigationProp<VistoriasStackParamList>;
+
+interface Vistoria {
+  id: string;
+  proprietario: string;
+  municipio: string;
+  data_vistoria: string;
+  tipo_intervencao: string;
+  status_upload: string;
+}
 
 export default function VistoriasScreen() {
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
   const tabBarHeight = useBottomTabBarHeight();
   const { theme } = useTheme();
-  const [refreshing, setRefreshing] = useState(false);
+  const { user } = useAuth();
+  const navigation = useNavigation<NavigationProp>();
   const [searchQuery, setSearchQuery] = useState("");
-  const [vistorias] = useState<any[]>([]);
 
-  const onRefresh = React.useCallback(() => {
-    setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 1000);
-  }, []);
+  const { data: vistorias = [], isLoading, refetch, isRefetching } = useQuery<Vistoria[]>({
+    queryKey: ["/api/vistorias", { usuario_id: user?.id }],
+    enabled: !!user?.id,
+  });
+
+  const filteredVistorias = vistorias.filter((v) =>
+    v.proprietario?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    v.municipio?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleNewVistoria = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    navigation.navigate("NovaVistoria");
   };
 
   const renderEmptyState = () => (
@@ -49,7 +71,7 @@ export default function VistoriasScreen() {
       entering={FadeIn.duration(400)}
       style={[styles.emptyState, { backgroundColor: theme.backgroundDefault }]}
     >
-      <Feather name="search" size={56} color={theme.tabIconDefault} />
+      <Feather name="clipboard" size={56} color={theme.tabIconDefault} />
       <ThemedText style={styles.emptyTitle}>
         Nenhuma vistoria encontrada
       </ThemedText>
@@ -58,14 +80,78 @@ export default function VistoriasScreen() {
         lightColor={Colors.light.textSecondary}
         darkColor={Colors.dark.textSecondary}
       >
-        Crie sua primeira vistoria para começar
+        Toque no botão + para criar sua primeira vistoria
       </ThemedText>
+    </Animated.View>
+  );
+
+  const renderVistoriaItem = ({ item }: { item: Vistoria }) => (
+    <Animated.View entering={FadeIn.duration(300)}>
+      <Pressable
+        style={[
+          styles.vistoriaCard,
+          { backgroundColor: theme.backgroundDefault, borderColor: theme.border },
+        ]}
+        onPress={() => {
+          Haptics.selectionAsync();
+        }}
+      >
+        <View style={styles.cardHeader}>
+          <View style={styles.cardTitleRow}>
+            <Feather name="user" size={16} color={Colors.light.primary} />
+            <ThemedText style={styles.cardTitle} numberOfLines={1}>
+              {item.proprietario}
+            </ThemedText>
+          </View>
+          <View
+            style={[
+              styles.statusBadge,
+              {
+                backgroundColor:
+                  item.status_upload === "synced"
+                    ? Colors.light.accent
+                    : "#FFA500",
+              },
+            ]}
+          >
+            <Feather
+              name={item.status_upload === "synced" ? "check-circle" : "clock"}
+              size={12}
+              color="#FFFFFF"
+            />
+          </View>
+        </View>
+
+        <View style={styles.cardBody}>
+          {item.municipio ? (
+            <View style={styles.cardRow}>
+              <Feather name="map-pin" size={14} color={theme.tabIconDefault} />
+              <ThemedText style={styles.cardText}>{item.municipio}</ThemedText>
+            </View>
+          ) : null}
+
+          <View style={styles.cardRow}>
+            <Feather name="calendar" size={14} color={theme.tabIconDefault} />
+            <ThemedText style={styles.cardText}>
+              {new Date(item.data_vistoria).toLocaleDateString("pt-BR")}
+            </ThemedText>
+          </View>
+
+          {item.tipo_intervencao && item.tipo_intervencao !== "NA" ? (
+            <View style={styles.cardRow}>
+              <Feather name="alert-triangle" size={14} color="#FFA500" />
+              <ThemedText style={[styles.cardText, { color: "#FFA500" }]}>
+                {item.tipo_intervencao}
+              </ThemedText>
+            </View>
+          ) : null}
+        </View>
+      </Pressable>
     </Animated.View>
   );
 
   return (
     <ThemedView style={styles.container}>
-      {/* Search Bar */}
       <View
         style={[
           styles.searchContainer,
@@ -98,22 +184,23 @@ export default function VistoriasScreen() {
           {
             paddingBottom: tabBarHeight + Spacing["5xl"],
           },
+          filteredVistorias.length === 0 && { flex: 1 },
         ]}
         scrollIndicatorInsets={{ bottom: insets.bottom }}
-        data={vistorias}
+        data={filteredVistorias}
         keyExtractor={(item) => item.id}
-        renderItem={() => null}
+        renderItem={renderVistoriaItem}
         ListEmptyComponent={renderEmptyState}
         refreshControl={
           <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
+            refreshing={isRefetching}
+            onRefresh={refetch}
             tintColor={theme.link}
           />
         }
+        ItemSeparatorComponent={() => <View style={{ height: Spacing.md }} />}
       />
 
-      {/* FAB */}
       <FAB onPress={handleNewVistoria} tabBarHeight={tabBarHeight} />
     </ThemedView>
   );
@@ -181,7 +268,6 @@ const styles = StyleSheet.create({
   listContent: {
     paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.md,
-    flexGrow: 1,
   },
   emptyState: {
     flex: 1,
@@ -189,7 +275,6 @@ const styles = StyleSheet.create({
     padding: Spacing["4xl"],
     alignItems: "center",
     justifyContent: "center",
-    marginTop: Spacing["4xl"],
   },
   emptyTitle: {
     fontSize: 18,
@@ -200,6 +285,46 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginTop: Spacing.sm,
     textAlign: "center",
+  },
+  vistoriaCard: {
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.lg,
+    borderWidth: 1,
+  },
+  cardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: Spacing.sm,
+  },
+  cardTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+    flex: 1,
+  },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    flex: 1,
+  },
+  statusBadge: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  cardBody: {
+    gap: Spacing.xs,
+  },
+  cardRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+  },
+  cardText: {
+    fontSize: 14,
   },
   fab: {
     position: "absolute",

@@ -1,4 +1,10 @@
+import { db } from "./db";
 import { 
+  usuarios,
+  vistorias,
+  coordenadas,
+  usosSolo,
+  fotos,
   type Usuario, 
   type InsertUsuario,
   type Vistoria,
@@ -10,196 +16,118 @@ import {
   type Foto,
   type InsertFoto
 } from "@shared/schema";
-import { randomUUID } from "crypto";
-import * as bcrypt from "bcryptjs";
+import { eq, desc } from "drizzle-orm";
 
 export interface IStorage {
-  // Usuario
   getUsuario(id: string): Promise<Usuario | undefined>;
   getUsuarioByEmail(email: string): Promise<Usuario | undefined>;
   createUsuario(usuario: InsertUsuario): Promise<Usuario>;
   
-  // Vistoria
   getVistoria(id: string): Promise<Vistoria | undefined>;
   getVistoriasByUsuario(usuarioId: string): Promise<Vistoria[]>;
   createVistoria(vistoria: InsertVistoria): Promise<Vistoria>;
   updateVistoria(id: string, updates: Partial<InsertVistoria>): Promise<Vistoria | undefined>;
   deleteVistoria(id: string): Promise<boolean>;
   
-  // Coordenada
   getCoordenadas(vistoriaId: string): Promise<Coordenada[]>;
   createCoordenada(coordenada: InsertCoordenada): Promise<Coordenada>;
   deleteCoordenadas(vistoriaId: string): Promise<boolean>;
   
-  // UsoSolo
   getUsosSolo(vistoriaId: string): Promise<UsoSolo[]>;
   createUsoSolo(usoSolo: InsertUsoSolo): Promise<UsoSolo>;
   deleteUsosSolo(vistoriaId: string): Promise<boolean>;
   
-  // Foto
   getFotos(vistoriaId: string): Promise<Foto[]>;
   createFoto(foto: InsertFoto): Promise<Foto>;
   deleteFotos(vistoriaId: string): Promise<boolean>;
 }
 
-export class MemStorage implements IStorage {
-  private usuarios: Map<string, Usuario>;
-  private vistorias: Map<string, Vistoria>;
-  private coordenadas: Map<string, Coordenada>;
-  private usosSolo: Map<string, UsoSolo>;
-  private fotos: Map<string, Foto>;
-
-  constructor() {
-    this.usuarios = new Map();
-    this.vistorias = new Map();
-    this.coordenadas = new Map();
-    this.usosSolo = new Map();
-    this.fotos = new Map();
-    
-    this.seedDemoUser();
-  }
-
-  private async seedDemoUser() {
-    const hashedPassword = await bcrypt.hash("123456", 10);
-    const demoUser: Usuario = {
-      id: randomUUID(),
-      nome: "Fiscal Demo",
-      email: "demo@mapeia.com",
-      tipo_usuario: "Fiscal",
-      senha_hash: hashedPassword,
-      created_at: new Date(),
-    };
-    this.usuarios.set(demoUser.id, demoUser);
-  }
-
-  // Usuario methods
+export class DatabaseStorage implements IStorage {
   async getUsuario(id: string): Promise<Usuario | undefined> {
-    return this.usuarios.get(id);
-  }
-
-  async getUsuarioByEmail(email: string): Promise<Usuario | undefined> {
-    return Array.from(this.usuarios.values()).find(
-      (usuario) => usuario.email.toLowerCase() === email.toLowerCase(),
-    );
-  }
-
-  async createUsuario(insertUsuario: InsertUsuario): Promise<Usuario> {
-    const id = randomUUID();
-    const usuario: Usuario = { 
-      ...insertUsuario, 
-      id,
-      created_at: new Date(),
-    };
-    this.usuarios.set(id, usuario);
+    const [usuario] = await db.select().from(usuarios).where(eq(usuarios.id, id));
     return usuario;
   }
 
-  // Vistoria methods
+  async getUsuarioByEmail(email: string): Promise<Usuario | undefined> {
+    const [usuario] = await db.select().from(usuarios).where(eq(usuarios.email, email));
+    return usuario;
+  }
+
+  async createUsuario(insertUsuario: InsertUsuario): Promise<Usuario> {
+    const [usuario] = await db.insert(usuarios).values(insertUsuario).returning();
+    return usuario;
+  }
+
   async getVistoria(id: string): Promise<Vistoria | undefined> {
-    return this.vistorias.get(id);
+    const [vistoria] = await db.select().from(vistorias).where(eq(vistorias.id, id));
+    return vistoria;
   }
 
   async getVistoriasByUsuario(usuarioId: string): Promise<Vistoria[]> {
-    return Array.from(this.vistorias.values())
-      .filter((v) => v.usuario_id === usuarioId)
-      .sort((a, b) => {
-        const dateA = new Date(a.data_vistoria).getTime();
-        const dateB = new Date(b.data_vistoria).getTime();
-        return dateB - dateA;
-      });
+    return db.select().from(vistorias)
+      .where(eq(vistorias.usuario_id, usuarioId))
+      .orderBy(desc(vistorias.created_at));
   }
 
-  async createVistoria(insertVistoria: InsertVistoria): Promise<Vistoria> {
-    const id = randomUUID();
-    const vistoria: Vistoria = {
-      ...insertVistoria,
-      id,
-      created_at: new Date(),
-    };
-    this.vistorias.set(id, vistoria);
+  async createVistoria(vistoriaData: InsertVistoria): Promise<Vistoria> {
+    const [vistoria] = await db.insert(vistorias).values(vistoriaData).returning();
     return vistoria;
   }
 
   async updateVistoria(id: string, updates: Partial<InsertVistoria>): Promise<Vistoria | undefined> {
-    const existing = this.vistorias.get(id);
-    if (!existing) return undefined;
-    
-    const updated: Vistoria = { ...existing, ...updates };
-    this.vistorias.set(id, updated);
-    return updated;
+    const [vistoria] = await db.update(vistorias)
+      .set(updates)
+      .where(eq(vistorias.id, id))
+      .returning();
+    return vistoria;
   }
 
   async deleteVistoria(id: string): Promise<boolean> {
-    return this.vistorias.delete(id);
+    await db.delete(vistorias).where(eq(vistorias.id, id));
+    return true;
   }
 
-  // Coordenada methods
   async getCoordenadas(vistoriaId: string): Promise<Coordenada[]> {
-    return Array.from(this.coordenadas.values())
-      .filter((c) => c.vistoria_id === vistoriaId)
-      .sort((a, b) => a.ordem - b.ordem);
+    return db.select().from(coordenadas).where(eq(coordenadas.vistoria_id, vistoriaId));
   }
 
-  async createCoordenada(insertCoordenada: InsertCoordenada): Promise<Coordenada> {
-    const id = randomUUID();
-    const coordenada: Coordenada = { ...insertCoordenada, id };
-    this.coordenadas.set(id, coordenada);
+  async createCoordenada(coordenadaData: InsertCoordenada): Promise<Coordenada> {
+    const [coordenada] = await db.insert(coordenadas).values(coordenadaData).returning();
     return coordenada;
   }
 
   async deleteCoordenadas(vistoriaId: string): Promise<boolean> {
-    for (const [key, coord] of this.coordenadas) {
-      if (coord.vistoria_id === vistoriaId) {
-        this.coordenadas.delete(key);
-      }
-    }
+    await db.delete(coordenadas).where(eq(coordenadas.vistoria_id, vistoriaId));
     return true;
   }
 
-  // UsoSolo methods
   async getUsosSolo(vistoriaId: string): Promise<UsoSolo[]> {
-    return Array.from(this.usosSolo.values())
-      .filter((u) => u.vistoria_id === vistoriaId);
+    return db.select().from(usosSolo).where(eq(usosSolo.vistoria_id, vistoriaId));
   }
 
-  async createUsoSolo(insertUsoSolo: InsertUsoSolo): Promise<UsoSolo> {
-    const id = randomUUID();
-    const usoSolo: UsoSolo = { ...insertUsoSolo, id };
-    this.usosSolo.set(id, usoSolo);
-    return usoSolo;
+  async createUsoSolo(usoSoloData: InsertUsoSolo): Promise<UsoSolo> {
+    const [uso] = await db.insert(usosSolo).values(usoSoloData).returning();
+    return uso;
   }
 
   async deleteUsosSolo(vistoriaId: string): Promise<boolean> {
-    for (const [key, uso] of this.usosSolo) {
-      if (uso.vistoria_id === vistoriaId) {
-        this.usosSolo.delete(key);
-      }
-    }
+    await db.delete(usosSolo).where(eq(usosSolo.vistoria_id, vistoriaId));
     return true;
   }
 
-  // Foto methods
   async getFotos(vistoriaId: string): Promise<Foto[]> {
-    return Array.from(this.fotos.values())
-      .filter((f) => f.vistoria_id === vistoriaId)
-      .sort((a, b) => a.ordem - b.ordem);
+    return db.select().from(fotos).where(eq(fotos.vistoria_id, vistoriaId));
   }
 
-  async createFoto(insertFoto: InsertFoto): Promise<Foto> {
-    const id = randomUUID();
-    const foto: Foto = { ...insertFoto, id };
-    this.fotos.set(id, foto);
+  async createFoto(fotoData: InsertFoto): Promise<Foto> {
+    const [foto] = await db.insert(fotos).values(fotoData).returning();
     return foto;
   }
 
   async deleteFotos(vistoriaId: string): Promise<boolean> {
-    for (const [key, foto] of this.fotos) {
-      if (foto.vistoria_id === vistoriaId) {
-        this.fotos.delete(key);
-      }
-    }
+    await db.delete(fotos).where(eq(fotos.vistoria_id, vistoriaId));
     return true;
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();

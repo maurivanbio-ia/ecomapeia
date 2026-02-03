@@ -2,10 +2,13 @@ import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import VistoriasScreen from "@/screens/VistoriasScreen";
+import NovaVistoriaScreen from "@/screens/NovaVistoriaScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 
 export type VistoriasStackParamList = {
-  Vistorias: undefined;
+  VistoriasList: undefined;
+  NovaVistoria: undefined;
+  EditarVistoria: { id: string };
 };
 
 const Stack = createNativeStackNavigator<VistoriasStackParamList>();
@@ -16,10 +19,17 @@ export default function VistoriasStackNavigator() {
   return (
     <Stack.Navigator screenOptions={screenOptions}>
       <Stack.Screen
-        name="Vistorias"
+        name="VistoriasList"
         component={VistoriasScreen}
         options={{
           title: "Vistorias",
+        }}
+      />
+      <Stack.Screen
+        name="NovaVistoria"
+        component={NovaVistoriaScreen}
+        options={{
+          title: "Nova Vistoria",
         }}
       />
     </Stack.Navigator>
