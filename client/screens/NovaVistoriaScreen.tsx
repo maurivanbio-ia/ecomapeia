@@ -34,6 +34,7 @@ import SignatureCapture from "@/components/SignatureCapture";
 import { captureCurrentUTM, requestLocationPermission } from "@/lib/gpsUtils";
 import { saveVistoriaOffline } from "@/lib/offlineStorage";
 import { PhotoWatermarkProcessor, getCurrentLocation, createWatermarkData, WatermarkData } from "@/lib/photoWatermark";
+import { useGPSTracking, TrackPoint } from "@/hooks/useGPSTracking";
 
 const MARGEM_OPTIONS = ["DIREITA", "ESQUERDA"];
 const TIPO_INSPECAO_OPTIONS = ["CADASTRAMENTO", "MONITORAMENTO", "FISCALIZAÇÃO"];
@@ -161,6 +162,18 @@ export default function NovaVistoriaScreen() {
   const { user } = useAuth();
   const navigation = useNavigation<NativeStackNavigationProp<VistoriasStackParamList>>();
   const queryClient = useQueryClient();
+
+  const {
+    isTracking,
+    trackPoints,
+    currentLocation,
+    startTracking,
+    stopTracking,
+    clearTrack,
+    totalDistance,
+    elapsedTime,
+    error: trackingError,
+  } = useGPSTracking();
 
   const now = new Date();
   const today = now.toISOString().split("T")[0];
@@ -1150,6 +1163,103 @@ export default function NovaVistoriaScreen() {
                 Adicionar Manual
               </ThemedText>
             </Pressable>
+          </View>
+
+          <View style={[styles.trackingSection, { backgroundColor: isTracking ? Colors.light.error + "10" : Colors.light.success + "10", borderColor: isTracking ? Colors.light.error : Colors.light.success }]}>
+            <View style={styles.trackingHeader}>
+              <View style={styles.trackingTitleRow}>
+                <Feather name="activity" size={20} color={isTracking ? Colors.light.error : Colors.light.success} />
+                <ThemedText style={[styles.trackingTitle, { color: isTracking ? Colors.light.error : Colors.light.success }]}>
+                  Rastreamento de Trajeto
+                </ThemedText>
+                {isTracking ? (
+                  <View style={[styles.trackingBadge, { backgroundColor: Colors.light.error }]}>
+                    <View style={styles.trackingDot} />
+                    <ThemedText style={styles.trackingBadgeText}>GRAVANDO</ThemedText>
+                  </View>
+                ) : null}
+              </View>
+            </View>
+
+            {trackingError ? (
+              <ThemedText style={[styles.trackingError, { color: Colors.light.error }]}>
+                {trackingError}
+              </ThemedText>
+            ) : null}
+
+            {isTracking ? (
+              <View style={styles.trackingStats}>
+                <View style={styles.trackingStat}>
+                  <ThemedText style={styles.trackingStatLabel}>Tempo</ThemedText>
+                  <ThemedText style={styles.trackingStatValue}>
+                    {Math.floor(elapsedTime / 60).toString().padStart(2, "0")}:{(elapsedTime % 60).toString().padStart(2, "0")}
+                  </ThemedText>
+                </View>
+                <View style={styles.trackingStat}>
+                  <ThemedText style={styles.trackingStatLabel}>Distância</ThemedText>
+                  <ThemedText style={styles.trackingStatValue}>
+                    {totalDistance >= 1000 ? `${(totalDistance / 1000).toFixed(2)} km` : `${totalDistance.toFixed(0)} m`}
+                  </ThemedText>
+                </View>
+                <View style={styles.trackingStat}>
+                  <ThemedText style={styles.trackingStatLabel}>Pontos</ThemedText>
+                  <ThemedText style={styles.trackingStatValue}>{trackPoints.length}</ThemedText>
+                </View>
+              </View>
+            ) : trackPoints.length > 0 ? (
+              <View style={styles.trackingStats}>
+                <View style={styles.trackingStat}>
+                  <ThemedText style={styles.trackingStatLabel}>Trajeto gravado</ThemedText>
+                  <ThemedText style={styles.trackingStatValue}>
+                    {totalDistance >= 1000 ? `${(totalDistance / 1000).toFixed(2)} km` : `${totalDistance.toFixed(0)} m`} • {trackPoints.length} pontos
+                  </ThemedText>
+                </View>
+              </View>
+            ) : (
+              <ThemedText style={[styles.trackingInfo, { color: theme.tabIconDefault }]}>
+                Grave o trajeto percorrido durante a vistoria para incluir no mapa e exportar em KMZ.
+              </ThemedText>
+            )}
+
+            <View style={styles.trackingButtons}>
+              {isTracking ? (
+                <Pressable
+                  onPress={stopTracking}
+                  style={[styles.trackingBtn, { backgroundColor: Colors.light.error }]}
+                >
+                  <Feather name="square" size={18} color="#FFFFFF" />
+                  <ThemedText style={styles.trackingBtnText}>Parar Gravação</ThemedText>
+                </Pressable>
+              ) : (
+                <Pressable
+                  onPress={startTracking}
+                  style={[styles.trackingBtn, { backgroundColor: Colors.light.success }]}
+                >
+                  <Feather name="play" size={18} color="#FFFFFF" />
+                  <ThemedText style={styles.trackingBtnText}>
+                    {trackPoints.length > 0 ? "Continuar Gravação" : "Iniciar Gravação"}
+                  </ThemedText>
+                </Pressable>
+              )}
+              {trackPoints.length > 0 && !isTracking ? (
+                <Pressable
+                  onPress={() => {
+                    Alert.alert(
+                      "Limpar Trajeto",
+                      "Deseja apagar o trajeto gravado?",
+                      [
+                        { text: "Cancelar", style: "cancel" },
+                        { text: "Apagar", style: "destructive", onPress: clearTrack },
+                      ]
+                    );
+                  }}
+                  style={[styles.trackingBtnOutline, { borderColor: Colors.light.error }]}
+                >
+                  <Feather name="trash-2" size={18} color={Colors.light.error} />
+                  <ThemedText style={[styles.trackingBtnTextOutline, { color: Colors.light.error }]}>Limpar</ThemedText>
+                </Pressable>
+              ) : null}
+            </View>
           </View>
 
           {carInfo ? (
@@ -2182,5 +2292,108 @@ const styles = StyleSheet.create({
   weatherLabel: {
     fontSize: 10,
     marginTop: 2,
+  },
+  trackingSection: {
+    marginTop: Spacing.lg,
+    padding: Spacing.md,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+  },
+  trackingHeader: {
+    marginBottom: Spacing.sm,
+  },
+  trackingTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+    flexWrap: "wrap",
+  },
+  trackingTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  trackingBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+  },
+  trackingDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: "#FFFFFF",
+  },
+  trackingBadgeText: {
+    color: "#FFFFFF",
+    fontSize: 10,
+    fontWeight: "700",
+  },
+  trackingError: {
+    fontSize: 12,
+    marginBottom: Spacing.sm,
+  },
+  trackingInfo: {
+    fontSize: 13,
+    lineHeight: 18,
+    marginBottom: Spacing.md,
+  },
+  trackingStats: {
+    flexDirection: "row",
+    gap: Spacing.md,
+    marginBottom: Spacing.md,
+    flexWrap: "wrap",
+  },
+  trackingStat: {
+    flex: 1,
+    minWidth: 80,
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.6)",
+    padding: Spacing.sm,
+    borderRadius: BorderRadius.sm,
+  },
+  trackingStatLabel: {
+    fontSize: 11,
+    opacity: 0.7,
+  },
+  trackingStatValue: {
+    fontSize: 16,
+    fontWeight: "700",
+    marginTop: 2,
+  },
+  trackingButtons: {
+    flexDirection: "row",
+    gap: Spacing.sm,
+  },
+  trackingBtn: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: Spacing.xs,
+    paddingVertical: 12,
+    paddingHorizontal: Spacing.md,
+    borderRadius: BorderRadius.md,
+  },
+  trackingBtnText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  trackingBtnOutline: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: Spacing.xs,
+    paddingVertical: 12,
+    paddingHorizontal: Spacing.md,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+  },
+  trackingBtnTextOutline: {
+    fontSize: 14,
+    fontWeight: "600",
   },
 });
