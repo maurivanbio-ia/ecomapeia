@@ -2,6 +2,77 @@ import { getApiUrl } from "@/lib/query-client";
 
 const API_BASE = getApiUrl();
 
+export interface AlertCAR {
+  id: number;
+  code: string;
+  area: number;
+  intersectionArea: number;
+  type: string;
+}
+
+export interface LegalReserve {
+  id: number;
+  areaHa: number;
+  carCode: string;
+  ruralPropertyId: string;
+  stateAcronym: string;
+  insertedAt?: string;
+  updatedAt?: string;
+  version?: number;
+  ruralProperty?: RuralPropertyBasic;
+}
+
+export interface PermanentProtectedArea {
+  id: number;
+  areaHa: number;
+  carCode: string;
+  ruralPropertyId: string;
+  stateAcronym: string;
+  insertedAt?: string;
+  updatedAt?: string;
+  version?: number;
+  ruralProperty?: RuralPropertyBasic;
+}
+
+export interface RuralPropertyBasic {
+  id: number;
+  code: string;
+  areaHa: number;
+  type: string;
+}
+
+export interface RuralProperty {
+  id: number;
+  code: string;
+  areaHa: number;
+  type: string;
+  alertAreaInCar: number;
+  alertGeometryCode?: string;
+  alertInPropertyImage?: string;
+  afterDeforestationSimplifiedImage?: string;
+  layerImage?: string;
+  propertyInStateImage?: string;
+  insertedAt?: string;
+  updatedAt?: string;
+  version?: number;
+  legalReserves?: LegalReserve[];
+  permanentProtectedAreas?: PermanentProtectedArea[];
+}
+
+export interface AlertGeometryPoint {
+  id: number;
+  number: number;
+  xCoord: string;
+  yCoord: string;
+  ruralPropertyId: number;
+}
+
+export interface ClassLabel {
+  name: string;
+  colors: string[];
+  colorsWithLabels: Record<string, string>;
+}
+
 export interface MapBiomasAlert {
   alertCode: string;
   detectedAt: string;
@@ -11,6 +82,8 @@ export interface MapBiomasAlert {
   biome: string;
   state: string;
   city: string;
+  cars?: AlertCAR[];
+  ruralProperties?: RuralProperty[];
 }
 
 export interface MapBiomasAlertDetail extends MapBiomasAlert {
@@ -21,30 +94,27 @@ export interface MapBiomasAlertDetail extends MapBiomasAlert {
     before?: { url: string; satellite: string; date: string };
     after?: { url: string; satellite: string; date: string };
   };
-  ruralProperties?: Array<{
-    propertyCode: string;
-    status: string;
-    type: string;
-    areaHa: number;
-  }>;
   conservationUnits?: Array<{ name: string; category: string }>;
   indigenousLands?: Array<{ name: string; ethnicName: string }>;
   settlements?: Array<{ name: string }>;
   quilombolaAreas?: Array<{ name: string }>;
+  alertGeometryPoints?: AlertGeometryPoint[];
 }
 
-export interface LandCoverClass {
-  classId: number;
-  className: string;
-  areaHa: number;
-  percentage: number;
+export interface FullAnalysisSummary {
+  totalAlerts: number;
+  totalAlertAreaHa: number;
+  totalRuralProperties: number;
+  totalLegalReserveAreaHa: number;
+  totalAPPAreaHa: number;
 }
 
-export interface LandCoverData {
-  year: number;
-  classes: LandCoverClass[];
-  totalAreaHa: number;
-  message?: string;
+export interface FullAnalysisResult {
+  summary: FullAnalysisSummary;
+  alerts: MapBiomasAlert[];
+  ruralProperties: RuralProperty[];
+  alertsTotal: number;
+  ruralPropertiesTotal: number;
 }
 
 export interface Coordinate {
@@ -65,7 +135,7 @@ export async function getAlertsByLocation(
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.message || "Falha ao buscar alertas");
+    throw new Error(error.message || error.error || "Falha ao buscar alertas");
   }
 
   const data = await response.json();
@@ -83,23 +153,86 @@ export async function getAlertDetails(alertCode: string): Promise<MapBiomasAlert
   return data.alert;
 }
 
-export async function getLandCover(
-  coordinates: Coordinate[],
-  year?: number
-): Promise<LandCoverData | null> {
-  const response = await fetch(new URL("/api/mapbiomas/land-cover", API_BASE).toString(), {
+export async function getRuralProperties(
+  coordinates?: Coordinate[],
+  carCode?: string
+): Promise<{ ruralProperties: RuralProperty[]; total: number } | { ruralProperty: RuralProperty | null }> {
+  const response = await fetch(new URL("/api/mapbiomas/rural-properties", API_BASE).toString(), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ coordinates, year }),
+    body: JSON.stringify({ coordinates, carCode }),
   });
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.message || "Falha ao buscar dados de uso do solo");
+    throw new Error(error.message || error.error || "Falha ao buscar propriedades rurais");
+  }
+
+  return await response.json();
+}
+
+export async function getLegalReserves(
+  coordinates?: Coordinate[],
+  carCode?: string
+): Promise<{ legalReserves: LegalReserve[]; total: number }> {
+  const response = await fetch(new URL("/api/mapbiomas/legal-reserves", API_BASE).toString(), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ coordinates, carCode }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || error.error || "Falha ao buscar reservas legais");
   }
 
   const data = await response.json();
-  return data.landCover;
+  return { legalReserves: data.legalReserves, total: data.total };
+}
+
+export async function getPermanentProtectedAreas(
+  coordinates?: Coordinate[],
+  carCode?: string
+): Promise<{ permanentProtectedAreas: PermanentProtectedArea[]; total: number }> {
+  const response = await fetch(new URL("/api/mapbiomas/permanent-protected-areas", API_BASE).toString(), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ coordinates, carCode }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || error.error || "Falha ao buscar APPs");
+  }
+
+  const data = await response.json();
+  return { permanentProtectedAreas: data.permanentProtectedAreas, total: data.total };
+}
+
+export async function getFullAnalysis(coordinates: Coordinate[]): Promise<FullAnalysisResult> {
+  const response = await fetch(new URL("/api/mapbiomas/full-analysis", API_BASE).toString(), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ coordinates }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || error.error || "Falha ao realizar análise completa");
+  }
+
+  return await response.json();
+}
+
+export async function getClassLabels(): Promise<ClassLabel[]> {
+  const response = await fetch(new URL("/api/mapbiomas/class-labels", API_BASE).toString());
+
+  if (!response.ok) {
+    throw new Error("Falha ao buscar legendas de classes");
+  }
+
+  const data = await response.json();
+  return data.classLabels;
 }
 
 export function getBiomeColor(biome: string): string {
@@ -124,34 +257,14 @@ export function getSourceLabel(source: string): string {
   return labels[source] || source;
 }
 
-export function getLandCoverColor(classId: number): string {
-  const colors: Record<number, string> = {
-    3: "#1F8D49",   // Formação Florestal
-    4: "#7DC975",   // Formação Savânica
-    5: "#04381D",   // Mangue
-    9: "#7A5900",   // Silvicultura
-    11: "#519799",  // Campo Alagado
-    12: "#D6BC74",  // Formação Campestre
-    15: "#EDDE8E",  // Pastagem
-    18: "#E974ED",  // Agricultura
-    21: "#FFEFC3",  // Mosaico Agricultura/Pastagem
-    22: "#D4271E",  // Área não Vegetada
-    23: "#FFD966",  // Praia/Duna/Areal
-    24: "#D082DE",  // Infraestrutura Urbana
-    25: "#6B0088",  // Outra Área não Vegetada
-    29: "#AF2A2A",  // Afloramento Rochoso
-    30: "#968C46",  // Mineração
-    31: "#0000FF",  // Aquicultura
-    33: "#0000FF",  // Corpos d'Água
-    36: "#C71585",  // Lavoura Perene
-    39: "#935132",  // Soja
-    40: "#C27BA0",  // Arroz
-    41: "#FFAA5F",  // Outras Lavouras Temporárias
-    46: "#FF6D4C",  // Café
-    47: "#D8BFD8",  // Citrus
-    48: "#9C7A3D",  // Outras Lavouras Perenes
+export function getCARTypeLabel(type: string): string {
+  const labels: Record<string, string> = {
+    "IRU": "Imóvel Rural",
+    "ASS": "Assentamento",
+    "PCT": "Comunidade Tradicional",
+    "TI": "Terra Indígena",
   };
-  return colors[classId] || "#CCCCCC";
+  return labels[type] || type;
 }
 
 export function formatArea(areaHa: number): string {
@@ -172,4 +285,21 @@ export function formatDate(dateString: string): string {
   } catch {
     return dateString;
   }
+}
+
+export function getAlertSeverity(areaHa: number): "low" | "medium" | "high" | "critical" {
+  if (areaHa < 1) return "low";
+  if (areaHa < 10) return "medium";
+  if (areaHa < 100) return "high";
+  return "critical";
+}
+
+export function getAlertSeverityColor(severity: "low" | "medium" | "high" | "critical"): string {
+  const colors = {
+    low: "#4CAF50",
+    medium: "#FFC107",
+    high: "#FF9800",
+    critical: "#F44336",
+  };
+  return colors[severity];
 }
