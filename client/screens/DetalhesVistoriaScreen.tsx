@@ -24,7 +24,6 @@ import { useTheme } from "@/hooks/useTheme";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 import { getApiUrl, apiRequest } from "@/lib/query-client";
 import MapPolygonView from "@/components/MapPolygonView";
-import { MapBiomasAlertsModal } from "@/components/MapBiomasAlertsModal";
 
 interface RouteParams {
   vistoriaId: string;
@@ -130,7 +129,6 @@ export default function DetalhesVistoriaScreen() {
   const navigation = useNavigation();
   const { vistoriaId } = route.params as RouteParams;
   const [mapImageUri, setMapImageUri] = useState<string | null>(null);
-  const [showMapBiomasModal, setShowMapBiomasModal] = useState(false);
 
   const { data: vistoria, isLoading } = useQuery<VistoriaData>({
     queryKey: [`/api/vistorias/${vistoriaId}`],
@@ -315,16 +313,6 @@ export default function DetalhesVistoriaScreen() {
             <Feather name="file" size={18} color="#FFFFFF" />
             <ThemedText style={styles.actionBtnText}>Word</ThemedText>
           </Pressable>
-          <Pressable
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-              setShowMapBiomasModal(true);
-            }}
-            style={[styles.actionBtn, { backgroundColor: "#2E7D32" }]}
-          >
-            <Feather name="map" size={18} color="#FFFFFF" />
-            <ThemedText style={styles.actionBtnText}>MapBiomas</ThemedText>
-          </Pressable>
         </View>
 
         <View
@@ -442,13 +430,6 @@ export default function DetalhesVistoriaScreen() {
           </View>
         </View>
       </ScrollView>
-
-      <MapBiomasAlertsModal
-        visible={showMapBiomasModal}
-        onClose={() => setShowMapBiomasModal(false)}
-        municipio={vistoria.municipio || ""}
-        theme={theme}
-      />
     </ThemedView>
   );
 }

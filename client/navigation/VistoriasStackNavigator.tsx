@@ -9,6 +9,7 @@ import DashboardScreen from "@/screens/DashboardScreen";
 import EquipesScreen from "@/screens/EquipesScreen";
 import NotificacoesScreen from "@/screens/NotificacoesScreen";
 import HistoricoPropriedadeScreen from "@/screens/HistoricoPropriedadeScreen";
+import MapBiomasScreen from "@/screens/MapBiomasScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 
 export type VistoriasStackParamList = {
@@ -20,6 +21,7 @@ export type VistoriasStackParamList = {
   Equipes: undefined;
   Notificacoes: undefined;
   HistoricoPropriedade: undefined;
+  MapBiomas: undefined;
 };
 
 const Stack = createNativeStackNavigator<VistoriasStackParamList>();
@@ -83,6 +85,13 @@ export default function VistoriasStackNavigator() {
         component={HistoricoPropriedadeScreen}
         options={{
           title: "Histórico",
+        }}
+      />
+      <Stack.Screen
+        name="MapBiomas"
+        component={MapBiomasScreen}
+        options={{
+          title: "MapBiomas Alerta",
         }}
       />
     </Stack.Navigator>
