@@ -26,7 +26,8 @@ import { Language } from "@/lib/translations";
 import { isBiometricAvailable, getBiometricType, authenticateWithBiometrics } from "@/lib/biometricAuth";
 import { exportToJSON, exportToCSV } from "@/lib/exportData";
 import { shareViaWhatsApp, shareViaEmail } from "@/lib/shareUtils";
-import { resetTutorial, TutorialOverlay } from "@/components/TutorialOverlay";
+import { resetTutorial } from "@/components/TutorialOverlay";
+import { InteractiveTutorial } from "@/components/InteractiveTutorial";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -701,7 +702,7 @@ export default function ProfileScreen() {
       </Modal>
 
       {showTutorial ? (
-        <TutorialOverlay
+        <InteractiveTutorial
           forceShow={true}
           onClose={() => setShowTutorial(false)}
         />

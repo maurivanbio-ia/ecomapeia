@@ -14,7 +14,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AuthProvider } from "@/hooks/useAuth";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { ThemeProvider, useThemeContext } from "@/contexts/ThemeContext";
-import { TutorialOverlay } from "@/components/TutorialOverlay";
+import { InteractiveTutorial } from "@/components/InteractiveTutorial";
 
 function AppContent() {
   const { isDark } = useThemeContext();
@@ -25,7 +25,7 @@ function AppContent() {
         <RootStackNavigator />
       </NavigationContainer>
       <StatusBar style={isDark ? "light" : "dark"} />
-      <TutorialOverlay />
+      <InteractiveTutorial />
     </>
   );
 }
