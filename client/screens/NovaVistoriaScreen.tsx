@@ -18,6 +18,8 @@ import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { VistoriasStackParamList } from "@/navigation/VistoriasStackNavigator";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
@@ -153,7 +155,7 @@ export default function NovaVistoriaScreen() {
   const headerHeight = useHeaderHeight();
   const { theme } = useTheme();
   const { user } = useAuth();
-  const navigation = useNavigation();
+  const navigation = useNavigation<NativeStackNavigationProp<VistoriasStackParamList>>();
   const queryClient = useQueryClient();
 
   const now = new Date();
@@ -1194,10 +1196,11 @@ export default function NovaVistoriaScreen() {
               style={[styles.mapBiomasButton, { backgroundColor: "#4caf50" }]}
               onPress={() => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                navigation.navigate("MapBiomas" as never, {
-                  latitude: polygonCoordinates[0]?.latitude,
-                  longitude: polygonCoordinates[0]?.longitude,
-                } as never);
+                const coords = polygonCoordinates[0];
+                navigation.navigate("MapBiomas", {
+                  latitude: coords?.latitude,
+                  longitude: coords?.longitude,
+                });
               }}
             >
               <Feather name="globe" size={18} color="#fff" />

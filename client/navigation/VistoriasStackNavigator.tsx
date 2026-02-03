@@ -21,7 +21,7 @@ export type VistoriasStackParamList = {
   Equipes: undefined;
   Notificacoes: undefined;
   HistoricoPropriedade: undefined;
-  MapBiomas: undefined;
+  MapBiomas: { latitude?: number; longitude?: number } | undefined;
 };
 
 const Stack = createNativeStackNavigator<VistoriasStackParamList>();
