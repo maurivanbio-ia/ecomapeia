@@ -96,56 +96,39 @@ export default function VistoriasScreen() {
           Haptics.selectionAsync();
           navigation.navigate("DetalhesVistoria", { vistoriaId: item.id });
         }}
+        testID={`vistoria-card-${item.id}`}
       >
-        <View style={styles.cardHeader}>
-          <View style={styles.cardTitleRow}>
-            <Feather name="user" size={16} color={Colors.light.primary} />
-            <ThemedText style={styles.cardTitle} numberOfLines={1}>
-              {item.proprietario}
-            </ThemedText>
-          </View>
-          <View
-            style={[
-              styles.statusBadge,
-              {
-                backgroundColor:
-                  item.status_upload === "synced"
-                    ? Colors.light.accent
-                    : "#FFA500",
-              },
-            ]}
-          >
-            <Feather
-              name={item.status_upload === "synced" ? "check-circle" : "clock"}
-              size={12}
-              color="#FFFFFF"
-            />
-          </View>
-        </View>
-
-        <View style={styles.cardBody}>
-          {item.municipio ? (
-            <View style={styles.cardRow}>
-              <Feather name="map-pin" size={14} color={theme.tabIconDefault} />
-              <ThemedText style={styles.cardText}>{item.municipio}</ThemedText>
+        <View style={styles.cardContent}>
+          <View style={styles.cardInfo}>
+            <View style={styles.cardHeader}>
+              <ThemedText style={styles.cardTitle} numberOfLines={1}>
+                {item.proprietario}
+              </ThemedText>
+              <View
+                style={[
+                  styles.statusBadge,
+                  {
+                    backgroundColor:
+                      item.status_upload === "synced"
+                        ? Colors.light.accent
+                        : "#FFA500",
+                  },
+                ]}
+              >
+                <ThemedText style={styles.statusText}>
+                  {item.status_upload === "synced" ? "Sincronizado" : "Pendentes"}
+                </ThemedText>
+              </View>
             </View>
-          ) : null}
 
-          <View style={styles.cardRow}>
-            <Feather name="calendar" size={14} color={theme.tabIconDefault} />
-            <ThemedText style={styles.cardText}>
+            <ThemedText style={[styles.cardDate, { color: theme.tabIconDefault }]}>
               {new Date(item.data_vistoria).toLocaleDateString("pt-BR")}
             </ThemedText>
           </View>
 
-          {item.tipo_intervencao && item.tipo_intervencao !== "NA" ? (
-            <View style={styles.cardRow}>
-              <Feather name="alert-triangle" size={14} color="#FFA500" />
-              <ThemedText style={[styles.cardText, { color: "#FFA500" }]}>
-                {item.tipo_intervencao}
-              </ThemedText>
-            </View>
-          ) : null}
+          <View style={styles.chevronContainer}>
+            <Feather name="chevron-right" size={20} color={theme.tabIconDefault} />
+          </View>
         </View>
       </Pressable>
     </Animated.View>
@@ -292,17 +275,18 @@ const styles = StyleSheet.create({
     padding: Spacing.lg,
     borderWidth: 1,
   },
-  cardHeader: {
+  cardContent: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: Spacing.sm,
   },
-  cardTitleRow: {
+  cardInfo: {
+    flex: 1,
+  },
+  cardHeader: {
     flexDirection: "row",
     alignItems: "center",
     gap: Spacing.sm,
-    flex: 1,
+    marginBottom: Spacing.xs,
   },
   cardTitle: {
     fontSize: 16,
@@ -310,22 +294,23 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   statusBadge: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 4,
+    borderRadius: BorderRadius.sm,
     alignItems: "center",
     justifyContent: "center",
   },
-  cardBody: {
-    gap: Spacing.xs,
+  statusText: {
+    color: "#FFFFFF",
+    fontSize: 12,
+    fontWeight: "600",
   },
-  cardRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: Spacing.sm,
-  },
-  cardText: {
+  cardDate: {
     fontSize: 14,
+  },
+  chevronContainer: {
+    marginLeft: Spacing.md,
+    padding: Spacing.xs,
   },
   fab: {
     position: "absolute",
