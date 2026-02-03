@@ -7,12 +7,26 @@ import {
   ScrollView,
   Text,
   Modal,
+  useColorScheme,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import { ThemedView } from "@/components/ThemedView";
-import { ThemedText } from "@/components/ThemedText";
-import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius, Fonts } from "@/constants/theme";
+
+// Fallback colors for when ThemeProvider is not available
+const fallbackTheme = {
+  light: {
+    background: "#FFFFFF",
+    text: "#1C1C1E",
+    link: "#0077ED",
+    buttonText: "#FFFFFF",
+  },
+  dark: {
+    background: "#1C1C1E",
+    text: "#FFFFFF",
+    link: "#0A84FF",
+    buttonText: "#FFFFFF",
+  },
+};
 
 export type ErrorFallbackProps = {
   error: Error;
@@ -20,7 +34,8 @@ export type ErrorFallbackProps = {
 };
 
 export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
-  const { theme } = useTheme();
+  const colorScheme = useColorScheme();
+  const theme = colorScheme === "dark" ? fallbackTheme.dark : fallbackTheme.light;
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   const handleRestart = async () => {
@@ -41,14 +56,14 @@ export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
   };
 
   return (
-    <ThemedView style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       {__DEV__ ? (
         <Pressable
           onPress={() => setIsModalVisible(true)}
           style={({ pressed }) => [
             styles.topButton,
             {
-              backgroundColor: theme.backgroundDefault,
+              backgroundColor: theme.background,
               opacity: pressed ? 0.8 : 1,
             },
           ]}
@@ -58,13 +73,13 @@ export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
       ) : null}
 
       <View style={styles.content}>
-        <ThemedText type="h1" style={styles.title}>
+        <Text style={[styles.title, { color: theme.text }]}>
           Something went wrong
-        </ThemedText>
+        </Text>
 
-        <ThemedText type="body" style={styles.message}>
+        <Text style={[styles.message, { color: theme.text }]}>
           Please reload the app to continue.
-        </ThemedText>
+        </Text>
 
         <Pressable
           onPress={handleRestart}
@@ -77,12 +92,9 @@ export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
             },
           ]}
         >
-          <ThemedText
-            type="body"
-            style={[styles.buttonText, { color: theme.buttonText }]}
-          >
+          <Text style={[styles.buttonText, { color: theme.buttonText }]}>
             Try Again
-          </ThemedText>
+          </Text>
         </Pressable>
       </View>
 
@@ -94,11 +106,11 @@ export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
           onRequestClose={() => setIsModalVisible(false)}
         >
           <View style={styles.modalOverlay}>
-            <ThemedView style={styles.modalContainer}>
+            <View style={[styles.modalContainer, { backgroundColor: theme.background }]}>
               <View style={styles.modalHeader}>
-                <ThemedText type="h2" style={styles.modalTitle}>
+                <Text style={[styles.modalTitle, { color: theme.text }]}>
                   Error Details
-                </ThemedText>
+                </Text>
                 <Pressable
                   onPress={() => setIsModalVisible(false)}
                   style={({ pressed }) => [
@@ -118,7 +130,7 @@ export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
                 <View
                   style={[
                     styles.errorContainer,
-                    { backgroundColor: theme.backgroundDefault },
+                    { backgroundColor: theme.background },
                   ]}
                 >
                   <Text
@@ -135,11 +147,11 @@ export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
                   </Text>
                 </View>
               </ScrollView>
-            </ThemedView>
+            </View>
           </View>
         </Modal>
       ) : null}
-    </ThemedView>
+    </View>
   );
 }
 

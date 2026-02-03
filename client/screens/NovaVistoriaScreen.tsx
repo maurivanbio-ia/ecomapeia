@@ -1042,7 +1042,7 @@ export default function NovaVistoriaScreen() {
             </View>
           ) : null}
 
-          {utmPoints.length > 0 && !loadingCompliance ? (
+          {embargoCheck && polygonCoordinates.length > 0 && !loadingCompliance ? (
             <TouchableOpacity
               style={[styles.complianceButton, { backgroundColor: theme.primary }]}
               onPress={() => {

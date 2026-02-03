@@ -64,3 +64,10 @@ The application integrates Replit AI, leveraging OpenAI's gpt-5.2 model for vari
 ### MapBiomas Alerta Integration
 
 -   **MapBiomas Alerta API V2:** Integration for deforestation monitoring, providing access to alerts, rural properties (CAR), legal reserves (RL), and permanent protected areas (APPs).
+
+### Environmental Compliance Features
+
+-   **Embargo Detection:** `/api/conservation/check-embargo` - Point-in-polygon verification against 968 loaded conservation units, returns risk level (HIGH/MEDIUM/LOW) and specific reasons for embargo
+-   **AI Compliance Analysis:** `/api/ai/compliance-analysis` - Uses GPT-5.2 to analyze inspection data against Brazilian legislation (Lei 12.651/2012, Lei 9.985/2000, CONAMA), returns compliance score (0-100%), risks with legal foundation, non-conformities, and recommendations
+-   **Automatic Flow:** GPS capture triggers: CAR lookup → UC proximity check → embargo detection → compliance analysis button availability
+-   **Visual Alerts:** Color-coded cards (red=HIGH/CRITICAL, yellow=MEDIUM, green=LOW) appear after GPS capture showing embargo risk status
