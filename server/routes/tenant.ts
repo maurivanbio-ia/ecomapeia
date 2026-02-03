@@ -1,7 +1,7 @@
 import { Router, Request, Response } from "express";
 import { db } from "../db";
 import { empresas, projetos, usuarios, vistorias } from "../../shared/schema";
-import { eq, and, sql, count } from "drizzle-orm";
+import { eq, and, sql, count, inArray } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 
 const router = Router();
@@ -406,7 +406,7 @@ router.get("/empresas/:empresaId/dashboard", async (req: Request, res: Response)
     if (projetoIds.length > 0) {
       vistoriasData = await db.select()
         .from(vistorias)
-        .where(sql`${vistorias.projeto_id} = ANY(${projetoIds})`);
+        .where(inArray(vistorias.projeto_id, projetoIds));
 
       const statusCounts: Record<string, number> = {};
       const projetoCounts: Record<string, number> = {};
@@ -463,7 +463,7 @@ router.get("/empresas/:empresaId/export/csv", async (req: Request, res: Response
     if (projetoIds.length > 0) {
       vistoriasData = await db.select()
         .from(vistorias)
-        .where(sql`${vistorias.projeto_id} = ANY(${projetoIds})`);
+        .where(inArray(vistorias.projeto_id, projetoIds));
     }
 
     const headers = [
@@ -517,7 +517,7 @@ router.get("/empresas/:empresaId/export/excel", async (req: Request, res: Respon
     if (projetoIds.length > 0) {
       vistoriasData = await db.select()
         .from(vistorias)
-        .where(sql`${vistorias.projeto_id} = ANY(${projetoIds})`);
+        .where(inArray(vistorias.projeto_id, projetoIds));
     }
 
     const headers = [
