@@ -26,7 +26,7 @@ import { Language } from "@/lib/translations";
 import { isBiometricAvailable, getBiometricType, authenticateWithBiometrics } from "@/lib/biometricAuth";
 import { exportToJSON, exportToCSV } from "@/lib/exportData";
 import { shareViaWhatsApp, shareViaEmail } from "@/lib/shareUtils";
-import { resetTutorial } from "@/components/TutorialOverlay";
+import { resetTutorial, TutorialOverlay } from "@/components/TutorialOverlay";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -48,6 +48,7 @@ export default function ProfileScreen() {
   const [biometricModalVisible, setBiometricModalVisible] = useState(false);
   const [backupModalVisible, setBackupModalVisible] = useState(false);
   const [shareModalVisible, setShareModalVisible] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
   
   const [biometricAvailable, setBiometricAvailable] = useState(false);
   const [biometricType, setBiometricType] = useState("Biometria");
@@ -178,7 +179,7 @@ export default function ProfileScreen() {
   const handleResetTutorial = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     await resetTutorial();
-    Alert.alert(t.tutorialReset, t.tutorialResetSuccess);
+    setShowTutorial(true);
   };
 
   const handleAbout = () => {
@@ -698,6 +699,13 @@ export default function ProfileScreen() {
           </Pressable>
         </Pressable>
       </Modal>
+
+      {showTutorial ? (
+        <TutorialOverlay
+          forceShow={true}
+          onClose={() => setShowTutorial(false)}
+        />
+      ) : null}
     </ThemedView>
   );
 }

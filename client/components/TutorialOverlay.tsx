@@ -25,46 +25,98 @@ const tutorialSteps: TutorialStep[] = [
   {
     icon: "home",
     title: "Bem-vindo ao MapeIA!",
-    description: "Sua plataforma completa para vistorias ambientais. Vamos fazer um tour rápido pelas funcionalidades.",
+    description: "Sua plataforma completa para vistorias ambientais em reservatórios hidrelétricos. Vamos conhecer todas as funcionalidades.",
   },
   {
-    icon: "plus-circle",
+    icon: "clipboard",
     title: "Criar Vistorias",
-    description: "Registre novas vistorias com fotos, coordenadas UTM e todos os dados necessários para seu relatório.",
+    description: "Na aba Vistorias, crie registros completos com dados do proprietário, tipo de inspeção, e documentação fotográfica.",
+  },
+  {
+    icon: "navigation",
+    title: "Captura GPS Automática",
+    description: "Capture coordenadas UTM diretamente do GPS do seu celular. O app converte automaticamente para o sistema UTM usado em campo.",
+  },
+  {
+    icon: "map-pin",
+    title: "Código CAR Automático",
+    description: "Ao capturar GPS, o app busca automaticamente o código CAR (Cadastro Ambiental Rural) no MapBiomas para a localização.",
   },
   {
     icon: "map",
-    title: "Mapeamento GPS",
-    description: "Capture coordenadas automaticamente do seu GPS e visualize polígonos no mapa satélite.",
+    title: "Visualização de Polígonos",
+    description: "Adicione 3 ou mais pontos UTM para visualizar o polígono da propriedade em mapa satélite com imagem capturável.",
+  },
+  {
+    icon: "camera",
+    title: "Fotos com Legendas",
+    description: "Tire fotos da câmera ou selecione da galeria. Adicione legendas descritivas para cada imagem capturada.",
+  },
+  {
+    icon: "edit-3",
+    title: "Assinatura Digital",
+    description: "Assine digitalmente suas vistorias diretamente na tela. A assinatura é incluída automaticamente nos relatórios.",
+  },
+  {
+    icon: "cpu",
+    title: "Assistente IA (EcoIA)",
+    description: "Tire dúvidas sobre APP, Reserva Legal, legislação ambiental e procedimentos de campo com nosso assistente inteligente.",
+  },
+  {
+    icon: "alert-triangle",
+    title: "MapBiomas Alerta",
+    description: "Consulte alertas de desmatamento do MapBiomas por município ou código de alerta para suas análises.",
+  },
+  {
+    icon: "database",
+    title: "Dados Ambientais",
+    description: "Acesse dados do INPE (desmatamento), ANA (recursos hídricos), IBGE (limites municipais) e SiBBr (biodiversidade).",
   },
   {
     icon: "wifi-off",
     title: "Modo Offline",
-    description: "Trabalhe sem internet! Suas vistorias são salvas localmente e sincronizadas quando houver conexão.",
+    description: "Trabalhe sem internet! Suas vistorias são salvas localmente e sincronizadas automaticamente quando houver conexão.",
   },
   {
     icon: "file-text",
-    title: "Relatórios PDF e Word",
-    description: "Gere relatórios profissionais automaticamente no padrão RO-NOT-ITU, prontos para envio.",
+    title: "Relatórios PDF",
+    description: "Gere relatórios profissionais no padrão RO-NOT-ITU automaticamente, incluindo fotos, mapas e assinatura.",
+  },
+  {
+    icon: "globe",
+    title: "Multilíngue",
+    description: "O app suporta Português, Inglês e Espanhol. Altere o idioma nas configurações do seu perfil.",
+  },
+  {
+    icon: "moon",
+    title: "Tema Claro/Escuro",
+    description: "Escolha entre tema claro ou escuro nas configurações para melhor visualização em diferentes condições de luz.",
   },
   {
     icon: "check-circle",
     title: "Pronto para começar!",
-    description: "Agora você pode criar suas vistorias. Boa sorte no campo!",
+    description: "Agora você conhece todas as funcionalidades do MapeIA. Boa sorte nas suas vistorias de campo!",
   },
 ];
 
 interface TutorialOverlayProps {
   onComplete?: () => void;
+  forceShow?: boolean;
+  onClose?: () => void;
 }
 
-export function TutorialOverlay({ onComplete }: TutorialOverlayProps) {
-  const [visible, setVisible] = useState(false);
+export function TutorialOverlay({ onComplete, forceShow = false, onClose }: TutorialOverlayProps) {
+  const [visible, setVisible] = useState(forceShow);
   const [currentStep, setCurrentStep] = useState(0);
 
   useEffect(() => {
-    checkTutorialStatus();
-  }, []);
+    if (forceShow) {
+      setVisible(true);
+      setCurrentStep(0);
+    } else {
+      checkTutorialStatus();
+    }
+  }, [forceShow]);
 
   const checkTutorialStatus = async () => {
     try {
@@ -99,10 +151,13 @@ export function TutorialOverlay({ onComplete }: TutorialOverlayProps) {
     try {
       await AsyncStorage.setItem(TUTORIAL_COMPLETED_KEY, "true");
       setVisible(false);
+      setCurrentStep(0);
       onComplete?.();
+      onClose?.();
     } catch (error) {
       console.error("Error saving tutorial status:", error);
       setVisible(false);
+      onClose?.();
     }
   };
 
