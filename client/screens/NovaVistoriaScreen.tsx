@@ -1471,9 +1471,12 @@ export default function NovaVistoriaScreen() {
 
           {polygonCoordinates.length >= 3 ? (
             <View style={styles.mapSection}>
-              <ThemedText style={styles.subLabel}>Visualização do Polígono</ThemedText>
+              <ThemedText style={styles.subLabel}>
+                Visualização do Polígono {trackPoints.length > 0 ? `e Trajeto (${trackPoints.length} pontos)` : ""}
+              </ThemedText>
               <MapPolygonView
                 polygonCoordinates={polygonCoordinates}
+                trackPoints={trackPoints.map(p => ({ latitude: p.latitude, longitude: p.longitude }))}
                 mapRegion={mapRegion}
                 onMapImageCaptured={handleMapImageCaptured}
                 mapImageUri={mapImageUri}

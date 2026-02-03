@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
 import { View, StyleSheet, Pressable, Image, Platform } from "react-native";
 import { captureRef } from "react-native-view-shot";
-import MapView, { Polygon, Marker, PROVIDER_DEFAULT } from "react-native-maps";
+import MapView, { Polygon, Polyline, Marker, PROVIDER_DEFAULT } from "react-native-maps";
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
@@ -14,6 +14,7 @@ interface LatLng {
 
 interface MapPolygonViewProps {
   polygonCoordinates: LatLng[];
+  trackPoints?: LatLng[];
   mapRegion: {
     latitude: number;
     longitude: number;
@@ -26,6 +27,7 @@ interface MapPolygonViewProps {
 
 export default function MapPolygonView({
   polygonCoordinates,
+  trackPoints = [],
   mapRegion,
   onMapImageCaptured,
   mapImageUri,
@@ -84,6 +86,14 @@ export default function MapPolygonView({
             fillColor="rgba(141, 198, 63, 0.3)"
             strokeWidth={3}
           />
+          {trackPoints.length > 1 ? (
+            <Polyline
+              coordinates={trackPoints}
+              strokeColor="#FF6B00"
+              strokeWidth={4}
+              lineDashPattern={[1]}
+            />
+          ) : null}
           {polygonCoordinates.map((coord, idx) => (
             <Marker
               key={idx}
@@ -92,6 +102,20 @@ export default function MapPolygonView({
               pinColor={Colors.light.primary}
             />
           ))}
+          {trackPoints.length > 0 ? (
+            <Marker
+              coordinate={trackPoints[0]}
+              title="Início do trajeto"
+              pinColor="#FF6B00"
+            />
+          ) : null}
+          {trackPoints.length > 1 ? (
+            <Marker
+              coordinate={trackPoints[trackPoints.length - 1]}
+              title="Posição atual"
+              pinColor="#22C55E"
+            />
+          ) : null}
         </MapView>
       </View>
 
