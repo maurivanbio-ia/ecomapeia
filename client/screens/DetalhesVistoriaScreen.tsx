@@ -140,7 +140,23 @@ export default function DetalhesVistoriaScreen() {
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       
-      const response = await apiRequest("POST", "/api/pdf/generate", vistoria);
+      // Ensure all environmental data fields are properly mapped for PDF generation
+      const pdfData = {
+        ...vistoria,
+        // Map camelCase fields to what the PDF template expects
+        carInfo: vistoria.carInfo || (vistoria as any).car_info,
+        embargoCheck: vistoria.embargoCheck || (vistoria as any).embargo_check,
+        complianceAnalysis: vistoria.complianceAnalysis || (vistoria as any).compliance_analysis,
+        weather_data: vistoria.weatherData || vistoria.weather_data,
+        hora_vistoria: vistoria.horaVistoria || vistoria.hora_vistoria,
+        usos_solo: vistoria.usosSolo,
+        coordenadas_utm: vistoria.coordenadas_utm || vistoria.coordenadas?.map((c, i) => ({
+          e: c.latitude?.toFixed(6) || "",
+          n: c.longitude?.toFixed(6) || ""
+        })),
+      };
+      
+      const response = await apiRequest("POST", "/api/pdf/generate", pdfData);
       const html = await response.text();
 
       if (Platform.OS === "web") {
