@@ -6,6 +6,8 @@ export interface UTMCoordinate {
   northing: number;
   zone: number;
   zoneLetter: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 export interface GPSCoordinate {
@@ -127,5 +129,10 @@ export async function captureCurrentUTM(): Promise<UTMCoordinate | null> {
   if (!location) {
     return null;
   }
-  return latLngToUTM(location.latitude, location.longitude);
+  const utm = latLngToUTM(location.latitude, location.longitude);
+  return {
+    ...utm,
+    latitude: location.latitude,
+    longitude: location.longitude,
+  };
 }

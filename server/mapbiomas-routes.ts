@@ -550,4 +550,152 @@ router.post("/search", async (req: Request, res: Response) => {
   }
 });
 
+router.post("/car-by-coordinates", async (req: Request, res: Response) => {
+  try {
+    const { latitude, longitude } = req.body;
+    const token = process.env.MAPBIOMAS_API_TOKEN;
+
+    if (!token) {
+      return res.status(400).json({ 
+        error: "Token da API MapBiomas não configurado" 
+      });
+    }
+
+    if (!latitude || !longitude) {
+      return res.status(400).json({ 
+        error: "Latitude e longitude são obrigatórios" 
+      });
+    }
+
+    const query = `
+      query RuralPropertyByPoint($lat: Float!, $lng: Float!) {
+        ruralPropertyByPoint(lat: $lat, lng: $lng) {
+          id
+          carCode
+          areaHa
+          status
+          state
+          city
+          ownerType
+          legalReserve {
+            areaHa
+            percentage
+          }
+          permanentProtectedArea {
+            areaHa
+            percentage
+          }
+        }
+      }
+    `;
+
+    const response = await fetch(MAPBIOMAS_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({ 
+        query, 
+        variables: { 
+          lat: parseFloat(latitude), 
+          lng: parseFloat(longitude) 
+        } 
+      })
+    });
+
+    const data = await response.json();
+
+    if (data.errors) {
+      console.error("MapBiomas CAR lookup errors:", data.errors);
+      
+      const alternativeQuery = `
+        query AlertsByPoint($lat: Float!, $lng: Float!, $radius: Float) {
+          alertsByPoint(lat: $lat, lng: $lng, radius: $radius) {
+            alertCode
+            ruralPropertiesCodes
+            areaHa
+            detectedAt
+            crossedCities
+            crossedStates
+          }
+        }
+      `;
+      
+      const altResponse = await fetch(MAPBIOMAS_API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ 
+          query: alternativeQuery, 
+          variables: { 
+            lat: parseFloat(latitude), 
+            lng: parseFloat(longitude),
+            radius: 1000
+          } 
+        })
+      });
+      
+      const altData = await altResponse.json();
+      
+      if (altData.data?.alertsByPoint?.length > 0) {
+        const alerts = altData.data.alertsByPoint;
+        const carCodes = alerts.flatMap((a: any) => a.ruralPropertiesCodes || []);
+        const uniqueCarCodes = [...new Set(carCodes)];
+        
+        return res.json({
+          success: true,
+          source: "alerts",
+          carCodes: uniqueCarCodes,
+          alerts: alerts.slice(0, 5),
+          coordinates: { latitude, longitude }
+        });
+      }
+      
+      return res.json({
+        success: true,
+        source: "none",
+        carCodes: [],
+        message: "Nenhum imóvel rural encontrado nesta localização",
+        coordinates: { latitude, longitude }
+      });
+    }
+
+    const property = data.data?.ruralPropertyByPoint;
+    
+    if (property) {
+      res.json({
+        success: true,
+        source: "direct",
+        property: {
+          carCode: property.carCode,
+          areaHa: property.areaHa,
+          status: property.status,
+          state: property.state,
+          city: property.city,
+          ownerType: property.ownerType,
+          legalReserve: property.legalReserve,
+          app: property.permanentProtectedArea
+        },
+        carCodes: [property.carCode],
+        coordinates: { latitude, longitude }
+      });
+    } else {
+      res.json({
+        success: true,
+        source: "none",
+        carCodes: [],
+        message: "Nenhum imóvel rural cadastrado nesta localização",
+        coordinates: { latitude, longitude }
+      });
+    }
+
+  } catch (error) {
+    console.error("Error looking up CAR by coordinates:", error);
+    res.status(500).json({ error: "Falha ao buscar CAR por coordenadas" });
+  }
+});
+
 export default router;

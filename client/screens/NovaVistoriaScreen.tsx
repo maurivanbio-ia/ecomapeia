@@ -21,7 +21,7 @@ import { ThemedView } from "@/components/ThemedView";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/hooks/useAuth";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
-import { apiRequest } from "@/lib/query-client";
+import { apiRequest, getApiUrl } from "@/lib/query-client";
 import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollViewCompat";
 import MapPolygonView from "@/components/MapPolygonView";
 import DatePickerField from "@/components/DatePickerField";
@@ -196,6 +196,13 @@ export default function NovaVistoriaScreen() {
   const [mapImageUri, setMapImageUri] = useState<string | null>(null);
   const [signatureUri, setSignatureUri] = useState<string | null>(null);
   const [capturingGPS, setCapturingGPS] = useState(false);
+  const [carInfo, setCarInfo] = useState<{
+    carCode: string;
+    areaHa?: number;
+    city?: string;
+    state?: string;
+  } | null>(null);
+  const [loadingCAR, setLoadingCAR] = useState(false);
 
   const polygonCoordinates = useMemo(() => {
     const zoneMatch = formData.zona_utm.match(/(\d+)([A-Za-z])/);
@@ -340,6 +347,35 @@ export default function NovaVistoriaScreen() {
     ]);
   };
 
+  const fetchCARByCoordinates = async (latitude: number, longitude: number) => {
+    setLoadingCAR(true);
+    try {
+      const response = await fetch(new URL("/api/mapbiomas/car-by-coordinates", getApiUrl()).toString(), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ latitude, longitude }),
+      });
+      const data = await response.json();
+      
+      if (data.success && data.carCodes && data.carCodes.length > 0) {
+        const carCode = data.carCodes[0];
+        setCarInfo({
+          carCode,
+          areaHa: data.property?.areaHa,
+          city: data.property?.city,
+          state: data.property?.state,
+        });
+        return carCode;
+      }
+      return null;
+    } catch (error) {
+      console.error("Error fetching CAR:", error);
+      return null;
+    } finally {
+      setLoadingCAR(false);
+    }
+  };
+
   const captureGPSPoint = async () => {
     setCapturingGPS(true);
     try {
@@ -361,7 +397,23 @@ export default function NovaVistoriaScreen() {
             n: utm.northing.toFixed(2),
           },
         ]);
-        Alert.alert("Sucesso", `Coordenada capturada!\nE: ${utm.easting.toFixed(2)}\nN: ${utm.northing.toFixed(2)}`);
+
+        const lat = utm.latitude;
+        const lng = utm.longitude;
+        
+        if (lat && lng) {
+          const carCode = await fetchCARByCoordinates(lat, lng);
+          if (carCode) {
+            Alert.alert(
+              "Coordenada Capturada",
+              `E: ${utm.easting.toFixed(2)}\nN: ${utm.northing.toFixed(2)}\n\nCódigo CAR encontrado:\n${carCode}`
+            );
+          } else {
+            Alert.alert("Sucesso", `Coordenada capturada!\nE: ${utm.easting.toFixed(2)}\nN: ${utm.northing.toFixed(2)}\n\nNenhum CAR encontrado nesta localização.`);
+          }
+        } else {
+          Alert.alert("Sucesso", `Coordenada capturada!\nE: ${utm.easting.toFixed(2)}\nN: ${utm.northing.toFixed(2)}`);
+        }
       } else {
         Alert.alert("Erro", "Não foi possível obter a localização atual.");
       }
@@ -732,6 +784,35 @@ export default function NovaVistoriaScreen() {
               </ThemedText>
             </Pressable>
           </View>
+
+          {carInfo ? (
+            <View style={[styles.carInfoCard, { backgroundColor: Colors.light.accent + "15", borderColor: Colors.light.accent }]}>
+              <View style={styles.carInfoHeader}>
+                <Feather name="map-pin" size={18} color={Colors.light.accent} />
+                <ThemedText style={[styles.carInfoTitle, { color: Colors.light.accent }]}>
+                  Código CAR Encontrado
+                </ThemedText>
+              </View>
+              <ThemedText style={styles.carCode}>{carInfo.carCode}</ThemedText>
+              {carInfo.city || carInfo.state ? (
+                <ThemedText style={[styles.carDetails, { color: theme.tabIconDefault }]}>
+                  {carInfo.city}{carInfo.city && carInfo.state ? " - " : ""}{carInfo.state}
+                </ThemedText>
+              ) : null}
+              {carInfo.areaHa ? (
+                <ThemedText style={[styles.carDetails, { color: theme.tabIconDefault }]}>
+                  Área: {carInfo.areaHa.toFixed(2)} ha
+                </ThemedText>
+              ) : null}
+            </View>
+          ) : loadingCAR ? (
+            <View style={[styles.carInfoCard, { backgroundColor: theme.backgroundSecondary }]}>
+              <ActivityIndicator size="small" color={Colors.light.accent} />
+              <ThemedText style={{ marginLeft: Spacing.sm, color: theme.tabIconDefault }}>
+                Buscando código CAR no MapBiomas...
+              </ThemedText>
+            </View>
+          ) : null}
 
           {polygonCoordinates.length >= 3 ? (
             <View style={styles.mapSection}>
@@ -1129,5 +1210,30 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "700",
+  },
+  carInfoCard: {
+    flexDirection: "column",
+    padding: Spacing.md,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    marginTop: Spacing.md,
+  },
+  carInfoHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+    marginBottom: Spacing.xs,
+  },
+  carInfoTitle: {
+    fontWeight: "600",
+    fontSize: 14,
+  },
+  carCode: {
+    fontSize: 12,
+    fontFamily: "monospace",
+    marginBottom: Spacing.xs,
+  },
+  carDetails: {
+    fontSize: 12,
   },
 });
