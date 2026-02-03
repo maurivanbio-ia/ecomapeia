@@ -12,9 +12,17 @@ interface LatLng {
   longitude: number;
 }
 
+interface SavedTrack {
+  id: string;
+  legenda: string;
+  points: LatLng[];
+  color: string;
+}
+
 interface MapPolygonViewProps {
   polygonCoordinates: LatLng[];
   trackPoints?: LatLng[];
+  savedTracks?: SavedTrack[];
   mapRegion: {
     latitude: number;
     longitude: number;
@@ -28,6 +36,7 @@ interface MapPolygonViewProps {
 export default function MapPolygonView({
   polygonCoordinates,
   trackPoints = [],
+  savedTracks = [],
   mapRegion,
   onMapImageCaptured,
   mapImageUri,
@@ -86,6 +95,29 @@ export default function MapPolygonView({
             fillColor="rgba(141, 198, 63, 0.3)"
             strokeWidth={3}
           />
+          {savedTracks.map((track) => (
+            <React.Fragment key={track.id}>
+              <Polyline
+                coordinates={track.points}
+                strokeColor={track.color}
+                strokeWidth={4}
+              />
+              {track.points.length > 0 ? (
+                <Marker
+                  coordinate={track.points[0]}
+                  title={`${track.legenda} - Início`}
+                  pinColor={track.color}
+                />
+              ) : null}
+              {track.points.length > 1 ? (
+                <Marker
+                  coordinate={track.points[track.points.length - 1]}
+                  title={`${track.legenda} - Fim`}
+                  pinColor={track.color}
+                />
+              ) : null}
+            </React.Fragment>
+          ))}
           {trackPoints.length > 1 ? (
             <Polyline
               coordinates={trackPoints}
@@ -105,7 +137,7 @@ export default function MapPolygonView({
           {trackPoints.length > 0 ? (
             <Marker
               coordinate={trackPoints[0]}
-              title="Início do trajeto"
+              title="Gravação atual - Início"
               pinColor="#FF6B00"
             />
           ) : null}

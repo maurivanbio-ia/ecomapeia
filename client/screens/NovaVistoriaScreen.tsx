@@ -1593,11 +1593,19 @@ export default function NovaVistoriaScreen() {
           {polygonCoordinates.length >= 3 ? (
             <View style={styles.mapSection}>
               <ThemedText style={styles.subLabel}>
-                Visualização do Polígono {trackPoints.length > 0 ? `e Trajeto (${trackPoints.length} pontos)` : ""}
+                Visualização do Polígono {savedTracks.length > 0 || trackPoints.length > 0 
+                  ? `e ${savedTracks.length + (trackPoints.length > 0 ? 1 : 0)} trajeto(s)` 
+                  : ""}
               </ThemedText>
               <MapPolygonView
                 polygonCoordinates={polygonCoordinates}
                 trackPoints={trackPoints.map(p => ({ latitude: p.latitude, longitude: p.longitude }))}
+                savedTracks={savedTracks.map(t => ({
+                  id: t.id,
+                  legenda: t.legenda,
+                  points: t.points.map(p => ({ latitude: p.latitude, longitude: p.longitude })),
+                  color: t.color,
+                }))}
                 mapRegion={mapRegion}
                 onMapImageCaptured={handleMapImageCaptured}
                 mapImageUri={mapImageUri}
