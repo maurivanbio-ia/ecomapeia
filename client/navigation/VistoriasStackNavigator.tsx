@@ -5,6 +5,10 @@ import VistoriasScreen from "@/screens/VistoriasScreen";
 import NovaVistoriaScreen from "@/screens/NovaVistoriaScreen";
 import DetalhesVistoriaScreen from "@/screens/DetalhesVistoriaScreen";
 import MapaGeralScreen from "@/screens/MapaGeralScreen";
+import DashboardScreen from "@/screens/DashboardScreen";
+import EquipesScreen from "@/screens/EquipesScreen";
+import NotificacoesScreen from "@/screens/NotificacoesScreen";
+import HistoricoPropriedadeScreen from "@/screens/HistoricoPropriedadeScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 
 export type VistoriasStackParamList = {
@@ -12,6 +16,10 @@ export type VistoriasStackParamList = {
   NovaVistoria: undefined;
   DetalhesVistoria: { vistoriaId: string };
   MapaGeral: undefined;
+  Dashboard: undefined;
+  Equipes: undefined;
+  Notificacoes: undefined;
+  HistoricoPropriedade: undefined;
 };
 
 const Stack = createNativeStackNavigator<VistoriasStackParamList>();
@@ -47,6 +55,34 @@ export default function VistoriasStackNavigator() {
         component={MapaGeralScreen}
         options={{
           title: "Mapa das Propriedades",
+        }}
+      />
+      <Stack.Screen
+        name="Dashboard"
+        component={DashboardScreen}
+        options={{
+          title: "Dashboard",
+        }}
+      />
+      <Stack.Screen
+        name="Equipes"
+        component={EquipesScreen}
+        options={{
+          title: "Equipes",
+        }}
+      />
+      <Stack.Screen
+        name="Notificacoes"
+        component={NotificacoesScreen}
+        options={{
+          title: "Notificações",
+        }}
+      />
+      <Stack.Screen
+        name="HistoricoPropriedade"
+        component={HistoricoPropriedadeScreen}
+        options={{
+          title: "Histórico",
         }}
       />
     </Stack.Navigator>

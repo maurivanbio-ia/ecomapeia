@@ -136,11 +136,34 @@ export default function VistoriasScreen() {
 
   return (
     <ThemedView style={styles.container}>
+      <View style={[styles.quickActions, { marginTop: headerHeight + Spacing.md }]}>
+        <Pressable
+          style={[styles.quickActionButton, { backgroundColor: Colors.light.accent + "15" }]}
+          onPress={() => navigation.navigate("Dashboard")}
+        >
+          <Feather name="bar-chart-2" size={18} color={Colors.light.accent} />
+          <ThemedText style={[styles.quickActionText, { color: Colors.light.accent }]}>Dashboard</ThemedText>
+        </Pressable>
+        <Pressable
+          style={[styles.quickActionButton, { backgroundColor: Colors.light.success + "15" }]}
+          onPress={() => navigation.navigate("Equipes")}
+        >
+          <Feather name="users" size={18} color={Colors.light.success} />
+          <ThemedText style={[styles.quickActionText, { color: Colors.light.success }]}>Equipes</ThemedText>
+        </Pressable>
+        <Pressable
+          style={[styles.quickActionButton, { backgroundColor: Colors.light.warning + "15" }]}
+          onPress={() => navigation.navigate("HistoricoPropriedade")}
+        >
+          <Feather name="clock" size={18} color={Colors.light.warning} />
+          <ThemedText style={[styles.quickActionText, { color: Colors.light.warning }]}>Histórico</ThemedText>
+        </Pressable>
+      </View>
+
       <View
         style={[
           styles.searchContainer,
           {
-            marginTop: headerHeight + Spacing.md,
             backgroundColor: theme.backgroundDefault,
             borderColor: theme.border,
           },
@@ -229,6 +252,25 @@ function FAB({ onPress, tabBarHeight }: FABProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  quickActions: {
+    flexDirection: "row",
+    paddingHorizontal: Spacing.lg,
+    gap: Spacing.sm,
+    marginBottom: Spacing.md,
+  },
+  quickActionButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingVertical: 10,
+    borderRadius: 10,
+  },
+  quickActionText: {
+    fontSize: 12,
+    fontWeight: "600",
   },
   searchContainer: {
     flexDirection: "row",
