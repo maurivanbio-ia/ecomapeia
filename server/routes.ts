@@ -8,6 +8,7 @@ import pdfRoutes from "./routes/pdf";
 import docxRoutes from "./routes/docx";
 import aiRoutes from "./ai-routes";
 import mapbiomasRoutes from "./mapbiomas-routes";
+import environmentalRoutes from "./environmental-routes";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Register AI chat routes
@@ -18,6 +19,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Register MapBiomas routes
   app.use("/api/mapbiomas", mapbiomasRoutes);
+  
+  // Register Environmental Data APIs (INPE, ANA, IBGE, SiBBr, Satellite)
+  app.use("/api/environmental", environmentalRoutes);
   
   // Register PDF routes
   app.use("/api/pdf", pdfRoutes);
