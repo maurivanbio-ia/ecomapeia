@@ -298,34 +298,75 @@ router.post("/field-assistant", async (req: Request, res: Response) => {
 
 ## CONHECIMENTO SOBRE APP (Área de Preservação Permanente)
 
-**Definição Legal (Código Florestal - Lei 12.651/2012, art. 3º):**
-APP é a área protegida por lei, coberta ou não por vegetação nativa, com função de preservar recursos hídricos, estabilidade geológica, biodiversidade, fluxo gênico, solo e bem-estar das populações.
+**O que é APP?**
+Área protegida por lei (com ou sem vegetação nativa) que tem a função ambiental de preservar recursos hídricos, estabilidade geológica, biodiversidade, fluxo gênico, solo e bem-estar das populações.
+Base Legal: Código Florestal (Lei 12.651/2012, art. 3º)
 
-**LARGURAS MÍNIMAS DA APP (Código Florestal, art. 4º):**
+---
 
-### Rios e cursos d'água naturais (medida da borda da calha do leito regular):
-- **30 m**: cursos d'água com menos de 10 m de largura
-- **50 m**: 10 a 50 m de largura
-- **100 m**: 50 a 200 m de largura
-- **200 m**: 200 a 600 m de largura
-- **500 m**: acima de 600 m de largura
+## GUIA RÁPIDO: QUAL APP APLICAR?
 
-### Lagos e lagoas naturais:
-- **100 m** em zona rural
-- **30 m** em zona urbana
+Ao apresentar as regras de APP, use SEMPRE este formato visual organizado:
 
-### Nascentes e olhos d'água perenes:
-- **Raio mínimo de 50 m** (qualquer situação)
+### TIPO 1: RESERVATÓRIO ARTIFICIAL (UHE Itupararanga)
+╔══════════════════════════════════════════════════════════════╗
+║  MARGEM DO RESERVATÓRIO                                      ║
+║  ─────────────────────────────────────────────────────────── ║
+║  Largura da APP: Definida na LICENÇA AMBIENTAL e/ou PACUERA  ║
+║  (Plano Ambiental de Conservação e Uso do Entorno)           ║
+║                                                               ║
+║  Base Legal: Lei 12.651/2012, art. 4º, III                   ║
+║                                                               ║
+║  IMPORTANTE: Consultar os condicionantes do licenciamento    ║
+║  e o PACUERA vigente do empreendimento para confirmar a      ║
+║  faixa exata aplicável ao ponto vistoriado.                  ║
+╚══════════════════════════════════════════════════════════════╝
 
-### RESERVATÓRIOS ARTIFICIAIS (como a UHE Itupararanga):
-Para reservatórios artificiais, a APP do entorno NÃO é um valor fixo como para rios. É definida na **licença ambiental** e/ou no **PACUERA** (Plano Ambiental de Conservação e Uso do Entorno do Reservatório Artificial), conforme **Código Florestal, art. 4º**.
-Na prática, para Itupararanga, o técnico deve confirmar a faixa oficial nos condicionantes do licenciamento e no PACUERA vigente.
+### TIPO 2: RIOS E CURSOS D'ÁGUA NATURAIS
+╔══════════════════════════════════════════════════════════════╗
+║  LARGURA DO RIO          →   APP MÍNIMA                      ║
+║  ─────────────────────────────────────────────────────────── ║
+║  Menos de 10 m           →   30 metros                       ║
+║  De 10 a 50 m            →   50 metros                       ║
+║  De 50 a 200 m           →   100 metros                      ║
+║  De 200 a 600 m          →   200 metros                      ║
+║  Acima de 600 m          →   500 metros                      ║
+║                                                               ║
+║  Medição: a partir da borda da calha do leito regular        ║
+║  Base Legal: Lei 12.651/2012, art. 4º, I                     ║
+╚══════════════════════════════════════════════════════════════╝
 
-## OUTRAS REFERÊNCIAS IMPORTANTES
-- **Código Florestal**: Lei 12.651/2012
-- **CONAMA 303/2002**: Parâmetros para delimitação de APPs
-- **CONAMA 369/2006**: Intervenção em APPs
-- **Lei de Crimes Ambientais**: Lei 9.605/1998
+### TIPO 3: NASCENTES E OLHOS D'ÁGUA PERENES
+╔══════════════════════════════════════════════════════════════╗
+║  NASCENTE OU OLHO D'ÁGUA PERENE                              ║
+║  ─────────────────────────────────────────────────────────── ║
+║  APP: Raio mínimo de 50 metros                               ║
+║  (independente da situação topográfica)                      ║
+║                                                               ║
+║  Base Legal: Lei 12.651/2012, art. 4º, IV                    ║
+╚══════════════════════════════════════════════════════════════╝
+
+### TIPO 4: LAGOS E LAGOAS NATURAIS
+╔══════════════════════════════════════════════════════════════╗
+║  LOCALIZAÇÃO             →   APP MÍNIMA                      ║
+║  ─────────────────────────────────────────────────────────── ║
+║  Zona Rural              →   100 metros                      ║
+║  Zona Urbana             →   30 metros                       ║
+║                                                               ║
+║  Base Legal: Lei 12.651/2012, art. 4º, II                    ║
+╚══════════════════════════════════════════════════════════════╝
+
+---
+
+## LEGISLAÇÃO DE REFERÊNCIA
+
+| Norma                  | Assunto                                    |
+|------------------------|--------------------------------------------|
+| Lei 12.651/2012        | Código Florestal (define APPs)             |
+| CONAMA 303/2002        | Parâmetros para delimitação de APPs        |
+| CONAMA 369/2006        | Casos excepcionais de intervenção em APPs  |
+| Lei 9.605/1998         | Lei de Crimes Ambientais                   |
+| Resolução CONAMA 302   | APP em reservatórios artificiais           |
 
 ## COMPORTAMENTO
 - Se o técnico mencionar um ponto específico (margem de rio, nascente, margem do reservatório), indique exatamente qual regra usar e como medir em campo
