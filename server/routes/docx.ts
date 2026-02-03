@@ -10,10 +10,8 @@ import {
   WidthType,
   AlignmentType,
   BorderStyle,
-  HeadingLevel,
   ImageRun,
-  Header,
-  Footer,
+  PageBreak,
 } from "docx";
 import * as fs from "fs";
 import * as path from "path";
@@ -75,39 +73,26 @@ function createSectionHeader(text: string): Paragraph {
     shading: {
       fill: "002855",
     },
-    spacing: { before: 200, after: 100 },
+    spacing: { before: 300, after: 100 },
     alignment: AlignmentType.LEFT,
   });
 }
 
-function createFieldRow(label: string, value: string): TableRow {
-  return new TableRow({
-    children: [
-      new TableCell({
-        width: { size: 30, type: WidthType.PERCENTAGE },
-        children: [
-          new Paragraph({
-            children: [new TextRun({ text: label, bold: true, size: 20 })],
-          }),
-        ],
-        shading: { fill: "E8E8E8" },
-      }),
-      new TableCell({
-        width: { size: 70, type: WidthType.PERCENTAGE },
-        children: [
-          new Paragraph({
-            children: [new TextRun({ text: value || "-", size: 20 })],
-          }),
-        ],
-      }),
-    ],
-  });
+function base64ToBuffer(base64String: string): Buffer | null {
+  try {
+    const matches = base64String.match(/^data:image\/([a-zA-Z]+);base64,(.+)$/);
+    if (matches && matches[2]) {
+      return Buffer.from(matches[2], "base64");
+    }
+    return null;
+  } catch {
+    return null;
+  }
 }
 
 async function generateWordDocument(vistoria: VistoriaData): Promise<Buffer> {
   const sections: any[] = [];
 
-  // Try to load CBA logo
   let logoImage: ImageRun | null = null;
   try {
     const logoPath = path.join(__dirname, "../assets/cba_logo.png");
@@ -116,8 +101,8 @@ async function generateWordDocument(vistoria: VistoriaData): Promise<Buffer> {
       logoImage = new ImageRun({
         data: logoBuffer,
         transformation: {
-          width: 150,
-          height: 50,
+          width: 180,
+          height: 60,
         },
         type: "png",
       });
@@ -126,7 +111,6 @@ async function generateWordDocument(vistoria: VistoriaData): Promise<Buffer> {
     console.error("Error loading logo:", error);
   }
 
-  // Header paragraphs
   const headerParagraphs: Paragraph[] = [];
   
   if (logoImage) {
@@ -169,11 +153,13 @@ async function generateWordDocument(vistoria: VistoriaData): Promise<Buffer> {
         }),
       ],
       alignment: AlignmentType.RIGHT,
-      spacing: { after: 200 },
+      spacing: { after: 300 },
+      border: {
+        bottom: { style: BorderStyle.SINGLE, size: 12, color: "000000" },
+      },
     })
   );
 
-  // 01 – IDENTIFICAÇÃO PROPRIEDADE
   sections.push(
     createSectionHeader("01 – IDENTIFICAÇÃO PROPRIEDADE"),
     new Table({
@@ -276,7 +262,6 @@ async function generateWordDocument(vistoria: VistoriaData): Promise<Buffer> {
     })
   );
 
-  // 02 – IDENTIFICAÇÃO PROPRIETÁRIO
   sections.push(
     createSectionHeader("02 – IDENTIFICAÇÃO PROPRIETÁRIO"),
     new Table({
@@ -307,7 +292,6 @@ async function generateWordDocument(vistoria: VistoriaData): Promise<Buffer> {
     })
   );
 
-  // 03 – USOS ENCONTRADOS
   const usosRows: TableRow[] = [
     new TableRow({
       children: [
@@ -413,25 +397,57 @@ async function generateWordDocument(vistoria: VistoriaData): Promise<Buffer> {
     );
   }
 
-  // CROQUI DA ÁREA
   sections.push(
-    createSectionHeader(`CROQUI DA ÁREA (Coordenadas UTM - Zona ${vistoria.zona_utm || "23K"})`),
-    new Paragraph({
-      children: [
-        new TextRun({
-          text: vistoria.croqui_imagem
-            ? "[Croqui do mapa incluído no documento PDF]"
-            : "Croqui não disponível",
-          size: 20,
-          italics: true,
-        }),
-      ],
-      alignment: AlignmentType.CENTER,
-      spacing: { before: 200, after: 200 },
-    })
+    createSectionHeader(`CROQUI DA ÁREA (Coordenadas UTM - Zona ${vistoria.zona_utm || "23K"})`)
   );
 
-  // Coordinates table
+  if (vistoria.croqui_imagem) {
+    const croquiBuffer = base64ToBuffer(vistoria.croqui_imagem);
+    if (croquiBuffer) {
+      try {
+        const croquiImage = new ImageRun({
+          data: croquiBuffer,
+          transformation: {
+            width: 450,
+            height: 280,
+          },
+          type: "png",
+        });
+        sections.push(
+          new Paragraph({
+            children: [croquiImage],
+            alignment: AlignmentType.CENTER,
+            spacing: { before: 200, after: 200 },
+          })
+        );
+      } catch {
+        sections.push(
+          new Paragraph({
+            children: [new TextRun({ text: "Croqui disponível no documento PDF", size: 20, italics: true })],
+            alignment: AlignmentType.CENTER,
+            spacing: { before: 200, after: 200 },
+          })
+        );
+      }
+    } else {
+      sections.push(
+        new Paragraph({
+          children: [new TextRun({ text: "Croqui disponível no documento PDF", size: 20, italics: true })],
+          alignment: AlignmentType.CENTER,
+          spacing: { before: 200, after: 200 },
+        })
+      );
+    }
+  } else {
+    sections.push(
+      new Paragraph({
+        children: [new TextRun({ text: "Croqui não disponível", size: 20, italics: true })],
+        alignment: AlignmentType.CENTER,
+        spacing: { before: 200, after: 200 },
+      })
+    );
+  }
+
   const coordRows: TableRow[] = [
     new TableRow({
       children: [
@@ -525,7 +541,6 @@ async function generateWordDocument(vistoria: VistoriaData): Promise<Buffer> {
     })
   );
 
-  // OBSERVAÇÕES GERAIS
   sections.push(
     createSectionHeader("OBSERVAÇÕES GERAIS"),
     new Paragraph({
@@ -539,30 +554,151 @@ async function generateWordDocument(vistoria: VistoriaData): Promise<Buffer> {
     })
   );
 
-  // REGISTROS FOTOGRÁFICOS
   sections.push(
-    createSectionHeader("REGISTROS FOTOGRÁFICOS"),
-    new Paragraph({
-      children: [
-        new TextRun({
-          text: vistoria.fotos && vistoria.fotos.length > 0
-            ? `${vistoria.fotos.length} registro(s) fotográfico(s) incluído(s) no documento PDF.`
-            : "Nenhum registro fotográfico disponível.",
-          size: 20,
-          italics: true,
-        }),
-      ],
-      alignment: AlignmentType.CENTER,
-      spacing: { before: 200, after: 200 },
-    })
+    createSectionHeader("REGISTROS FOTOGRÁFICOS")
   );
 
-  // Signature section
+  if (vistoria.fotos && vistoria.fotos.length > 0) {
+    for (let i = 0; i < vistoria.fotos.length; i += 2) {
+      const fotosRow: TableCell[] = [];
+      
+      for (let j = 0; j < 2; j++) {
+        const fotoIndex = i + j;
+        if (fotoIndex < vistoria.fotos.length) {
+          const foto = vistoria.fotos[fotoIndex];
+          const fotoBuffer = base64ToBuffer(foto.uri);
+          
+          if (fotoBuffer) {
+            try {
+              const fotoImage = new ImageRun({
+                data: fotoBuffer,
+                transformation: {
+                  width: 220,
+                  height: 165,
+                },
+                type: "png",
+              });
+              
+              fotosRow.push(
+                new TableCell({
+                  children: [
+                    new Paragraph({
+                      children: [fotoImage],
+                      alignment: AlignmentType.CENTER,
+                      spacing: { after: 50 },
+                    }),
+                    new Paragraph({
+                      children: [
+                        new TextRun({
+                          text: foto.legenda || `Foto ${fotoIndex + 1}`,
+                          size: 18,
+                          italics: true,
+                        }),
+                      ],
+                      alignment: AlignmentType.CENTER,
+                    }),
+                  ],
+                  width: { size: 50, type: WidthType.PERCENTAGE },
+                  borders: {
+                    top: { style: BorderStyle.NONE },
+                    bottom: { style: BorderStyle.NONE },
+                    left: { style: BorderStyle.NONE },
+                    right: { style: BorderStyle.NONE },
+                  },
+                })
+              );
+            } catch {
+              fotosRow.push(
+                new TableCell({
+                  children: [
+                    new Paragraph({
+                      children: [
+                        new TextRun({
+                          text: `[${foto.legenda || `Foto ${fotoIndex + 1}`}]`,
+                          size: 18,
+                          italics: true,
+                        }),
+                      ],
+                      alignment: AlignmentType.CENTER,
+                    }),
+                  ],
+                  width: { size: 50, type: WidthType.PERCENTAGE },
+                  borders: {
+                    top: { style: BorderStyle.NONE },
+                    bottom: { style: BorderStyle.NONE },
+                    left: { style: BorderStyle.NONE },
+                    right: { style: BorderStyle.NONE },
+                  },
+                })
+              );
+            }
+          } else {
+            fotosRow.push(
+              new TableCell({
+                children: [
+                  new Paragraph({
+                    children: [
+                      new TextRun({
+                        text: `[${foto.legenda || `Foto ${fotoIndex + 1}`}]`,
+                        size: 18,
+                        italics: true,
+                      }),
+                    ],
+                    alignment: AlignmentType.CENTER,
+                  }),
+                ],
+                width: { size: 50, type: WidthType.PERCENTAGE },
+                borders: {
+                  top: { style: BorderStyle.NONE },
+                  bottom: { style: BorderStyle.NONE },
+                  left: { style: BorderStyle.NONE },
+                  right: { style: BorderStyle.NONE },
+                },
+              })
+            );
+          }
+        } else {
+          fotosRow.push(
+            new TableCell({
+              children: [new Paragraph({ children: [] })],
+              width: { size: 50, type: WidthType.PERCENTAGE },
+              borders: {
+                top: { style: BorderStyle.NONE },
+                bottom: { style: BorderStyle.NONE },
+                left: { style: BorderStyle.NONE },
+                right: { style: BorderStyle.NONE },
+              },
+            })
+          );
+        }
+      }
+
+      sections.push(
+        new Table({
+          width: { size: 100, type: WidthType.PERCENTAGE },
+          rows: [new TableRow({ children: fotosRow })],
+        }),
+        new Paragraph({ children: [], spacing: { after: 150 } })
+      );
+    }
+  } else {
+    sections.push(
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: "Nenhum registro fotográfico disponível.",
+            size: 20,
+            italics: true,
+          }),
+        ],
+        alignment: AlignmentType.CENTER,
+        spacing: { before: 200, after: 200 },
+      })
+    );
+  }
+
   sections.push(
-    new Paragraph({
-      children: [],
-      spacing: { before: 600 },
-    }),
+    new Paragraph({ children: [], spacing: { before: 400 } }),
     new Table({
       width: { size: 100, type: WidthType.PERCENTAGE },
       rows: [
@@ -570,6 +706,26 @@ async function generateWordDocument(vistoria: VistoriaData): Promise<Buffer> {
           children: [
             new TableCell({
               children: [
+                vistoria.assinatura_uri ? (() => {
+                  const sigBuffer = base64ToBuffer(vistoria.assinatura_uri);
+                  if (sigBuffer) {
+                    try {
+                      return new Paragraph({
+                        children: [
+                          new ImageRun({
+                            data: sigBuffer,
+                            transformation: { width: 150, height: 50 },
+                            type: "png",
+                          }),
+                        ],
+                        alignment: AlignmentType.CENTER,
+                      });
+                    } catch {
+                      return new Paragraph({ children: [], spacing: { before: 300 } });
+                    }
+                  }
+                  return new Paragraph({ children: [], spacing: { before: 300 } });
+                })() : new Paragraph({ children: [], spacing: { before: 300 } }),
                 new Paragraph({
                   children: [new TextRun({ text: "_________________________", size: 20 })],
                   alignment: AlignmentType.CENTER,
@@ -588,6 +744,7 @@ async function generateWordDocument(vistoria: VistoriaData): Promise<Buffer> {
             }),
             new TableCell({
               children: [
+                new Paragraph({ children: [], spacing: { before: 300 } }),
                 new Paragraph({
                   children: [new TextRun({ text: "_________________________", size: 20 })],
                   alignment: AlignmentType.CENTER,
@@ -610,12 +767,8 @@ async function generateWordDocument(vistoria: VistoriaData): Promise<Buffer> {
     })
   );
 
-  // Footer
   sections.push(
-    new Paragraph({
-      children: [],
-      spacing: { before: 400 },
-    }),
+    new Paragraph({ children: [], spacing: { before: 400 } }),
     new Paragraph({
       children: [
         new TextRun({
@@ -625,6 +778,10 @@ async function generateWordDocument(vistoria: VistoriaData): Promise<Buffer> {
         }),
       ],
       alignment: AlignmentType.CENTER,
+      border: {
+        top: { style: BorderStyle.SINGLE, size: 6, color: "CCCCCC" },
+      },
+      spacing: { before: 100 },
     }),
     new Paragraph({
       children: [
