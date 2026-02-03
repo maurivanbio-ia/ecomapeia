@@ -117,9 +117,30 @@ Preferred communication style: Simple, everyday language.
 **Fonts:**
 - @expo-google-fonts/nunito - Primary typography
 
+### AI Integration (Replit OpenAI)
+
+**Status:** Installed and configured
+- Uses Replit AI Integrations for OpenAI access
+- Environment variables auto-configured: `AI_INTEGRATIONS_OPENAI_API_KEY`, `AI_INTEGRATIONS_OPENAI_BASE_URL`
+
+**AI Features Available:**
+- `/api/conversations` - CRUD endpoints for AI chat conversations
+- `/api/conversations/:id/messages` - Send messages and get AI responses (streaming via SSE)
+- `/api/generate-image` - Generate images using GPT-Image-1 model
+
+**Database Tables for AI:**
+- `conversations` - Stores chat conversation metadata
+- `messages` - Stores chat messages with role (user/assistant) and content
+
+**Integration Files:**
+- `server/replit_integrations/chat/` - Chat routes and storage
+- `server/replit_integrations/image/` - Image generation routes
+- `server/replit_integrations/audio/` - Audio/voice capabilities (optional)
+
 ### Future Integrations (Planned per design docs)
 
 - Map/polygon generation from coordinates
 - PDF report generation matching existing templates
 - Photo storage with cloud upload
 - Offline-first data sync system
+- AI-powered inspection suggestions and analysis
