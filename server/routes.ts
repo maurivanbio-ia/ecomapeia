@@ -6,6 +6,7 @@ import { loginSchema, registerSchema } from "@shared/schema";
 import { registerChatRoutes } from "./replit_integrations/chat";
 import pdfRoutes from "./routes/pdf";
 import docxRoutes from "./routes/docx";
+import kmzRoutes from "./routes/kmz";
 import aiRoutes from "./ai-routes";
 import mapbiomasRoutes from "./mapbiomas-routes";
 import environmentalRoutes from "./environmental-routes";
@@ -40,6 +41,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Register Word document routes
   app.use("/api/docx", docxRoutes);
+  
+  // Register KMZ export routes
+  app.use("/api/kmz", kmzRoutes);
+  
   // Auth routes
   app.post("/api/auth/login", async (req: Request, res: Response) => {
     try {
