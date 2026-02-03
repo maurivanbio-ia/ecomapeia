@@ -1,16 +1,18 @@
-import React, { useState } from "react";
-import { View, StyleSheet, Pressable, Alert, Platform, Modal, Linking, ScrollView } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, StyleSheet, Pressable, Alert, Platform, Modal, Linking, ScrollView, Switch } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import Animated, {
   FadeInDown,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
+import { useQuery } from "@tanstack/react-query";
 
 import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollViewCompat";
 import { ThemedText } from "@/components/ThemedText";
@@ -18,27 +20,79 @@ import { ThemedView } from "@/components/ThemedView";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useThemeContext } from "@/contexts/ThemeContext";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 import { Language } from "@/lib/translations";
+import { isBiometricAvailable, getBiometricType, authenticateWithBiometrics } from "@/lib/biometricAuth";
+import { exportToJSON, exportToCSV } from "@/lib/exportData";
+import { shareViaWhatsApp, shareViaEmail } from "@/lib/shareUtils";
+import { resetTutorial } from "@/components/TutorialOverlay";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+const BIOMETRIC_ENABLED_KEY = "@mapeia_biometric_enabled";
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
   const tabBarHeight = useBottomTabBarHeight();
-  const { theme } = useTheme();
+  const { theme, isDark } = useTheme();
+  const { themeMode, setThemeMode } = useThemeContext();
   const { user, logout } = useAuth();
   const { language, setLanguage, t } = useLanguage();
 
   const [languageModalVisible, setLanguageModalVisible] = useState(false);
   const [aboutModalVisible, setAboutModalVisible] = useState(false);
   const [notificationModalVisible, setNotificationModalVisible] = useState(false);
+  const [themeModalVisible, setThemeModalVisible] = useState(false);
+  const [biometricModalVisible, setBiometricModalVisible] = useState(false);
+  const [backupModalVisible, setBackupModalVisible] = useState(false);
+  const [shareModalVisible, setShareModalVisible] = useState(false);
+  
+  const [biometricAvailable, setBiometricAvailable] = useState(false);
+  const [biometricType, setBiometricType] = useState("Biometria");
+  const [biometricEnabled, setBiometricEnabled] = useState(false);
+
+  const { data: vistorias = [] } = useQuery<any[]>({
+    queryKey: [`/api/vistorias?usuario_id=${user?.id}`],
+    enabled: !!user?.id,
+  });
+
+  useEffect(() => {
+    checkBiometricStatus();
+  }, []);
+
+  const checkBiometricStatus = async () => {
+    const available = await isBiometricAvailable();
+    setBiometricAvailable(available);
+    
+    if (available) {
+      const type = await getBiometricType();
+      setBiometricType(type);
+      
+      const enabled = await AsyncStorage.getItem(BIOMETRIC_ENABLED_KEY);
+      setBiometricEnabled(enabled === "true");
+    }
+  };
 
   const handleLanguageSelect = (lang: Language) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setLanguage(lang);
     setLanguageModalVisible(false);
+  };
+
+  const handleThemeSelect = (mode: "light" | "dark" | "system") => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setThemeMode(mode);
+    setThemeModalVisible(false);
+  };
+
+  const getThemeLabel = () => {
+    switch (themeMode) {
+      case "light": return t.lightMode;
+      case "dark": return t.darkModeOption;
+      case "system": return t.systemMode;
+    }
   };
 
   const handleNotifications = () => {
@@ -57,6 +111,74 @@ export default function ProfileScreen() {
       }
     }
     setNotificationModalVisible(false);
+  };
+
+  const handleBiometricToggle = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    
+    if (!biometricAvailable) {
+      Alert.alert(t.biometricTitle, t.biometricNotAvailable);
+      return;
+    }
+
+    const prompt = biometricEnabled ? t.biometricDisablePrompt : t.biometricEnablePrompt;
+    const result = await authenticateWithBiometrics(prompt);
+    
+    if (result.success) {
+      const newValue = !biometricEnabled;
+      setBiometricEnabled(newValue);
+      await AsyncStorage.setItem(BIOMETRIC_ENABLED_KEY, newValue.toString());
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+    
+    setBiometricModalVisible(false);
+  };
+
+  const handleExportJSON = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    const result = await exportToJSON(vistorias, `mapeia_backup_${Date.now()}`);
+    
+    if (result.success) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      Alert.alert(t.success, t.backupSuccess);
+    } else {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      Alert.alert(t.error, t.backupError);
+    }
+    setBackupModalVisible(false);
+  };
+
+  const handleExportCSV = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    const headers = ["id", "proprietario", "municipio", "data_vistoria", "status_upload"];
+    const result = await exportToCSV(vistorias, `mapeia_backup_${Date.now()}`, headers);
+    
+    if (result.success) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      Alert.alert(t.success, t.backupSuccess);
+    } else {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      Alert.alert(t.error, t.backupError);
+    }
+    setBackupModalVisible(false);
+  };
+
+  const handleShareWhatsApp = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    await shareViaWhatsApp(t.shareMessage + " https://mapeia.replit.app");
+    setShareModalVisible(false);
+  };
+
+  const handleShareEmail = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    await shareViaEmail("", "MapeIA - Plataforma de Vistorias", t.shareMessage + " https://mapeia.replit.app");
+    setShareModalVisible(false);
+  };
+
+  const handleResetTutorial = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    await resetTutorial();
+    Alert.alert(t.tutorialReset, t.tutorialResetSuccess);
   };
 
   const handleAbout = () => {
@@ -128,14 +250,15 @@ export default function ProfileScreen() {
           </View>
         </Animated.View>
 
-        {/* Settings Section */}
+        {/* Appearance Settings */}
         <Animated.View entering={FadeInDown.duration(500).delay(200)}>
           <ThemedText style={styles.sectionTitle}>{t.settings}</ThemedText>
           <View style={[styles.settingsCard, { backgroundColor: theme.backgroundDefault }]}>
             <SettingsItem
-              icon="bell"
-              label={t.notifications}
-              onPress={handleNotifications}
+              icon="sun"
+              label={t.darkMode}
+              value={getThemeLabel()}
+              onPress={() => setThemeModalVisible(true)}
               theme={theme}
             />
             <View style={[styles.divider, { backgroundColor: theme.border }]} />
@@ -144,6 +267,59 @@ export default function ProfileScreen() {
               label={t.language}
               value={language}
               onPress={() => setLanguageModalVisible(true)}
+              theme={theme}
+            />
+            <View style={[styles.divider, { backgroundColor: theme.border }]} />
+            <SettingsItem
+              icon="bell"
+              label={t.notifications}
+              onPress={handleNotifications}
+              theme={theme}
+            />
+          </View>
+        </Animated.View>
+
+        {/* Security & Data */}
+        <Animated.View entering={FadeInDown.duration(500).delay(250)}>
+          <View style={[styles.settingsCard, { backgroundColor: theme.backgroundDefault }]}>
+            {Platform.OS !== "web" ? (
+              <>
+                <SettingsItem
+                  icon="smartphone"
+                  label={t.biometricLogin}
+                  value={biometricEnabled ? biometricType : ""}
+                  onPress={() => setBiometricModalVisible(true)}
+                  theme={theme}
+                  showSwitch
+                  switchValue={biometricEnabled}
+                  onSwitchChange={handleBiometricToggle}
+                />
+                <View style={[styles.divider, { backgroundColor: theme.border }]} />
+              </>
+            ) : null}
+            <SettingsItem
+              icon="download-cloud"
+              label={t.backupData}
+              onPress={() => setBackupModalVisible(true)}
+              theme={theme}
+            />
+            <View style={[styles.divider, { backgroundColor: theme.border }]} />
+            <SettingsItem
+              icon="share-2"
+              label={t.shareApp}
+              onPress={() => setShareModalVisible(true)}
+              theme={theme}
+            />
+          </View>
+        </Animated.View>
+
+        {/* Help & About */}
+        <Animated.View entering={FadeInDown.duration(500).delay(300)}>
+          <View style={[styles.settingsCard, { backgroundColor: theme.backgroundDefault }]}>
+            <SettingsItem
+              icon="help-circle"
+              label={t.resetTutorial}
+              onPress={handleResetTutorial}
               theme={theme}
             />
             <View style={[styles.divider, { backgroundColor: theme.border }]} />
@@ -157,7 +333,7 @@ export default function ProfileScreen() {
         </Animated.View>
 
         {/* Logout Button */}
-        <Animated.View entering={FadeInDown.duration(500).delay(300)}>
+        <Animated.View entering={FadeInDown.duration(500).delay(350)}>
           <LogoutButton onPress={handleLogout} label={t.logout} />
         </Animated.View>
 
@@ -175,6 +351,53 @@ export default function ProfileScreen() {
           </ThemedText>
         </Animated.View>
       </KeyboardAwareScrollViewCompat>
+
+      {/* Theme Selection Modal */}
+      <Modal
+        visible={themeModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setThemeModalVisible(false)}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setThemeModalVisible(false)}
+        >
+          <Pressable style={[styles.modalContent, { backgroundColor: theme.backgroundDefault }]}>
+            <ThemedText style={styles.modalTitle}>{t.selectTheme}</ThemedText>
+            
+            {([
+              { mode: "light" as const, label: t.lightMode, icon: "sun" as const },
+              { mode: "dark" as const, label: t.darkModeOption, icon: "moon" as const },
+              { mode: "system" as const, label: t.systemMode, icon: "smartphone" as const },
+            ]).map((item) => (
+              <Pressable
+                key={item.mode}
+                style={[
+                  styles.languageOption,
+                  themeMode === item.mode && { backgroundColor: Colors.light.accent + "20" },
+                ]}
+                onPress={() => handleThemeSelect(item.mode)}
+              >
+                <View style={styles.themeOptionRow}>
+                  <Feather name={item.icon} size={20} color={theme.text} />
+                  <ThemedText style={styles.themeOptionText}>{item.label}</ThemedText>
+                </View>
+                {themeMode === item.mode ? (
+                  <Feather name="check" size={20} color={Colors.light.accent} />
+                ) : null}
+              </Pressable>
+            ))}
+
+            <Pressable
+              style={styles.modalCloseButton}
+              onPress={() => setThemeModalVisible(false)}
+            >
+              <ThemedText style={styles.modalCloseText}>{t.close}</ThemedText>
+            </Pressable>
+          </Pressable>
+        </Pressable>
+      </Modal>
 
       {/* Language Selection Modal */}
       <Modal
@@ -253,6 +476,148 @@ export default function ProfileScreen() {
             <Pressable
               style={styles.modalCloseButton}
               onPress={() => setNotificationModalVisible(false)}
+            >
+              <ThemedText style={styles.modalCloseText}>{t.close}</ThemedText>
+            </Pressable>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
+      {/* Biometric Modal */}
+      <Modal
+        visible={biometricModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setBiometricModalVisible(false)}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setBiometricModalVisible(false)}
+        >
+          <Pressable style={[styles.modalContent, { backgroundColor: theme.backgroundDefault }]}>
+            <View style={styles.notificationIconContainer}>
+              <Feather name="smartphone" size={48} color={Colors.light.accent} />
+            </View>
+            <ThemedText style={styles.modalTitle}>{t.biometricTitle}</ThemedText>
+            
+            <ThemedText style={styles.notificationDescription}>
+              {!biometricAvailable 
+                ? t.biometricNotAvailable
+                : biometricEnabled 
+                  ? t.biometricEnabled 
+                  : t.biometricDisabled
+              }
+            </ThemedText>
+
+            {biometricAvailable ? (
+              <Pressable
+                style={[styles.settingsButton, { backgroundColor: biometricEnabled ? Colors.light.error : Colors.light.accent }]}
+                onPress={handleBiometricToggle}
+              >
+                <Feather name={biometricEnabled ? "x" : "check"} size={18} color="#FFFFFF" />
+                <ThemedText style={styles.settingsButtonText}>
+                  {biometricEnabled ? t.disableBiometric : t.enableBiometric}
+                </ThemedText>
+              </Pressable>
+            ) : null}
+
+            <Pressable
+              style={styles.modalCloseButton}
+              onPress={() => setBiometricModalVisible(false)}
+            >
+              <ThemedText style={styles.modalCloseText}>{t.close}</ThemedText>
+            </Pressable>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
+      {/* Backup Modal */}
+      <Modal
+        visible={backupModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setBackupModalVisible(false)}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setBackupModalVisible(false)}
+        >
+          <Pressable style={[styles.modalContent, { backgroundColor: theme.backgroundDefault }]}>
+            <View style={styles.notificationIconContainer}>
+              <Feather name="download-cloud" size={48} color={Colors.light.accent} />
+            </View>
+            <ThemedText style={styles.modalTitle}>{t.backupTitle}</ThemedText>
+            
+            <ThemedText style={styles.notificationDescription}>
+              {t.backupDescription}
+            </ThemedText>
+
+            <View style={styles.backupButtonsContainer}>
+              <Pressable
+                style={[styles.backupButton, { backgroundColor: Colors.light.accent }]}
+                onPress={handleExportJSON}
+              >
+                <Feather name="file" size={18} color="#FFFFFF" />
+                <ThemedText style={styles.settingsButtonText}>{t.exportJSON}</ThemedText>
+              </Pressable>
+              
+              <Pressable
+                style={[styles.backupButton, { backgroundColor: Colors.light.primary }]}
+                onPress={handleExportCSV}
+              >
+                <Feather name="file-text" size={18} color="#FFFFFF" />
+                <ThemedText style={styles.settingsButtonText}>{t.exportCSV}</ThemedText>
+              </Pressable>
+            </View>
+
+            <Pressable
+              style={styles.modalCloseButton}
+              onPress={() => setBackupModalVisible(false)}
+            >
+              <ThemedText style={styles.modalCloseText}>{t.close}</ThemedText>
+            </Pressable>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
+      {/* Share Modal */}
+      <Modal
+        visible={shareModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShareModalVisible(false)}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setShareModalVisible(false)}
+        >
+          <Pressable style={[styles.modalContent, { backgroundColor: theme.backgroundDefault }]}>
+            <View style={styles.notificationIconContainer}>
+              <Feather name="share-2" size={48} color={Colors.light.accent} />
+            </View>
+            <ThemedText style={styles.modalTitle}>{t.shareTitle}</ThemedText>
+
+            <View style={styles.shareButtonsContainer}>
+              <Pressable
+                style={[styles.shareButton, { backgroundColor: "#25D366" }]}
+                onPress={handleShareWhatsApp}
+              >
+                <Feather name="message-circle" size={24} color="#FFFFFF" />
+                <ThemedText style={styles.shareButtonText}>{t.shareViaWhatsApp}</ThemedText>
+              </Pressable>
+              
+              <Pressable
+                style={[styles.shareButton, { backgroundColor: Colors.light.primary }]}
+                onPress={handleShareEmail}
+              >
+                <Feather name="mail" size={24} color="#FFFFFF" />
+                <ThemedText style={styles.shareButtonText}>{t.shareViaEmail}</ThemedText>
+              </Pressable>
+            </View>
+
+            <Pressable
+              style={styles.modalCloseButton}
+              onPress={() => setShareModalVisible(false)}
             >
               <ThemedText style={styles.modalCloseText}>{t.close}</ThemedText>
             </Pressable>
@@ -343,9 +708,12 @@ interface SettingsItemProps {
   value?: string;
   onPress: () => void;
   theme: any;
+  showSwitch?: boolean;
+  switchValue?: boolean;
+  onSwitchChange?: () => void;
 }
 
-function SettingsItem({ icon, label, value, onPress, theme }: SettingsItemProps) {
+function SettingsItem({ icon, label, value, onPress, theme, showSwitch, switchValue, onSwitchChange }: SettingsItemProps) {
   return (
     <Pressable
       onPress={onPress}
@@ -368,7 +736,16 @@ function SettingsItem({ icon, label, value, onPress, theme }: SettingsItemProps)
             {value}
           </ThemedText>
         ) : null}
-        <Feather name="chevron-right" size={20} color={theme.tabIconDefault} />
+        {showSwitch ? (
+          <Switch
+            value={switchValue}
+            onValueChange={onSwitchChange}
+            trackColor={{ false: "#767577", true: Colors.light.accent + "80" }}
+            thumbColor={switchValue ? Colors.light.accent : "#f4f3f4"}
+          />
+        ) : (
+          <Feather name="chevron-right" size={20} color={theme.tabIconDefault} />
+        )}
       </View>
     </Pressable>
   );
@@ -464,7 +841,7 @@ const styles = StyleSheet.create({
   },
   settingsCard: {
     borderRadius: BorderRadius.lg,
-    marginBottom: Spacing["2xl"],
+    marginBottom: Spacing.xl,
     overflow: "hidden",
   },
   settingsItem: {
@@ -546,6 +923,14 @@ const styles = StyleSheet.create({
   languageText: {
     fontSize: 16,
   },
+  themeOptionRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.md,
+  },
+  themeOptionText: {
+    fontSize: 16,
+  },
   modalCloseButton: {
     marginTop: Spacing.lg,
     paddingVertical: Spacing.md,
@@ -575,6 +960,33 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   settingsButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#FFFFFF",
+  },
+  backupButtonsContainer: {
+    gap: Spacing.md,
+  },
+  backupButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.md,
+    gap: Spacing.sm,
+  },
+  shareButtonsContainer: {
+    gap: Spacing.md,
+  },
+  shareButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: Spacing.lg,
+    borderRadius: BorderRadius.md,
+    gap: Spacing.md,
+  },
+  shareButtonText: {
     fontSize: 16,
     fontWeight: "600",
     color: "#FFFFFF",

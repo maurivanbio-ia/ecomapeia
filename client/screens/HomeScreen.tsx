@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   View,
   StyleSheet,
@@ -6,6 +6,7 @@ import {
   Pressable,
   RefreshControl,
   Alert,
+  TextInput,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
@@ -20,14 +21,14 @@ import Animated, {
 } from "react-native-reanimated";
 import { useNavigation } from "@react-navigation/native";
 import type { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import { Card } from "@/components/Card";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/hooks/useAuth";
-import { Colors, Spacing, BorderRadius, Shadows } from "@/constants/theme";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 import type { MainTabParamList } from "@/navigation/MainTabNavigator";
 import { getPendingCount, syncPendingVistorias } from "@/lib/offlineStorage";
 import { apiRequest } from "@/lib/query-client";
@@ -42,6 +43,7 @@ interface Vistoria {
   data_vistoria: string;
   status_upload: string;
   tipo_intervencao?: string;
+  municipio?: string;
 }
 
 export default function HomeScreen() {
@@ -50,11 +52,13 @@ export default function HomeScreen() {
   const tabBarHeight = useBottomTabBarHeight();
   const { theme, isDark } = useTheme();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const navigation = useNavigation<NavigationProp>();
-  const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = React.useState(false);
   const [pendingCount, setPendingCount] = useState(0);
   const [syncing, setSyncing] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | "synced" | "pending">("all");
 
   const { data: vistorias = [], refetch } = useQuery<Vistoria[]>({
     queryKey: [`/api/vistorias?usuario_id=${user?.id}`],
@@ -64,6 +68,29 @@ export default function HomeScreen() {
   useEffect(() => {
     getPendingCount().then(setPendingCount);
   }, []);
+
+  const filteredVistorias = useMemo(() => {
+    let filtered = vistorias;
+    
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (v) =>
+          v.proprietario?.toLowerCase().includes(query) ||
+          v.municipio?.toLowerCase().includes(query)
+      );
+    }
+    
+    if (statusFilter !== "all") {
+      filtered = filtered.filter((v) => 
+        statusFilter === "synced" 
+          ? v.status_upload === "synced" 
+          : v.status_upload !== "synced"
+      );
+    }
+    
+    return filtered;
+  }, [vistorias, searchQuery, statusFilter]);
 
   const syncedCount = vistorias.filter((v) => v.status_upload === "synced").length;
   const totalCount = vistorias.length + pendingCount;
@@ -83,7 +110,7 @@ export default function HomeScreen() {
   const handleSyncPending = async () => {
     if (pendingCount === 0) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-      Alert.alert("Sincronização", "Não há vistorias pendentes para sincronizar.");
+      Alert.alert(t.syncNow, t.noInspections);
       return;
     }
 
@@ -101,12 +128,12 @@ export default function HomeScreen() {
       
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       Alert.alert(
-        "Sincronização Concluída",
+        t.success,
         `${result.synced} vistoria(s) sincronizada(s).${result.errors > 0 ? ` ${result.errors} erro(s).` : ""}`
       );
     } catch (error) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Alert.alert("Erro", "Falha na sincronização. Tente novamente.");
+      Alert.alert(t.error, "Falha na sincronização. Tente novamente.");
     } finally {
       setSyncing(false);
     }
@@ -144,7 +171,7 @@ export default function HomeScreen() {
           >
             <View style={styles.welcomeContent}>
               <ThemedText style={styles.welcomeLabel} lightColor="#FFFFFF" darkColor="#FFFFFF">
-                Bem-vindo de volta,
+                {t.welcome},
               </ThemedText>
               <ThemedText style={styles.welcomeName} lightColor="#FFFFFF" darkColor="#FFFFFF">
                 {user?.nome || "Usuário"}
@@ -155,7 +182,7 @@ export default function HomeScreen() {
                     {totalCount}
                   </ThemedText>
                   <ThemedText style={styles.statLabel} lightColor="rgba(255,255,255,0.8)" darkColor="rgba(255,255,255,0.8)">
-                    Vistorias
+                    {t.totalInspections}
                   </ThemedText>
                 </View>
                 <View style={styles.statDivider} />
@@ -164,7 +191,7 @@ export default function HomeScreen() {
                     {pendingCount}
                   </ThemedText>
                   <ThemedText style={styles.statLabel} lightColor="rgba(255,255,255,0.8)" darkColor="rgba(255,255,255,0.8)">
-                    Pendentes
+                    {t.pending}
                   </ThemedText>
                 </View>
                 <View style={styles.statDivider} />
@@ -173,7 +200,7 @@ export default function HomeScreen() {
                     {syncedCount}
                   </ThemedText>
                   <ThemedText style={styles.statLabel} lightColor="rgba(255,255,255,0.8)" darkColor="rgba(255,255,255,0.8)">
-                    Sincronizados
+                    {t.synced}
                   </ThemedText>
                 </View>
               </View>
@@ -186,20 +213,61 @@ export default function HomeScreen() {
 
         {/* Quick Actions */}
         <Animated.View entering={FadeInDown.duration(500).delay(200)}>
-          <ThemedText style={styles.sectionTitle}>Ações Rápidas</ThemedText>
+          <ThemedText style={styles.sectionTitle}>{t.home}</ThemedText>
           <View style={styles.actionsGrid}>
             <QuickActionCard
               icon="plus-circle"
-              label="Nova Vistoria"
+              label={t.newInspection}
               color={Colors.light.accent}
               onPress={handleNewVistoria}
               theme={theme}
             />
             <QuickActionCard
               icon="upload-cloud"
-              label="Sincronizar"
+              label={t.syncNow}
               color={Colors.light.primary}
               onPress={handleSyncPending}
+              theme={theme}
+              loading={syncing}
+            />
+          </View>
+        </Animated.View>
+
+        {/* Search and Filter */}
+        <Animated.View entering={FadeInDown.duration(500).delay(250)}>
+          <View style={[styles.searchContainer, { backgroundColor: theme.backgroundDefault }]}>
+            <Feather name="search" size={20} color={theme.tabIconDefault} />
+            <TextInput
+              style={[styles.searchInput, { color: theme.text }]}
+              placeholder={t.searchPlaceholder}
+              placeholderTextColor={theme.tabIconDefault}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+            {searchQuery.length > 0 ? (
+              <Pressable onPress={() => setSearchQuery("")}>
+                <Feather name="x" size={20} color={theme.tabIconDefault} />
+              </Pressable>
+            ) : null}
+          </View>
+          
+          <View style={styles.filterRow}>
+            <FilterChip
+              label={t.all}
+              active={statusFilter === "all"}
+              onPress={() => setStatusFilter("all")}
+              theme={theme}
+            />
+            <FilterChip
+              label={t.synced}
+              active={statusFilter === "synced"}
+              onPress={() => setStatusFilter("synced")}
+              theme={theme}
+            />
+            <FilterChip
+              label={t.pending}
+              active={statusFilter === "pending"}
+              onPress={() => setStatusFilter("pending")}
               theme={theme}
             />
           </View>
@@ -207,10 +275,10 @@ export default function HomeScreen() {
 
         {/* Recent Inspections */}
         <Animated.View entering={FadeInDown.duration(500).delay(300)}>
-          <ThemedText style={styles.sectionTitle}>Vistorias Recentes</ThemedText>
-          {vistorias.length > 0 ? (
+          <ThemedText style={styles.sectionTitle}>{t.recentInspections}</ThemedText>
+          {filteredVistorias.length > 0 ? (
             <View style={styles.recentList}>
-              {vistorias.slice(0, 3).map((vistoria) => (
+              {filteredVistorias.slice(0, 5).map((vistoria) => (
                 <View
                   key={vistoria.id}
                   style={[
@@ -235,7 +303,7 @@ export default function HomeScreen() {
                         ]}
                       >
                         <ThemedText style={styles.syncBadgeText}>
-                          {vistoria.status_upload === "synced" ? "Sincronizado" : "Pendente"}
+                          {vistoria.status_upload === "synced" ? t.synced : t.pending}
                         </ThemedText>
                       </View>
                     </View>
@@ -251,14 +319,14 @@ export default function HomeScreen() {
             <View style={[styles.emptyState, { backgroundColor: theme.backgroundDefault }]}>
               <Feather name="clipboard" size={48} color={theme.tabIconDefault} />
               <ThemedText style={styles.emptyTitle}>
-                Nenhuma vistoria cadastrada
+                {searchQuery ? t.noResults : t.noInspections}
               </ThemedText>
               <ThemedText
                 style={styles.emptySubtitle}
                 lightColor={Colors.light.textSecondary}
                 darkColor={Colors.dark.textSecondary}
               >
-                Comece criando uma nova vistoria
+                {searchQuery ? t.searchPlaceholder : t.newInspection}
               </ThemedText>
             </View>
           )}
@@ -274,9 +342,10 @@ interface QuickActionCardProps {
   color: string;
   onPress: () => void;
   theme: any;
+  loading?: boolean;
 }
 
-function QuickActionCard({ icon, label, color, onPress, theme }: QuickActionCardProps) {
+function QuickActionCard({ icon, label, color, onPress, theme, loading }: QuickActionCardProps) {
   const scale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -296,17 +365,52 @@ function QuickActionCard({ icon, label, color, onPress, theme }: QuickActionCard
       onPress={onPress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
+      disabled={loading}
       style={[
         styles.actionCard,
         { backgroundColor: theme.backgroundDefault },
         animatedStyle,
+        loading && { opacity: 0.7 },
       ]}
     >
       <View style={[styles.actionIconContainer, { backgroundColor: color }]}>
-        <Feather name={icon} size={24} color="#FFFFFF" />
+        <Feather name={loading ? "loader" : icon} size={24} color="#FFFFFF" />
       </View>
       <ThemedText style={styles.actionLabel}>{label}</ThemedText>
     </AnimatedPressable>
+  );
+}
+
+interface FilterChipProps {
+  label: string;
+  active: boolean;
+  onPress: () => void;
+  theme: any;
+}
+
+function FilterChip({ label, active, onPress, theme }: FilterChipProps) {
+  return (
+    <Pressable
+      onPress={() => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        onPress();
+      }}
+      style={[
+        styles.filterChip,
+        {
+          backgroundColor: active ? Colors.light.accent : theme.backgroundDefault,
+          borderColor: active ? Colors.light.accent : theme.border,
+        },
+      ]}
+    >
+      <ThemedText
+        style={[styles.filterChipText, active && { color: "#FFFFFF" }]}
+        lightColor={active ? "#FFFFFF" : Colors.light.textSecondary}
+        darkColor={active ? "#FFFFFF" : Colors.dark.textSecondary}
+      >
+        {label}
+      </ThemedText>
+    </Pressable>
   );
 }
 
@@ -352,14 +456,14 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   statLabel: {
-    fontSize: 12,
+    fontSize: 10,
     marginTop: 2,
   },
   statDivider: {
     width: 1,
     height: 40,
     backgroundColor: "rgba(255,255,255,0.3)",
-    marginHorizontal: Spacing["2xl"],
+    marginHorizontal: Spacing.lg,
   },
   welcomeIconContainer: {
     justifyContent: "center",
@@ -393,6 +497,35 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "500",
     textAlign: "center",
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.lg,
+    marginBottom: Spacing.md,
+    gap: Spacing.md,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    paddingVertical: Spacing.xs,
+  },
+  filterRow: {
+    flexDirection: "row",
+    gap: Spacing.sm,
+    marginBottom: Spacing["2xl"],
+  },
+  filterChip: {
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.full,
+    borderWidth: 1,
+  },
+  filterChipText: {
+    fontSize: 14,
+    fontWeight: "500",
   },
   emptyState: {
     borderRadius: BorderRadius.xl,
