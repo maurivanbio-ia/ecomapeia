@@ -2,35 +2,41 @@ import React, { useState } from "react";
 import {
   View,
   StyleSheet,
-  ImageBackground,
   TextInput,
   Pressable,
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
-  Text,
+  Dimensions,
+  ScrollView,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import { Image } from "expo-image";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
   FadeIn,
   FadeInDown,
+  FadeInUp,
 } from "react-native-reanimated";
+import { LinearGradient } from "expo-linear-gradient";
 
 import { ThemedText } from "@/components/ThemedText";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 import { useAuth } from "@/hooks/useAuth";
 
+import logoImage from "../../assets/images/ecomapeia-logo.png";
+
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 export default function LoginScreen() {
   const insets = useSafeAreaInsets();
   const { login, isLoading, error } = useAuth();
-  
+
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -56,7 +62,7 @@ export default function LoginScreen() {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       return;
     }
-    
+
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     await login(email.trim(), senha);
   };
@@ -67,128 +73,134 @@ export default function LoginScreen() {
   };
 
   return (
-    <ImageBackground
-      source={require("../../assets/images/login-background.png")}
-      style={styles.background}
-      resizeMode="cover"
+    <LinearGradient
+      colors={["#0B3D2E", "#145A3E", "#1A7A52", "#0F4C35"]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={styles.gradient}
     >
-      <View style={styles.overlay} />
-      
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        <View
-          style={[
-            styles.content,
+        <ScrollView
+          contentContainerStyle={[
+            styles.scrollContent,
             {
-              paddingTop: insets.top + Spacing["3xl"],
-              paddingBottom: insets.bottom + Spacing.lg,
+              paddingTop: insets.top + Spacing["2xl"],
+              paddingBottom: insets.bottom + Spacing.xl,
             },
           ]}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
-          {/* Login Form at Top */}
           <Animated.View
-            entering={FadeInDown.duration(600).delay(200)}
-            style={styles.formContainer}
+            entering={FadeIn.duration(800)}
+            style={styles.logoSection}
           >
-            <ThemedText
-              style={styles.welcomeText}
-              lightColor="#FFFFFF"
-              darkColor="#FFFFFF"
-            >
-              Bem-vindo ao
-            </ThemedText>
-            
-            {/* EcoMapeIA with colors */}
-            <View style={styles.logoTextContainer}>
-              <Text style={styles.logoTextGreen}>Eco</Text>
-              <Text style={styles.logoTextBlue}>Mape</Text>
-              <Text style={styles.logoTextPurple}>IA</Text>
-            </View>
-            
-            <ThemedText
-              style={styles.subtitleText}
-              lightColor="rgba(255,255,255,0.8)"
-              darkColor="rgba(255,255,255,0.8)"
-            >
-              Plataforma de Vistorias Ambientais
-            </ThemedText>
-
-            {/* Email Input */}
-            <View
-              style={[
-                styles.inputContainer,
-                emailFocused && styles.inputContainerFocused,
-              ]}
-            >
-              <Feather
-                name="mail"
-                size={20}
-                color={emailFocused ? Colors.light.accent : "rgba(255,255,255,0.6)"}
-                style={styles.inputIcon}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="E-mail"
-                placeholderTextColor="rgba(255,255,255,0.5)"
-                value={email}
-                onChangeText={setEmail}
-                onFocus={() => setEmailFocused(true)}
-                onBlur={() => setEmailFocused(false)}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoComplete="email"
-                testID="input-email"
+            <View style={styles.logoContainer}>
+              <Image
+                source={logoImage}
+                style={styles.logoImage}
+                contentFit="contain"
               />
             </View>
+          </Animated.View>
 
-            {/* Password Input */}
-            <View
-              style={[
-                styles.inputContainer,
-                senhaFocused && styles.inputContainerFocused,
-              ]}
-            >
-              <Feather
-                name="lock"
-                size={20}
-                color={senhaFocused ? Colors.light.accent : "rgba(255,255,255,0.6)"}
-                style={styles.inputIcon}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Senha"
-                placeholderTextColor="rgba(255,255,255,0.5)"
-                value={senha}
-                onChangeText={setSenha}
-                onFocus={() => setSenhaFocused(true)}
-                onBlur={() => setSenhaFocused(false)}
-                secureTextEntry={!showPassword}
-                autoCapitalize="none"
-                testID="input-password"
-              />
-              <Pressable
-                onPress={togglePasswordVisibility}
-                style={styles.eyeButton}
-                hitSlop={8}
+          <Animated.View
+            entering={FadeInUp.duration(600).delay(300)}
+            style={styles.formCard}
+          >
+            <ThemedText style={styles.formTitle} lightColor="#1E3A5F" darkColor="#1E3A5F">
+              Acesse sua conta
+            </ThemedText>
+            <ThemedText style={styles.formSubtitle} lightColor="#6B7280" darkColor="#6B7280">
+              Entre com suas credenciais para continuar
+            </ThemedText>
+
+            <View style={styles.inputGroup}>
+              <ThemedText style={styles.inputLabel} lightColor="#374151" darkColor="#374151">
+                E-mail
+              </ThemedText>
+              <View
+                style={[
+                  styles.inputContainer,
+                  emailFocused && styles.inputContainerFocused,
+                ]}
               >
                 <Feather
-                  name={showPassword ? "eye-off" : "eye"}
-                  size={20}
-                  color="rgba(255,255,255,0.6)"
+                  name="mail"
+                  size={18}
+                  color={emailFocused ? "#1A7A52" : "#9CA3AF"}
+                  style={styles.inputIcon}
                 />
-              </Pressable>
+                <TextInput
+                  style={styles.input}
+                  placeholder="seu@email.com"
+                  placeholderTextColor="#9CA3AF"
+                  value={email}
+                  onChangeText={setEmail}
+                  onFocus={() => setEmailFocused(true)}
+                  onBlur={() => setEmailFocused(false)}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoComplete="email"
+                  testID="input-email"
+                />
+              </View>
             </View>
 
-            {/* Error Message */}
+            <View style={styles.inputGroup}>
+              <ThemedText style={styles.inputLabel} lightColor="#374151" darkColor="#374151">
+                Senha
+              </ThemedText>
+              <View
+                style={[
+                  styles.inputContainer,
+                  senhaFocused && styles.inputContainerFocused,
+                ]}
+              >
+                <Feather
+                  name="lock"
+                  size={18}
+                  color={senhaFocused ? "#1A7A52" : "#9CA3AF"}
+                  style={styles.inputIcon}
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Digite sua senha"
+                  placeholderTextColor="#9CA3AF"
+                  value={senha}
+                  onChangeText={setSenha}
+                  onFocus={() => setSenhaFocused(true)}
+                  onBlur={() => setSenhaFocused(false)}
+                  secureTextEntry={!showPassword}
+                  autoCapitalize="none"
+                  testID="input-password"
+                />
+                <Pressable
+                  onPress={togglePasswordVisibility}
+                  style={styles.eyeButton}
+                  hitSlop={8}
+                >
+                  <Feather
+                    name={showPassword ? "eye-off" : "eye"}
+                    size={18}
+                    color="#9CA3AF"
+                  />
+                </Pressable>
+              </View>
+            </View>
+
             {error ? (
-              <Animated.View entering={FadeIn.duration(300)}>
-                <ThemedText style={styles.errorText}>{error}</ThemedText>
+              <Animated.View entering={FadeIn.duration(300)} style={styles.errorContainer}>
+                <Feather name="alert-circle" size={16} color="#EF4444" />
+                <ThemedText style={styles.errorText} lightColor="#EF4444" darkColor="#EF4444">
+                  {error}
+                </ThemedText>
               </Animated.View>
             ) : null}
 
-            {/* Login Button */}
             <AnimatedPressable
               onPress={handleLogin}
               onPressIn={handlePressIn}
@@ -197,179 +209,173 @@ export default function LoginScreen() {
               style={[styles.loginButton, buttonAnimatedStyle]}
               testID="button-login"
             >
-              {isLoading ? (
-                <ActivityIndicator color="#FFFFFF" size="small" />
-              ) : (
-                <ThemedText style={styles.loginButtonText}>
-                  Faça seu login
-                </ThemedText>
-              )}
+              <LinearGradient
+                colors={["#1A7A52", "#145A3E"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.loginButtonGradient}
+              >
+                {isLoading ? (
+                  <ActivityIndicator color="#FFFFFF" size="small" />
+                ) : (
+                  <>
+                    <ThemedText style={styles.loginButtonText} lightColor="#FFFFFF" darkColor="#FFFFFF">
+                      Entrar
+                    </ThemedText>
+                    <Feather name="arrow-right" size={20} color="#FFFFFF" />
+                  </>
+                )}
+              </LinearGradient>
             </AnimatedPressable>
 
-            {/* Forgot Password */}
             <Pressable style={styles.forgotButton}>
               <ThemedText
                 style={styles.forgotText}
-                lightColor="rgba(255,255,255,0.8)"
-                darkColor="rgba(255,255,255,0.8)"
+                lightColor="#1A7A52"
+                darkColor="#1A7A52"
               >
-                Esqueci minha senha
+                Esqueceu sua senha?
               </ThemedText>
             </Pressable>
           </Animated.View>
 
-          {/* Spacer */}
-          <View style={styles.spacer} />
-
-          {/* Footer */}
           <Animated.View
             entering={FadeIn.duration(800).delay(600)}
             style={styles.footerContainer}
           >
-            <ThemedText
-              style={styles.footerText}
-              lightColor="rgba(255,255,255,0.6)"
-              darkColor="rgba(255,255,255,0.6)"
-            >
+            <ThemedText style={styles.footerText} lightColor="rgba(255,255,255,0.5)" darkColor="rgba(255,255,255,0.5)">
               desenvolvido por
             </ThemedText>
-            <ThemedText
-              style={styles.footerCompany}
-              lightColor="rgba(255,255,255,0.8)"
-              darkColor="rgba(255,255,255,0.8)"
-            >
-              EcoIA - Inteligência Ambiental
-            </ThemedText>
-            <ThemedText
-              style={styles.footerCnpj}
-              lightColor="rgba(255,255,255,0.5)"
-              darkColor="rgba(255,255,255,0.5)"
-            >
-              por Maurivan Vaz Ribeiro
+            <ThemedText style={styles.footerCompany} lightColor="rgba(255,255,255,0.8)" darkColor="rgba(255,255,255,0.8)">
+              Maurivan Vaz Ribeiro
             </ThemedText>
           </Animated.View>
-        </View>
+        </ScrollView>
       </KeyboardAvoidingView>
-    </ImageBackground>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  background: {
+  gradient: {
     flex: 1,
-  },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(30, 58, 95, 0.55)",
   },
   container: {
     flex: 1,
   },
-  content: {
-    flex: 1,
-    paddingHorizontal: Spacing["2xl"],
-    justifyContent: "space-between",
+  scrollContent: {
+    flexGrow: 1,
+    paddingHorizontal: Spacing.xl,
+    justifyContent: "center",
   },
-  formContainer: {
+  logoSection: {
+    alignItems: "center",
+    marginBottom: Spacing["2xl"],
+  },
+  logoContainer: {
+    width: Math.min(SCREEN_WIDTH - 80, 320),
+    height: 100,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  logoImage: {
     width: "100%",
+    height: "100%",
   },
-  welcomeText: {
-    fontSize: 22,
-    fontWeight: "500",
+  formCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 24,
+    paddingHorizontal: Spacing.xl,
+    paddingVertical: Spacing["2xl"],
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 24,
+    elevation: 12,
+    marginBottom: Spacing["2xl"],
+  },
+  formTitle: {
+    fontSize: 24,
+    fontWeight: "700",
     textAlign: "center",
     marginBottom: Spacing.xs,
   },
-  logoTextContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: Spacing.sm,
-  },
-  logoTextBlue: {
-    fontSize: 48,
-    fontWeight: "800",
-    color: "#3b82f6",
-    textShadowColor: "rgba(255,255,255,0.3)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
-  },
-  logoTextGreen: {
-    fontSize: 48,
-    fontWeight: "800",
-    color: "#22c55e",
-    textShadowColor: "rgba(0,0,0,0.3)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
-  },
-  logoTextPurple: {
-    fontSize: 48,
-    fontWeight: "800",
-    color: "#8b5cf6",
-    textShadowColor: "rgba(0,0,0,0.3)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
-  },
-  subtitleText: {
-    fontSize: 16,
+  formSubtitle: {
+    fontSize: 14,
     textAlign: "center",
-    marginBottom: Spacing["3xl"],
+    marginBottom: Spacing["2xl"],
+  },
+  inputGroup: {
+    marginBottom: Spacing.lg,
+  },
+  inputLabel: {
+    fontSize: 13,
+    fontWeight: "600",
+    marginBottom: Spacing.xs,
+    marginLeft: 4,
   },
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.15)",
-    borderRadius: BorderRadius.md,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.2)",
-    marginBottom: Spacing.lg,
-    height: Spacing.inputHeight,
-    paddingHorizontal: Spacing.lg,
+    backgroundColor: "#F9FAFB",
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: "#E5E7EB",
+    height: 52,
+    paddingHorizontal: Spacing.md,
   },
   inputContainerFocused: {
-    borderColor: Colors.light.accent,
-    backgroundColor: "rgba(255,255,255,0.2)",
+    borderColor: "#1A7A52",
+    backgroundColor: "#F0FDF4",
   },
   inputIcon: {
-    marginRight: Spacing.md,
+    marginRight: Spacing.sm,
   },
   input: {
     flex: 1,
-    color: "#FFFFFF",
-    fontSize: 16,
+    color: "#1F2937",
+    fontSize: 15,
     height: "100%",
   },
   eyeButton: {
     padding: Spacing.xs,
   },
-  errorText: {
-    color: "#FF6B6B",
-    fontSize: 14,
-    textAlign: "center",
+  errorContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.xs,
+    backgroundColor: "#FEF2F2",
+    borderRadius: 10,
+    padding: Spacing.md,
     marginBottom: Spacing.md,
   },
+  errorText: {
+    fontSize: 13,
+    flex: 1,
+  },
   loginButton: {
-    backgroundColor: Colors.light.accent,
-    height: Spacing.buttonHeight,
-    borderRadius: BorderRadius.md,
+    marginTop: Spacing.sm,
+    borderRadius: 12,
+    overflow: "hidden",
+  },
+  loginButtonGradient: {
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    marginTop: Spacing.sm,
+    height: 52,
+    gap: Spacing.sm,
   },
   loginButtonText: {
-    color: "#FFFFFF",
-    fontSize: 18,
-    fontWeight: "600",
+    fontSize: 17,
+    fontWeight: "700",
   },
   forgotButton: {
-    marginTop: Spacing.xl,
+    marginTop: Spacing.lg,
     alignItems: "center",
   },
   forgotText: {
     fontSize: 14,
-    textDecorationLine: "underline",
-  },
-  spacer: {
-    flex: 1,
+    fontWeight: "500",
   },
   footerContainer: {
     alignItems: "center",
@@ -377,14 +383,10 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 12,
-    marginBottom: Spacing.xs,
+    marginBottom: 2,
   },
   footerCompany: {
     fontSize: 13,
     fontWeight: "600",
-    marginBottom: Spacing.xs,
-  },
-  footerCnpj: {
-    fontSize: 11,
   },
 });
