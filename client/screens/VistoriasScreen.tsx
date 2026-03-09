@@ -6,6 +6,7 @@ import {
   Pressable,
   RefreshControl,
   TextInput,
+  Alert,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
@@ -20,13 +21,14 @@ import Animated, {
 } from "react-native-reanimated";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/hooks/useAuth";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
+import { apiRequest } from "@/lib/query-client";
 import { VistoriasStackParamList } from "@/navigation/VistoriasStackNavigator";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -49,7 +51,36 @@ export default function VistoriasScreen() {
   const { theme } = useTheme();
   const { user } = useAuth();
   const navigation = useNavigation<NavigationProp>();
+  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
+
+  const deleteVistoria = useMutation({
+    mutationFn: async (id: string) => {
+      await apiRequest("DELETE", `/api/vistorias/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/vistorias?usuario_id=${user?.id}`] });
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    },
+    onError: () => {
+      Alert.alert("Erro", "Não foi possível excluir a vistoria.");
+    },
+  });
+
+  const handleEdit = (id: string) => {
+    navigation.navigate("NovaVistoria", { editVistoriaId: id });
+  };
+
+  const handleDelete = (id: string) => {
+    Alert.alert(
+      "Excluir Vistoria",
+      "Tem certeza que deseja excluir esta vistoria? Esta ação não pode ser desfeita.",
+      [
+        { text: "Cancelar", style: "cancel" },
+        { text: "Excluir", style: "destructive", onPress: () => deleteVistoria.mutate(id) },
+      ]
+    );
+  };
 
   const { data: vistorias = [], isLoading, refetch, isRefetching } = useQuery<Vistoria[]>({
     queryKey: [`/api/vistorias?usuario_id=${user?.id}`],
@@ -126,7 +157,29 @@ export default function VistoriasScreen() {
             </ThemedText>
           </View>
 
-          <View style={styles.chevronContainer}>
+          <View style={styles.cardActions}>
+            <Pressable
+              onPress={(e) => {
+                e.stopPropagation();
+                Haptics.selectionAsync();
+                handleEdit(item.id);
+              }}
+              style={styles.cardActionBtn}
+              testID={`edit-vistoria-${item.id}`}
+            >
+              <Feather name="edit" size={18} color="#F59E0B" />
+            </Pressable>
+            <Pressable
+              onPress={(e) => {
+                e.stopPropagation();
+                Haptics.selectionAsync();
+                handleDelete(item.id);
+              }}
+              style={styles.cardActionBtn}
+              testID={`delete-vistoria-${item.id}`}
+            >
+              <Feather name="trash-2" size={18} color="#EF4444" />
+            </Pressable>
             <Feather name="chevron-right" size={20} color={theme.tabIconDefault} />
           </View>
         </View>
@@ -350,9 +403,14 @@ const styles = StyleSheet.create({
   cardDate: {
     fontSize: 14,
   },
-  chevronContainer: {
-    marginLeft: Spacing.md,
-    padding: Spacing.xs,
+  cardActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 2,
+    marginLeft: Spacing.sm,
+  },
+  cardActionBtn: {
+    padding: Spacing.sm,
   },
   fab: {
     position: "absolute",
