@@ -246,7 +246,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   gradient: {
     flex: 1,
-    backgroundColor: "#0F4C35",
+    backgroundColor: "#FFFFFF",
   },
   container: {
     flex: 1,
@@ -261,8 +261,8 @@ const styles = StyleSheet.create({
     marginBottom: Spacing["2xl"],
   },
   logoContainer: {
-    width: Math.min(SCREEN_WIDTH - 80, 320),
-    height: 100,
+    width: Math.min(SCREEN_WIDTH - 40, 400),
+    height: 220,
     alignItems: "center",
     justifyContent: "center",
   },
