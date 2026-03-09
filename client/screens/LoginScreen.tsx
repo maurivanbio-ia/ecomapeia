@@ -19,11 +19,8 @@ import Animated, {
   useSharedValue,
   withSpring,
   FadeIn,
-  FadeInDown,
   FadeInUp,
 } from "react-native-reanimated";
-import { LinearGradient } from "expo-linear-gradient";
-
 import { ThemedText } from "@/components/ThemedText";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 import { useAuth } from "@/hooks/useAuth";
@@ -73,12 +70,7 @@ export default function LoginScreen() {
   };
 
   return (
-    <LinearGradient
-      colors={["#0B3D2E", "#145A3E", "#1A7A52", "#0F4C35"]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={styles.gradient}
-    >
+    <View style={styles.gradient}>
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -209,12 +201,7 @@ export default function LoginScreen() {
               style={[styles.loginButton, buttonAnimatedStyle]}
               testID="button-login"
             >
-              <LinearGradient
-                colors={["#1A7A52", "#145A3E"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.loginButtonGradient}
-              >
+              <View style={styles.loginButtonGradient}>
                 {isLoading ? (
                   <ActivityIndicator color="#FFFFFF" size="small" />
                 ) : (
@@ -225,7 +212,7 @@ export default function LoginScreen() {
                     <Feather name="arrow-right" size={20} color="#FFFFFF" />
                   </>
                 )}
-              </LinearGradient>
+              </View>
             </AnimatedPressable>
 
             <Pressable style={styles.forgotButton}>
@@ -252,13 +239,14 @@ export default function LoginScreen() {
           </Animated.View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </LinearGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   gradient: {
     flex: 1,
+    backgroundColor: "#0F4C35",
   },
   container: {
     flex: 1,
@@ -364,6 +352,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     height: 52,
     gap: Spacing.sm,
+    backgroundColor: "#1A7A52",
+    borderRadius: 12,
   },
   loginButtonText: {
     fontSize: 17,
