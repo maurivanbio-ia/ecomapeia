@@ -41,7 +41,7 @@ interface InteractiveTutorialStep {
 const tutorialSteps: InteractiveTutorialStep[] = [
   {
     icon: "home",
-    title: "Bem-vindo ao MapeIA!",
+    title: "Bem-vindo ao EcoMapeIA!",
     description: "Sua plataforma completa para vistorias ambientais. Vamos fazer um tour interativo!",
     spotlight: "center",
     tooltipPosition: "bottom",
@@ -130,7 +130,7 @@ const tutorialSteps: InteractiveTutorialStep[] = [
   {
     icon: "check-circle",
     title: "Pronto!",
-    description: "Você conhece todas as funcionalidades. Toque em 'Começar' para explorar o MapeIA!",
+    description: "Você conhece todas as funcionalidades. Toque em 'Começar' para explorar o EcoMapeIA!",
     spotlight: "center",
     tooltipPosition: "bottom",
   },

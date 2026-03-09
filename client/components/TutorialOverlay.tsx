@@ -24,7 +24,7 @@ interface TutorialStep {
 const tutorialSteps: TutorialStep[] = [
   {
     icon: "home",
-    title: "Bem-vindo ao MapeIA!",
+    title: "Bem-vindo ao EcoMapeIA!",
     description: "Sua plataforma completa para vistorias ambientais em reservatórios hidrelétricos. Vamos conhecer todas as funcionalidades.",
   },
   {
@@ -95,7 +95,7 @@ const tutorialSteps: TutorialStep[] = [
   {
     icon: "check-circle",
     title: "Pronto para começar!",
-    description: "Agora você conhece todas as funcionalidades do MapeIA. Boa sorte nas suas vistorias de campo!",
+    description: "Agora você conhece todas as funcionalidades do EcoMapeIA. Boa sorte nas suas vistorias de campo!",
   },
 ];
 
