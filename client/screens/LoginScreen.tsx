@@ -261,8 +261,8 @@ const styles = StyleSheet.create({
     marginBottom: Spacing["2xl"],
   },
   logoContainer: {
-    width: Math.min(SCREEN_WIDTH - 40, 400),
-    height: 220,
+    width: Math.min(SCREEN_WIDTH - 20, 450),
+    height: 320,
     alignItems: "center",
     justifyContent: "center",
   },
