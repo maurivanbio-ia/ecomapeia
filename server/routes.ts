@@ -203,8 +203,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (fotos && Array.isArray(fotos)) {
         for (const foto of fotos) {
           await storage.createFoto({
-            ...foto,
             vistoria_id: vistoria.id,
+            url_imagem: foto.url_imagem || foto.uri || "",
+            legenda: foto.legenda || "",
+            ordem: foto.ordem ?? 0,
           });
         }
       }
