@@ -1,6 +1,8 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
-import { EcoMapeIALogo } from "@/components/EcoMapeIALogo";
+import { Image } from "expo-image";
+
+import logoImage from "../../assets/images/ecomapeia-logo.png";
 
 interface HeaderTitleProps {
   title?: string;
@@ -9,7 +11,11 @@ interface HeaderTitleProps {
 export function HeaderTitle({ title }: HeaderTitleProps) {
   return (
     <View style={styles.container}>
-      <EcoMapeIALogo size="medium" showIcon={true} />
+      <Image
+        source={logoImage}
+        style={styles.logo}
+        contentFit="contain"
+      />
     </View>
   );
 }
@@ -19,5 +25,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+  },
+  logo: {
+    width: 180,
+    height: 40,
   },
 });
