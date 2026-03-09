@@ -84,12 +84,29 @@ export default function SignatureCapture({
   };
 
   const saveSignature = async () => {
-    if (signatureRef.current && paths.length > 0) {
+    if (paths.length > 0) {
       try {
-        const uri = await captureRef(signatureRef, {
-          format: "png",
-          quality: 1,
-        });
+        let uri: string | null = null;
+
+        if (Platform.OS !== "web" && signatureRef.current) {
+          try {
+            uri = await captureRef(signatureRef, {
+              format: "png",
+              quality: 1,
+            });
+          } catch (_e) {
+            // fallback to SVG data URI
+          }
+        }
+
+        if (!uri) {
+          const svgPaths = paths.map(
+            (p) => `<path d="${p}" stroke="#000000" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`
+          ).join("");
+          const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="${signatureWidth}" height="${signatureHeight}" viewBox="0 0 ${signatureWidth} ${signatureHeight}"><rect width="100%" height="100%" fill="white"/>${svgPaths}</svg>`;
+          uri = `data:image/svg+xml;base64,${btoa(svgContent)}`;
+        }
+
         const newTimestamp = formatTimestamp(new Date());
         setTimestamp(newTimestamp);
         setSavedImageUri(uri);

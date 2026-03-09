@@ -7,6 +7,7 @@ import {
   RefreshControl,
   TextInput,
   Alert,
+  Platform,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
@@ -72,14 +73,21 @@ export default function VistoriasScreen() {
   };
 
   const handleDelete = (id: string) => {
-    Alert.alert(
-      "Excluir Vistoria",
-      "Tem certeza que deseja excluir esta vistoria? Esta ação não pode ser desfeita.",
-      [
-        { text: "Cancelar", style: "cancel" },
-        { text: "Excluir", style: "destructive", onPress: () => deleteVistoria.mutate(id) },
-      ]
-    );
+    if (Platform.OS === "web") {
+      const confirmed = window.confirm("Tem certeza que deseja excluir esta vistoria? Esta ação não pode ser desfeita.");
+      if (confirmed) {
+        deleteVistoria.mutate(id);
+      }
+    } else {
+      Alert.alert(
+        "Excluir Vistoria",
+        "Tem certeza que deseja excluir esta vistoria? Esta ação não pode ser desfeita.",
+        [
+          { text: "Cancelar", style: "cancel" },
+          { text: "Excluir", style: "destructive", onPress: () => deleteVistoria.mutate(id) },
+        ]
+      );
+    }
   };
 
   const { data: vistorias = [], isLoading, refetch, isRefetching } = useQuery<Vistoria[]>({
