@@ -151,10 +151,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const coordenadas = await storage.getCoordenadas(vistoria.id);
-      const usosSolo = await storage.getUsosSolo(vistoria.id);
-      const fotos = await storage.getFotos(vistoria.id);
+      const usosSoloDB = await storage.getUsosSolo(vistoria.id);
+      const fotosDB = await storage.getFotos(vistoria.id);
 
-      // Transform snake_case database fields to camelCase for frontend/reports
       const vistoriaWithCamelCase = {
         ...vistoria,
         carInfo: vistoria.car_info,
@@ -163,6 +162,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         horaVistoria: vistoria.hora_vistoria,
         weatherData: vistoria.weather_data,
       };
+
+      const usosSolo = usosSoloDB.map(u => ({
+        ...u,
+        tipo: u.tipo_uso,
+        valor: u.area_m2 ? String(u.area_m2) : "",
+        unidade: "m²",
+      }));
+
+      const fotos = fotosDB.map(f => ({
+        ...f,
+        uri: f.url_imagem,
+      }));
 
       return res.json({
         ...vistoriaWithCamelCase,
@@ -178,24 +189,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/vistorias", async (req: Request, res: Response) => {
     try {
-      const { coordenadas, usosSolo, fotos, ...vistoriaData } = req.body;
+      const { coordenadas, coordenadas_utm, usosSolo, usos_solo, fotos, ...vistoriaData } = req.body;
       
       const vistoria = await storage.createVistoria(vistoriaData);
 
-      if (coordenadas && Array.isArray(coordenadas)) {
-        for (const coord of coordenadas) {
+      const coordsArray = coordenadas_utm || coordenadas;
+      if (coordsArray && Array.isArray(coordsArray)) {
+        for (const coord of coordsArray) {
           await storage.createCoordenada({
-            ...coord,
             vistoria_id: vistoria.id,
+            latitude: coord.latitude ?? (parseFloat(coord.e) || 0),
+            longitude: coord.longitude ?? (parseFloat(coord.n) || 0),
+            ordem: coord.ordem ?? 0,
           });
         }
       }
 
-      if (usosSolo && Array.isArray(usosSolo)) {
-        for (const uso of usosSolo) {
+      const usosArray = usos_solo || usosSolo;
+      if (usosArray && Array.isArray(usosArray)) {
+        for (const uso of usosArray) {
           await storage.createUsoSolo({
-            ...uso,
             vistoria_id: vistoria.id,
+            tipo_uso: uso.tipo_uso || uso.tipo || "",
+            area_m2: uso.area_m2 ?? (parseFloat(uso.valor) || null),
           });
         }
       }
