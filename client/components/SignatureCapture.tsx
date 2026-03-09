@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useCallback } from "react";
 import {
   View,
   StyleSheet,
@@ -7,6 +7,7 @@ import {
   Platform,
   PanResponder,
   Dimensions,
+  Image,
 } from "react-native";
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
@@ -33,8 +34,11 @@ export default function SignatureCapture({
   const [paths, setPaths] = useState<string[]>([]);
   const [currentPath, setCurrentPath] = useState<string>("");
   const [timestamp, setTimestamp] = useState<string>(signatureTimestamp || "");
+  const [savedImageUri, setSavedImageUri] = useState<string | null>(signatureUri);
   const signatureRef = useRef<View>(null);
-  
+
+  const currentPathRef = useRef<string>("");
+
   const formatTimestamp = (date: Date): string => {
     return date.toLocaleString("pt-BR", {
       day: "2-digit",
@@ -52,15 +56,21 @@ export default function SignatureCapture({
       onMoveShouldSetPanResponder: () => true,
       onPanResponderGrant: (evt) => {
         const { locationX, locationY } = evt.nativeEvent;
-        setCurrentPath(`M${locationX},${locationY}`);
+        const newPath = `M${locationX},${locationY}`;
+        currentPathRef.current = newPath;
+        setCurrentPath(newPath);
       },
       onPanResponderMove: (evt) => {
         const { locationX, locationY } = evt.nativeEvent;
-        setCurrentPath((prev) => `${prev} L${locationX},${locationY}`);
+        const updated = `${currentPathRef.current} L${locationX},${locationY}`;
+        currentPathRef.current = updated;
+        setCurrentPath(updated);
       },
       onPanResponderRelease: () => {
-        if (currentPath) {
-          setPaths((prev) => [...prev, currentPath]);
+        const pathToSave = currentPathRef.current;
+        if (pathToSave) {
+          setPaths((prev) => [...prev, pathToSave]);
+          currentPathRef.current = "";
           setCurrentPath("");
         }
       },
@@ -70,6 +80,7 @@ export default function SignatureCapture({
   const clearSignature = () => {
     setPaths([]);
     setCurrentPath("");
+    currentPathRef.current = "";
   };
 
   const saveSignature = async () => {
@@ -81,12 +92,22 @@ export default function SignatureCapture({
         });
         const newTimestamp = formatTimestamp(new Date());
         setTimestamp(newTimestamp);
+        setSavedImageUri(uri);
         onSignatureCapture(uri, newTimestamp);
         setModalVisible(false);
       } catch (error) {
         console.error("Error capturing signature:", error);
       }
     }
+  };
+
+  const handleRemoveSignature = () => {
+    setPaths([]);
+    setCurrentPath("");
+    currentPathRef.current = "";
+    setTimestamp("");
+    setSavedImageUri(null);
+    onSignatureCapture("", "");
   };
 
   const { width } = Dimensions.get("window");
@@ -97,7 +118,7 @@ export default function SignatureCapture({
     <View style={styles.container}>
       <ThemedText style={styles.label}>Assinatura do Responsável</ThemedText>
 
-      {signatureUri ? (
+      {savedImageUri ? (
         <View style={styles.signaturePreview}>
           <View
             style={[
@@ -105,9 +126,11 @@ export default function SignatureCapture({
               { backgroundColor: "#FFFFFF", borderColor: theme.border },
             ]}
           >
-            <Svg width="100%" height={120}>
-              <Path d={paths.join(" ")} stroke="#000" strokeWidth={2} fill="none" />
-            </Svg>
+            <Image
+              source={{ uri: savedImageUri }}
+              style={{ width: "100%", height: 120 }}
+              resizeMode="contain"
+            />
           </View>
           {showTimestamp && timestamp ? (
             <View style={styles.timestampContainer}>
@@ -118,11 +141,7 @@ export default function SignatureCapture({
             </View>
           ) : null}
           <Pressable
-            onPress={() => {
-              setPaths([]);
-              setTimestamp("");
-              onSignatureCapture("", "");
-            }}
+            onPress={handleRemoveSignature}
             style={styles.removeBtn}
           >
             <Feather name="trash-2" size={18} color="#FF4444" />
@@ -219,7 +238,13 @@ export default function SignatureCapture({
               </Pressable>
               <Pressable
                 onPress={saveSignature}
-                style={[styles.modalBtn, { backgroundColor: Colors.light.accent }]}
+                style={[
+                  styles.modalBtn,
+                  {
+                    backgroundColor: paths.length > 0 ? Colors.light.accent : "#CCC",
+                  },
+                ]}
+                disabled={paths.length === 0}
               >
                 <Feather name="check" size={18} color="#FFFFFF" />
                 <ThemedText style={styles.modalBtnText}>Confirmar</ThemedText>
