@@ -16,7 +16,10 @@ import * as Haptics from "expo-haptics";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
 import { useRoute, useNavigation } from "@react-navigation/native";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { VistoriasStackParamList } from "@/navigation/VistoriasStackNavigator";
+import { useAuth } from "@/hooks/useAuth";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
@@ -126,13 +129,49 @@ export default function DetalhesVistoriaScreen() {
   const headerHeight = useHeaderHeight();
   const { theme } = useTheme();
   const route = useRoute();
-  const navigation = useNavigation();
+  const navigation = useNavigation<NativeStackNavigationProp<VistoriasStackParamList>>();
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
   const { vistoriaId } = route.params as RouteParams;
   const [mapImageUri, setMapImageUri] = useState<string | null>(null);
 
   const { data: vistoria, isLoading } = useQuery<VistoriaData>({
     queryKey: [`/api/vistorias/${vistoriaId}`],
   });
+
+  const deleteVistoria = useMutation({
+    mutationFn: async () => {
+      await apiRequest("DELETE", `/api/vistorias/${vistoriaId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/vistorias?usuario_id=${user?.id}`] });
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      navigation.goBack();
+    },
+    onError: (error) => {
+      console.error("Error deleting vistoria:", error);
+      Alert.alert("Erro", "Não foi possível excluir a vistoria.");
+    },
+  });
+
+  const handleEdit = () => {
+    navigation.navigate("NovaVistoria", { editVistoriaId: vistoriaId });
+  };
+
+  const handleDelete = () => {
+    Alert.alert(
+      "Excluir Vistoria",
+      "Tem certeza que deseja excluir esta vistoria? Esta ação não pode ser desfeita.",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Excluir",
+          style: "destructive",
+          onPress: () => deleteVistoria.mutate(),
+        },
+      ]
+    );
+  };
 
   const generatePDF = async () => {
     if (!vistoria) return;
@@ -316,6 +355,13 @@ export default function DetalhesVistoriaScreen() {
       >
         <View style={styles.headerActions}>
           <Pressable
+            onPress={handleEdit}
+            style={[styles.actionBtn, { backgroundColor: "#F59E0B" }]}
+          >
+            <Feather name="edit" size={18} color="#FFFFFF" />
+            <ThemedText style={styles.actionBtnText}>Editar</ThemedText>
+          </Pressable>
+          <Pressable
             onPress={generatePDF}
             style={[styles.actionBtn, { backgroundColor: Colors.light.primary }]}
           >
@@ -328,6 +374,13 @@ export default function DetalhesVistoriaScreen() {
           >
             <Feather name="file" size={18} color="#FFFFFF" />
             <ThemedText style={styles.actionBtnText}>Word</ThemedText>
+          </Pressable>
+          <Pressable
+            onPress={handleDelete}
+            style={[styles.actionBtn, { backgroundColor: "#EF4444" }]}
+          >
+            <Feather name="trash-2" size={18} color="#FFFFFF" />
+            <ThemedText style={styles.actionBtnText}>Excluir</ThemedText>
           </Pressable>
         </View>
 
@@ -467,17 +520,18 @@ const styles = StyleSheet.create({
   },
   headerActions: {
     flexDirection: "row",
-    justifyContent: "flex-end",
+    flexWrap: "wrap",
+    justifyContent: "flex-start",
     marginBottom: Spacing.lg,
     gap: Spacing.sm,
   },
   actionBtn: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: Spacing.lg,
+    paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
     borderRadius: BorderRadius.md,
-    gap: Spacing.sm,
+    gap: 4,
   },
   actionBtnText: {
     color: "#FFFFFF",

@@ -16,8 +16,8 @@ import { useHeaderHeight } from "@react-navigation/elements";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useNavigation } from "@react-navigation/native";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { VistoriasStackParamList } from "@/navigation/VistoriasStackNavigator";
 
@@ -161,7 +161,10 @@ export default function NovaVistoriaScreen() {
   const { theme } = useTheme();
   const { user } = useAuth();
   const navigation = useNavigation<NativeStackNavigationProp<VistoriasStackParamList>>();
+  const route = useRoute();
   const queryClient = useQueryClient();
+  const editVistoriaId = (route.params as any)?.editVistoriaId as string | undefined;
+  const isEditMode = !!editVistoriaId;
 
   const {
     isTracking,
@@ -297,6 +300,83 @@ export default function NovaVistoriaScreen() {
 
   const trackColors = ["#FF6B00", "#4CAF50", "#2196F3", "#9C27B0", "#FF5722", "#00BCD4", "#E91E63", "#795548"];
 
+  const { data: editData } = useQuery<any>({
+    queryKey: [`/api/vistorias/${editVistoriaId}`],
+    enabled: isEditMode,
+  });
+
+  const [editLoaded, setEditLoaded] = useState(false);
+
+  React.useEffect(() => {
+    if (isEditMode && editData && !editLoaded) {
+      setEditLoaded(true);
+      setFormData({
+        numero_notificacao: editData.numero_notificacao || "",
+        setor: editData.setor || "",
+        margem: editData.margem || "DIREITA",
+        municipio: editData.municipio || "",
+        uf: editData.uf || "SP",
+        localizacao: editData.localizacao || "",
+        numero_confrontante: editData.numero_confrontante || "",
+        proprietario: editData.proprietario || "",
+        loteamento_condominio: editData.loteamento_condominio || "",
+        tipo_inspecao: editData.tipo_inspecao || "CADASTRAMENTO",
+        data_vistoria: editData.data_vistoria || today,
+        hora_vistoria: editData.hora_vistoria || currentTime,
+        comodatario: editData.comodatario || "NÃO",
+        contrato_vigente: editData.contrato_vigente || "NÃO",
+        zona_utm: editData.zona_utm || "23K",
+        tipo_intervencao: editData.tipo_intervencao || "NA",
+        intervencao: editData.intervencao || "",
+        detalhamento_intervencao: editData.detalhamento_intervencao || "",
+        emissao_notificacao: editData.emissao_notificacao || "NÃO",
+        reincidente: editData.reincidente || "NÃO",
+        observacoes: editData.observacoes || "",
+        observacoes_usos: editData.observacoes_usos || "",
+      });
+
+      if (editData.coordenadas_utm && editData.coordenadas_utm.length > 0) {
+        setUtmPoints(editData.coordenadas_utm.map((c: any, i: number) => ({
+          id: String(i + 1),
+          e: c.e || "",
+          n: c.n || "",
+        })));
+      }
+
+      if (editData.fotos && editData.fotos.length > 0) {
+        setPhotos(editData.fotos.map((f: any, i: number) => ({
+          id: String(i + 1),
+          uri: f.uri || "",
+          legenda: f.legenda || "",
+        })));
+      }
+
+      if (editData.usosSolo && editData.usosSolo.length > 0) {
+        setUsosSolo((prev) =>
+          prev.map((uso) => {
+            const match = editData.usosSolo.find((u: any) => u.tipo === uso.tipo);
+            if (match) {
+              return { ...uso, checked: true, valor: match.valor || "" };
+            }
+            return uso;
+          })
+        );
+      }
+
+      if (editData.assinatura_uri) {
+        setSignatureUri(editData.assinatura_uri);
+      }
+
+      if (editData.observacoes) {
+        setFormData((prev) => ({ ...prev, observacoes: editData.observacoes }));
+      }
+
+      navigation.setOptions({
+        title: "Editar Vistoria",
+      });
+    }
+  }, [editData, isEditMode, editLoaded]);
+
   const saveCurrentTrack = () => {
     if (trackPoints.length === 0) return;
     
@@ -415,7 +495,9 @@ export default function NovaVistoriaScreen() {
           unidade: uso.unidade,
         }));
 
-      const response = await apiRequest("POST", "/api/vistorias", {
+      const method = isEditMode ? "PUT" : "POST";
+      const url = isEditMode ? `/api/vistorias/${editVistoriaId}` : "/api/vistorias";
+      const response = await apiRequest(method, url, {
         ...data,
         usuario_id: user?.id,
         coordenadas_utm: coordenadasUtm,
@@ -491,14 +573,17 @@ export default function NovaVistoriaScreen() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/vistorias?usuario_id=${user?.id}`] });
+      if (isEditMode) {
+        queryClient.invalidateQueries({ queryKey: [`/api/vistorias/${editVistoriaId}`] });
+      }
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      Alert.alert("Sucesso", "Vistoria criada com sucesso!", [
+      Alert.alert("Sucesso", isEditMode ? "Vistoria atualizada com sucesso!" : "Vistoria criada com sucesso!", [
         { text: "OK", onPress: () => navigation.goBack() },
       ]);
     },
     onError: (error) => {
-      console.error("Error creating vistoria:", error);
-      Alert.alert("Erro", "Não foi possível criar a vistoria. Tente novamente.");
+      console.error(isEditMode ? "Error updating vistoria:" : "Error creating vistoria:", error);
+      Alert.alert("Erro", isEditMode ? "Não foi possível atualizar a vistoria." : "Não foi possível criar a vistoria. Tente novamente.");
     },
   });
 
@@ -1825,7 +1910,7 @@ export default function NovaVistoriaScreen() {
           ) : (
             <>
               <Feather name="save" size={20} color="#FFFFFF" />
-              <ThemedText style={styles.submitText}>Salvar Vistoria</ThemedText>
+              <ThemedText style={styles.submitText}>{isEditMode ? "Atualizar Vistoria" : "Salvar Vistoria"}</ThemedText>
             </>
           )}
         </Pressable>

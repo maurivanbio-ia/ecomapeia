@@ -14,7 +14,7 @@ import { useScreenOptions } from "@/hooks/useScreenOptions";
 
 export type VistoriasStackParamList = {
   VistoriasList: undefined;
-  NovaVistoria: undefined;
+  NovaVistoria: { editVistoriaId?: string } | undefined;
   DetalhesVistoria: { vistoriaId: string };
   MapaGeral: undefined;
   Dashboard: undefined;
