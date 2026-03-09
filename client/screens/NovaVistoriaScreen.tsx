@@ -577,9 +577,12 @@ export default function NovaVistoriaScreen() {
         queryClient.invalidateQueries({ queryKey: [`/api/vistorias/${editVistoriaId}`] });
       }
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      Alert.alert("Sucesso", isEditMode ? "Vistoria atualizada com sucesso!" : "Vistoria criada com sucesso!", [
-        { text: "OK", onPress: () => navigation.goBack() },
-      ]);
+      if (Platform.OS === "web") {
+        window.alert(isEditMode ? "Vistoria atualizada com sucesso!" : "Vistoria criada com sucesso!");
+      } else {
+        Alert.alert("Sucesso", isEditMode ? "Vistoria atualizada com sucesso!" : "Vistoria criada com sucesso!");
+      }
+      navigation.goBack();
     },
     onError: (error) => {
       console.error(isEditMode ? "Error updating vistoria:" : "Error creating vistoria:", error);
