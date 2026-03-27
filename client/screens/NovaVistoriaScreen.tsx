@@ -1315,44 +1315,61 @@ export default function NovaVistoriaScreen() {
       <Modal
         visible={photoPickerModal !== null}
         transparent
-        animationType="fade"
+        animationType="slide"
         onRequestClose={() => setPhotoPickerModal(null)}
       >
         <Pressable
           style={styles.photoPickerOverlay}
           onPress={() => setPhotoPickerModal(null)}
         >
-          <View style={[styles.photoPickerCard, { backgroundColor: theme.backgroundCard }]}>
-            <ThemedText style={styles.photoPickerTitle}>Adicionar Foto</ThemedText>
+          <View style={styles.photoPickerSheet}>
+            <View style={styles.photoPickerHandle} />
+            <ThemedText style={[styles.photoPickerTitle, { color: theme.text }]}>Adicionar Foto</ThemedText>
+            <ThemedText style={[styles.photoPickerSubtitle, { color: theme.textSecondary }]}>
+              {photoPickerModal?.instanceLabel
+                ? photoPickerModal.instanceLabel
+                : photoPickerModal?.usoTipo ?? ""}
+            </ThemedText>
+
+            <View style={styles.photoPickerButtons}>
+              <Pressable
+                style={styles.photoPickerBtnCamera}
+                onPress={() => {
+                  const modal = photoPickerModal;
+                  setPhotoPickerModal(null);
+                  if (modal?.instanceLabel) pickImageForUsoInstance(modal.instanceLabel, false);
+                  else if (modal?.usoTipo) pickImageForUso(modal.usoTipo, false);
+                }}
+              >
+                <View style={styles.photoPickerBtnIcon}>
+                  <Feather name="camera" size={28} color="#ffffff" />
+                </View>
+                <ThemedText style={styles.photoPickerBtnLabel}>Tirar foto</ThemedText>
+                <ThemedText style={styles.photoPickerBtnSub}>Usar a câmera do dispositivo</ThemedText>
+              </Pressable>
+
+              <Pressable
+                style={styles.photoPickerBtnGallery}
+                onPress={() => {
+                  const modal = photoPickerModal;
+                  setPhotoPickerModal(null);
+                  if (modal?.instanceLabel) pickImageForUsoInstance(modal.instanceLabel, true);
+                  else if (modal?.usoTipo) pickImageForUso(modal.usoTipo, true);
+                }}
+              >
+                <View style={styles.photoPickerBtnIcon}>
+                  <Feather name="image" size={28} color="#ffffff" />
+                </View>
+                <ThemedText style={styles.photoPickerBtnLabel}>Buscar na galeria</ThemedText>
+                <ThemedText style={styles.photoPickerBtnSub}>Selecionar foto salva</ThemedText>
+              </Pressable>
+            </View>
+
             <Pressable
-              style={[styles.photoPickerOption, { borderColor: theme.border }]}
-              onPress={() => {
-                const modal = photoPickerModal;
-                setPhotoPickerModal(null);
-                if (modal?.instanceLabel) pickImageForUsoInstance(modal.instanceLabel, false);
-                else if (modal?.usoTipo) pickImageForUso(modal.usoTipo, false);
-              }}
-            >
-              <Feather name="camera" size={22} color={Colors.light.primary} />
-              <ThemedText style={styles.photoPickerOptionText}>Tirar foto</ThemedText>
-            </Pressable>
-            <Pressable
-              style={[styles.photoPickerOption, { borderColor: theme.border }]}
-              onPress={() => {
-                const modal = photoPickerModal;
-                setPhotoPickerModal(null);
-                if (modal?.instanceLabel) pickImageForUsoInstance(modal.instanceLabel, true);
-                else if (modal?.usoTipo) pickImageForUso(modal.usoTipo, true);
-              }}
-            >
-              <Feather name="image" size={22} color={Colors.light.primary} />
-              <ThemedText style={styles.photoPickerOptionText}>Buscar na galeria</ThemedText>
-            </Pressable>
-            <Pressable
-              style={[styles.photoPickerCancel, { borderColor: theme.border }]}
+              style={styles.photoPickerCancel}
               onPress={() => setPhotoPickerModal(null)}
             >
-              <ThemedText style={[styles.photoPickerCancelText, { color: theme.tabIconDefault }]}>Cancelar</ThemedText>
+              <ThemedText style={styles.photoPickerCancelText}>Cancelar</ThemedText>
             </Pressable>
           </View>
         </Pressable>
@@ -2957,46 +2974,91 @@ const styles = StyleSheet.create({
   },
   photoPickerOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 24,
+    backgroundColor: "rgba(0,0,0,0.55)",
+    justifyContent: "flex-end",
   },
-  photoPickerCard: {
-    width: "100%",
-    maxWidth: 340,
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.lg,
-    gap: Spacing.sm,
+  photoPickerSheet: {
+    backgroundColor: "#ffffff",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingHorizontal: 20,
+    paddingBottom: 36,
+    paddingTop: 12,
+  },
+  photoPickerHandle: {
+    width: 40,
+    height: 4,
+    backgroundColor: "#d0d5d0",
+    borderRadius: 2,
+    alignSelf: "center",
+    marginBottom: 20,
   },
   photoPickerTitle: {
-    fontSize: 16,
-    fontWeight: "700",
+    fontSize: 18,
+    fontWeight: "800",
     textAlign: "center",
-    marginBottom: Spacing.xs,
+    marginBottom: 4,
+    color: "#111",
   },
-  photoPickerOption: {
+  photoPickerSubtitle: {
+    fontSize: 13,
+    textAlign: "center",
+    marginBottom: 24,
+    color: "#777",
+  },
+  photoPickerButtons: {
     flexDirection: "row",
-    alignItems: "center",
-    gap: Spacing.md,
-    paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.md,
-    borderWidth: 1,
-    borderRadius: BorderRadius.md,
+    gap: 12,
+    marginBottom: 16,
   },
-  photoPickerOptionText: {
-    fontSize: 15,
-    fontWeight: "500",
+  photoPickerBtnCamera: {
+    flex: 1,
+    backgroundColor: Colors.light.primary,
+    borderRadius: 18,
+    paddingVertical: 20,
+    paddingHorizontal: 16,
+    alignItems: "center",
+    gap: 10,
+  },
+  photoPickerBtnGallery: {
+    flex: 1,
+    backgroundColor: "#2563eb",
+    borderRadius: 18,
+    paddingVertical: 20,
+    paddingHorizontal: 16,
+    alignItems: "center",
+    gap: 10,
+  },
+  photoPickerBtnIcon: {
+    width: 52,
+    height: 52,
+    borderRadius: 16,
+    backgroundColor: "rgba(255,255,255,0.20)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  photoPickerBtnLabel: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#ffffff",
+    textAlign: "center",
+  },
+  photoPickerBtnSub: {
+    fontSize: 11,
+    fontWeight: "400",
+    color: "rgba(255,255,255,0.78)",
+    textAlign: "center",
   },
   photoPickerCancel: {
-    paddingVertical: Spacing.sm,
+    backgroundColor: "#f2f4f2",
+    borderRadius: 14,
+    paddingVertical: 14,
     alignItems: "center",
-    marginTop: Spacing.xs,
-    borderTopWidth: 1,
   },
   photoPickerCancelText: {
-    fontSize: 14,
-    fontWeight: "500",
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#555",
   },
   usoSoloCheck: {
     width: 24,
