@@ -9,6 +9,7 @@ import {
   Platform,
   Dimensions,
   ScrollView,
+  ImageBackground,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
@@ -25,7 +26,8 @@ import { ThemedText } from "@/components/ThemedText";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 import { useAuth } from "@/hooks/useAuth";
 
-import logoImage from "../../assets/images/ecomapeia-logo.png";
+import logoImage from "../../assets/images/ecomapeia-logo-transparent.png";
+import bgImage from "../../assets/images/hidroeletrica-bg.png";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -70,7 +72,8 @@ export default function LoginScreen() {
   };
 
   return (
-    <View style={styles.gradient}>
+    <ImageBackground source={bgImage} style={styles.gradient} resizeMode="cover">
+      <View style={styles.overlay} />
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -239,14 +242,18 @@ export default function LoginScreen() {
           </Animated.View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </View>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
   gradient: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#000000",
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 30, 15, 0.55)",
   },
   container: {
     flex: 1,
