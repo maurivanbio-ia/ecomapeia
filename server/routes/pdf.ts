@@ -86,17 +86,25 @@ interface VistoriaData {
   projeto_nome?: string;
 }
 
-function getCBALogoBase64(): string {
+function getLogoBase64(filename: string): string {
   try {
-    const logoPath = path.join(__dirname, "../assets/cba_logo.png");
+    const logoPath = path.join(__dirname, "../assets", filename);
     if (fs.existsSync(logoPath)) {
       const logoBuffer = fs.readFileSync(logoPath);
       return `data:image/png;base64,${logoBuffer.toString("base64")}`;
     }
   } catch (error) {
-    console.error("Error loading CBA logo:", error);
+    console.error(`Error loading logo ${filename}:`, error);
   }
   return "";
+}
+
+function getCBALogoBase64(): string {
+  return getLogoBase64("cba_logo.png");
+}
+
+function getEcoBrasilLogoBase64(): string {
+  return getLogoBase64("ecobrasil_logo.png");
 }
 
 function formatDate(dateStr: string): string {
@@ -110,6 +118,7 @@ function formatDate(dateStr: string): string {
 
 function generatePDFHTML(vistoria: VistoriaData): string {
   const logoBase64 = getCBALogoBase64();
+  const ecoBrasilLogoBase64 = getEcoBrasilLogoBase64();
   
   const usosSoloHTML = vistoria.usos_solo?.length
     ? vistoria.usos_solo
@@ -379,14 +388,12 @@ function generatePDFHTML(vistoria: VistoriaData): string {
 </head>
 <body>
   <div class="header">
-    ${logoBase64 ? `<img src="${logoBase64}" class="logo" alt="CBA Logo" />` : `<div style="width: 180px;"></div>`}
+    ${logoBase64 ? `<img src="${logoBase64}" class="logo" alt="CBA Logo" />` : `<div style="width: 150px;"></div>`}
     <div class="header-title">
       <h1>RELATÓRIO DE OCORRÊNCIA - NOTIFICAÇÃO</h1>
       <h2>${vistoria.projeto_nome || "EcoBrasil"}</h2>
     </div>
-    <div class="doc-code">
-      <strong>${vistoria.numero_notificacao || "-"}</strong>
-    </div>
+    ${ecoBrasilLogoBase64 ? `<img src="${ecoBrasilLogoBase64}" class="logo" alt="EcoBrasil Logo" style="height:52px;width:auto;object-fit:contain;" />` : `<div style="width: 150px;"></div>`}
   </div>
 
   <div class="section">
