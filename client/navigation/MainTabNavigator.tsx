@@ -82,14 +82,14 @@ export default function MainTabNavigator() {
           ),
         }}
       />
-      {user?.is_admin ? (
+      {user?.is_admin || user?.tipo_usuario === "Coordenador" ? (
         <Tab.Screen
           name="AdminTab"
           component={AdminDashboardScreen}
           options={{
-            title: "Admin",
+            title: user?.is_admin ? "Admin" : "Painel",
             tabBarIcon: ({ color, size }) => (
-              <Feather name="shield" size={size} color={color} />
+              <Feather name={user?.is_admin ? "shield" : "bar-chart-2"} size={size} color={color} />
             ),
           }}
         />

@@ -145,14 +145,17 @@ export default function AdminDashboardScreen({ navigation }: any) {
     });
   };
 
-  if (!user?.is_admin) {
+  const isCoordenador = user?.tipo_usuario === "Coordenador";
+  const hasAccess = user?.is_admin || isCoordenador;
+
+  if (!hasAccess) {
     return (
       <ThemedView style={styles.container}>
         <View style={[styles.accessDenied, { paddingTop: headerHeight + Spacing.xl }]}>
           <Feather name="lock" size={48} color={Colors.light.textSecondary} />
           <ThemedText style={styles.accessDeniedText}>Acesso restrito</ThemedText>
           <ThemedText style={styles.accessDeniedSub}>
-            Esta área é exclusiva para administradores EcoBrasil.
+            Esta área é exclusiva para administradores e coordenadores.
           </ThemedText>
         </View>
       </ThemedView>
@@ -183,13 +186,24 @@ export default function AdminDashboardScreen({ navigation }: any) {
         <Animated.View entering={FadeInDown.duration(400)}>
           <View style={styles.pageHeader}>
             <View>
-              <ThemedText style={styles.pageTitle}>Painel EcoBrasil</ThemedText>
-              <ThemedText style={styles.pageSubtitle}>Visão geral de todos os complexos CBA</ThemedText>
+              <ThemedText style={styles.pageTitle}>
+                {isCoordenador ? "Painel do Coordenador" : "Painel EcoBrasil"}
+              </ThemedText>
+              <ThemedText style={styles.pageSubtitle}>
+                {isCoordenador
+                  ? "Visão geral do seu complexo e todas as vistorias"
+                  : "Visão geral de todos os complexos CBA"}
+              </ThemedText>
             </View>
-            <View style={[styles.adminBadge, { backgroundColor: Colors.light.primary }]}>
-              <Feather name="shield" size={14} color="#fff" />
+            <View
+              style={[
+                styles.adminBadge,
+                { backgroundColor: isCoordenador ? "#6366F1" : Colors.light.primary },
+              ]}
+            >
+              <Feather name={isCoordenador ? "bar-chart-2" : "shield"} size={14} color="#fff" />
               <ThemedText style={styles.adminBadgeText} lightColor="#fff" darkColor="#fff">
-                Admin
+                {isCoordenador ? "Coordenador" : "Admin"}
               </ThemedText>
             </View>
           </View>
