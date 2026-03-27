@@ -135,7 +135,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const vistorias = await storage.getVistoriasByUsuario(usuarioId);
-      return res.json(vistorias);
+      const vistoriasWithSyncStatus = vistorias.map(v => ({ ...v, status_upload: "synced" }));
+      return res.json(vistoriasWithSyncStatus);
     } catch (error) {
       console.error("Get vistorias error:", error);
       return res.status(500).json({ message: "Erro interno do servidor" });
@@ -240,7 +241,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!usuario_id) {
         return res.status(400).json({ message: "usuario_id é obrigatório" });
       }
-      const vistorias = await storage.getVistorias(usuario_id);
+      const vistorias = await storage.getVistoriasByUsuario(usuario_id);
       const pending = vistorias.filter((v) => v.status_upload !== "synced");
       let synced = 0;
       for (const v of pending) {
