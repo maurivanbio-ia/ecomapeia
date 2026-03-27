@@ -255,6 +255,7 @@ export default function NovaVistoriaScreen() {
   const [processingPhoto, setProcessingPhoto] = useState(false);
   const [mapImageUri, setMapImageUri] = useState<string | null>(null);
   const [signatureUri, setSignatureUri] = useState<string | null>(null);
+  const [signatureTecnicoUri, setSignatureTecnicoUri] = useState<string | null>(null);
   const [capturingGPS, setCapturingGPS] = useState(false);
   const [carInfo, setCarInfo] = useState<{
     carCode: string;
@@ -378,6 +379,9 @@ export default function NovaVistoriaScreen() {
 
       if (editData.assinatura_uri) {
         setSignatureUri(editData.assinatura_uri);
+      }
+      if (editData.assinatura_tecnico_uri) {
+        setSignatureTecnicoUri(editData.assinatura_tecnico_uri);
       }
 
       if (editData.observacoes) {
@@ -518,6 +522,7 @@ export default function NovaVistoriaScreen() {
         usos_solo: usosSoloData,
         croqui_imagem: mapImageUri,
         assinatura_uri: signatureUri,
+        assinatura_tecnico_uri: signatureTecnicoUri,
         car_info: carInfo ? {
           codigo: carInfo.carCode,
           municipio: carInfo.city,
@@ -1906,11 +1911,19 @@ export default function NovaVistoriaScreen() {
           ]}
         >
           <ThemedText style={styles.sectionTitle}>
-            <Feather name="edit-2" size={18} /> Assinatura
+            <Feather name="edit-2" size={18} /> Assinaturas
           </ThemedText>
           <SignatureCapture
+            label="Assinatura do Técnico"
+            onSignatureCapture={setSignatureTecnicoUri}
+            signatureUri={signatureTecnicoUri}
+          />
+          <View style={{ height: 16 }} />
+          <SignatureCapture
+            label="Assinatura do Proprietário / Caseiro"
             onSignatureCapture={setSignatureUri}
             signatureUri={signatureUri}
+            allowSpecialStates
           />
         </View>
 

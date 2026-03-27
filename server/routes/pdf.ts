@@ -78,6 +78,7 @@ interface VistoriaData {
   usos_solo?: UsoSolo[];
   croqui_imagem?: string;
   assinatura_uri?: string;
+  assinatura_tecnico_uri?: string;
   embargoCheck?: EmbargoCheck;
   complianceAnalysis?: ComplianceAnalysis;
   carInfo?: CARInfo;
@@ -579,7 +580,10 @@ function generatePDFHTML(vistoria: VistoriaData): string {
 
   <div class="signature-section">
     <div class="signature-box">
-      <div class="signature-line" style="margin-top: 60px;"></div>
+      ${vistoria.assinatura_tecnico_uri
+        ? `<img src="${vistoria.assinatura_tecnico_uri}" class="signature-image" alt="Assinatura Tecnico" />`
+        : `<div style="margin-top: 60px;"></div>`}
+      <div class="signature-line"></div>
       <div class="signature-label">Responsável Técnico</div>
     </div>
     <div class="signature-box">
@@ -589,7 +593,7 @@ function generatePDFHTML(vistoria: VistoriaData): string {
         ? `<span class="signature-special signature-absent">Ninguem no local</span>`
         : vistoria.assinatura_uri
         ? `<img src="${vistoria.assinatura_uri}" class="signature-image" alt="Assinatura" />`
-        : ""}
+        : `<div style="margin-top: 60px;"></div>`}
       <div class="signature-line"></div>
       <div class="signature-label">Proprietario / Caseiro</div>
     </div>

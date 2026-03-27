@@ -24,6 +24,8 @@ interface SignatureCaptureProps {
   signatureUri: string | null;
   signatureTimestamp?: string | null;
   showTimestamp?: boolean;
+  label?: string;
+  allowSpecialStates?: boolean;
 }
 
 export default function SignatureCapture({
@@ -31,6 +33,8 @@ export default function SignatureCapture({
   signatureUri,
   signatureTimestamp,
   showTimestamp = true,
+  label = "Assinatura do Responsável",
+  allowSpecialStates = false,
 }: SignatureCaptureProps) {
   const { theme } = useTheme();
   const [modalVisible, setModalVisible] = useState(false);
@@ -140,7 +144,7 @@ export default function SignatureCapture({
 
   return (
     <View style={styles.container}>
-      <ThemedText style={styles.label}>Assinatura do Responsável</ThemedText>
+      <ThemedText style={styles.label}>{label}</ThemedText>
 
       {hasSignature ? (
         <View style={styles.signaturePreview}>
@@ -217,27 +221,29 @@ export default function SignatureCapture({
             </ThemedText>
           </Pressable>
 
-          <View style={styles.alternativeRow}>
-            <Pressable
-              onPress={() => handleSpecialState(SIGNATURE_REFUSED)}
-              style={[styles.altButton, { borderColor: "#F59E0B", backgroundColor: "#FFF9ED" }]}
-            >
-              <Feather name="x-circle" size={16} color="#F59E0B" />
-              <ThemedText style={[styles.altButtonText, { color: "#B45309" }]}>
-                Recusou assinar
-              </ThemedText>
-            </Pressable>
+          {allowSpecialStates ? (
+            <View style={styles.alternativeRow}>
+              <Pressable
+                onPress={() => handleSpecialState(SIGNATURE_REFUSED)}
+                style={[styles.altButton, { borderColor: "#F59E0B", backgroundColor: "#FFF9ED" }]}
+              >
+                <Feather name="x-circle" size={16} color="#F59E0B" />
+                <ThemedText style={[styles.altButtonText, { color: "#B45309" }]}>
+                  Recusou assinar
+                </ThemedText>
+              </Pressable>
 
-            <Pressable
-              onPress={() => handleSpecialState(SIGNATURE_ABSENT)}
-              style={[styles.altButton, { borderColor: "#3B82F6", backgroundColor: "#EFF6FF" }]}
-            >
-              <Feather name="user-x" size={16} color="#3B82F6" />
-              <ThemedText style={[styles.altButtonText, { color: "#1D4ED8" }]}>
-                Ninguém no local
-              </ThemedText>
-            </Pressable>
-          </View>
+              <Pressable
+                onPress={() => handleSpecialState(SIGNATURE_ABSENT)}
+                style={[styles.altButton, { borderColor: "#3B82F6", backgroundColor: "#EFF6FF" }]}
+              >
+                <Feather name="user-x" size={16} color="#3B82F6" />
+                <ThemedText style={[styles.altButtonText, { color: "#1D4ED8" }]}>
+                  Ninguém no local
+                </ThemedText>
+              </Pressable>
+            </View>
+          ) : null}
         </View>
       )}
 

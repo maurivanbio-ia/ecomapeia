@@ -82,6 +82,7 @@ interface VistoriaData {
   usos_solo?: UsoSolo[];
   croqui_imagem?: string;
   assinatura_uri?: string;
+  assinatura_tecnico_uri?: string;
   embargoCheck?: EmbargoCheck;
   complianceAnalysis?: ComplianceAnalysis;
   carInfo?: CARInfo;
@@ -971,7 +972,21 @@ async function generateWordDocument(vistoria: VistoriaData): Promise<Buffer> {
           children: [
             new TableCell({
               children: [
-                new Paragraph({ children: [], spacing: { before: 300 } }),
+                (() => {
+                  const techUri = vistoria.assinatura_tecnico_uri;
+                  if (techUri) {
+                    const techBuffer = base64ToBuffer(techUri);
+                    if (techBuffer) {
+                      try {
+                        return new Paragraph({
+                          children: [new ImageRun({ data: techBuffer, transformation: { width: 150, height: 50 }, type: "png" })],
+                          alignment: AlignmentType.CENTER,
+                        });
+                      } catch {}
+                    }
+                  }
+                  return new Paragraph({ children: [], spacing: { before: 300 } });
+                })(),
                 new Paragraph({
                   children: [new TextRun({ text: "_________________________", size: 20 })],
                   alignment: AlignmentType.CENTER,
