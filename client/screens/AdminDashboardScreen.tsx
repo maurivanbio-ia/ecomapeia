@@ -185,7 +185,7 @@ export default function AdminDashboardScreen({ navigation }: any) {
       >
         <Animated.View entering={FadeInDown.duration(400)}>
           <View style={styles.pageHeader}>
-            <View>
+            <View style={{ flex: 1 }}>
               <ThemedText style={styles.pageTitle}>
                 {isCoordenador ? "Painel do Coordenador" : "Painel EcoBrasil"}
               </ThemedText>
@@ -207,6 +207,22 @@ export default function AdminDashboardScreen({ navigation }: any) {
               </ThemedText>
             </View>
           </View>
+
+          <Pressable
+            style={[styles.projetosBtn, { backgroundColor: Colors.light.primary + "15" }]}
+            onPress={() => navigation.navigate("GerenciarProjetos")}
+          >
+            <Feather name="folder" size={18} color={Colors.light.primary} />
+            <View style={{ flex: 1 }}>
+              <ThemedText style={styles.projetosBtnTitle} lightColor={Colors.light.primary} darkColor={Colors.light.primary}>
+                Gerenciar Projetos / UHEs
+              </ThemedText>
+              <ThemedText style={styles.projetosBtnSub}>
+                Cadastre projetos por complexo e UHE
+              </ThemedText>
+            </View>
+            <Feather name="chevron-right" size={18} color={Colors.light.primary} />
+          </Pressable>
 
           <View style={styles.statsRow}>
             {[
@@ -450,6 +466,23 @@ const styles = StyleSheet.create({
   adminBadgeText: {
     fontSize: 12,
     fontWeight: "700",
+  },
+  projetosBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.md,
+    borderRadius: 14,
+    padding: Spacing.lg,
+    marginBottom: Spacing.xl,
+  },
+  projetosBtnTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  projetosBtnSub: {
+    fontSize: 12,
+    color: Colors.light.textSecondary,
+    marginTop: 2,
   },
   statsRow: {
     flexDirection: "row",

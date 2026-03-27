@@ -1,7 +1,17 @@
 import React, { useState } from "react";
-import { View, StyleSheet, Pressable, ScrollView, TextInput, Modal, Alert } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  View,
+  StyleSheet,
+  Pressable,
+  ScrollView,
+  TextInput,
+  Modal,
+  Alert,
+  ActivityIndicator,
+  Platform,
+} from "react-native";
 import { useHeaderHeight } from "@react-navigation/elements";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import Animated, { FadeInDown } from "react-native-reanimated";
@@ -14,6 +24,17 @@ import { useAuth } from "@/hooks/useAuth";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 import { getApiUrl } from "@/lib/query-client";
 
+interface Complexo {
+  id: number;
+  nome: string;
+  descricao: string | null;
+  ativo: boolean;
+  totalUhes: number;
+  uhes: Projeto[];
+  totalVistorias: number;
+  totalUsuarios: number;
+}
+
 interface Projeto {
   id: number;
   nome: string;
@@ -23,98 +44,84 @@ interface Projeto {
   rio_principal: string | null;
   municipios: string | null;
   ativo: boolean;
+  complexo_id: number | null;
 }
 
+const emptyForm = {
+  nome: "",
+  codigo: "",
+  descricao: "",
+  reservatorio: "",
+  rio_principal: "",
+  municipios: "",
+};
+
 export default function GerenciarProjetosScreen() {
-  const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
+  const tabBarHeight = useBottomTabBarHeight();
   const { theme } = useTheme();
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
   const [modalVisible, setModalVisible] = useState(false);
   const [editingProjeto, setEditingProjeto] = useState<Projeto | null>(null);
-  const [formData, setFormData] = useState({
-    nome: "",
-    codigo: "",
-    descricao: "",
-    reservatorio: "",
-    rio_principal: "",
-    municipios: "",
-  });
+  const [selectedComplexoId, setSelectedComplexoId] = useState<number | null>(null);
+  const [formComplexoId, setFormComplexoId] = useState<number | null>(null);
+  const [formData, setFormData] = useState(emptyForm);
+  const [showComplexoDropdown, setShowComplexoDropdown] = useState(false);
+  const [expandedComplexo, setExpandedComplexo] = useState<number | null>(null);
 
-  const { data: tenantData } = useQuery({
-    queryKey: ["/api/tenant/usuarios", user?.id, "tenant"],
+  const { data: stats, isLoading } = useQuery<{ complexos: Complexo[]; totais: any }>({
+    queryKey: ["/api/complexos/admin/stats"],
     queryFn: async () => {
-      const response = await fetch(
-        new URL(`/api/tenant/usuarios/${user?.id}/tenant`, getApiUrl()).toString()
-      );
-      if (!response.ok) throw new Error("Failed to fetch tenant data");
-      return response.json();
+      const res = await fetch(new URL("/api/complexos/admin/stats", getApiUrl()).toString());
+      if (!res.ok) throw new Error("Erro ao carregar dados");
+      return res.json();
     },
-    enabled: !!user?.id,
   });
 
   const createMutation = useMutation({
-    mutationFn: async (data: typeof formData) => {
-      const response = await fetch(
-        new URL("/api/tenant/projetos", getApiUrl()).toString(),
+    mutationFn: async (data: typeof emptyForm & { complexo_id: number }) => {
+      const res = await fetch(
+        new URL(`/api/complexos/${data.complexo_id}/uhes`, getApiUrl()).toString(),
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            ...data,
-            empresa_id: tenantData?.empresa?.id,
-          }),
+          body: JSON.stringify({ ...data, empresa_id: user?.empresa_id }),
         }
       );
-      if (!response.ok) throw new Error("Failed to create project");
-      return response.json();
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Erro ao criar projeto");
+      }
+      return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/tenant/usuarios"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/complexos/admin/stats"] });
       setModalVisible(false);
       resetForm();
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     },
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: typeof formData }) => {
-      const response = await fetch(
-        new URL(`/api/tenant/projetos/${id}`, getApiUrl()).toString(),
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        }
-      );
-      if (!response.ok) throw new Error("Failed to update project");
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/tenant/usuarios"] });
-      setModalVisible(false);
-      resetForm();
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    onError: (err: any) => {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      if (Platform.OS === "web") {
+        window.alert(err.message);
+      } else {
+        Alert.alert("Erro", err.message);
+      }
     },
   });
 
   const resetForm = () => {
-    setFormData({
-      nome: "",
-      codigo: "",
-      descricao: "",
-      reservatorio: "",
-      rio_principal: "",
-      municipios: "",
-    });
+    setFormData(emptyForm);
+    setFormComplexoId(null);
     setEditingProjeto(null);
   };
 
-  const handleOpenModal = (projeto?: Projeto) => {
+  const handleOpenModal = (complexoId?: number, projeto?: Projeto) => {
     if (projeto) {
       setEditingProjeto(projeto);
+      setFormComplexoId(projeto.complexo_id);
       setFormData({
         nome: projeto.nome,
         codigo: projeto.codigo || "",
@@ -125,193 +132,316 @@ export default function GerenciarProjetosScreen() {
       });
     } else {
       resetForm();
+      if (complexoId) setFormComplexoId(complexoId);
     }
     setModalVisible(true);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
   };
 
   const handleSave = () => {
     if (!formData.nome.trim()) {
-      Alert.alert("Erro", "O nome do projeto é obrigatório");
+      if (Platform.OS === "web") {
+        window.alert("O nome do projeto/UHE é obrigatório");
+      } else {
+        Alert.alert("Atenção", "O nome do projeto/UHE é obrigatório");
+      }
       return;
     }
-
-    if (editingProjeto) {
-      updateMutation.mutate({ id: editingProjeto.id, data: formData });
-    } else {
-      createMutation.mutate(formData);
+    if (!formComplexoId) {
+      if (Platform.OS === "web") {
+        window.alert("Selecione o complexo ao qual este projeto pertence");
+      } else {
+        Alert.alert("Atenção", "Selecione o complexo ao qual este projeto pertence");
+      }
+      return;
     }
+    createMutation.mutate({ ...formData, complexo_id: formComplexoId });
   };
 
-  const projetos = tenantData?.projetosDisponiveis || [];
+  const complexos = stats?.complexos || [];
+  const selectedFormComplexo = complexos.find((c) => c.id === formComplexoId);
+  const totalProjetos = complexos.reduce((acc, c) => acc + c.totalUhes, 0);
 
   return (
     <ThemedView style={styles.container}>
       <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={[
-          styles.content,
-          { paddingTop: headerHeight + Spacing.lg, paddingBottom: insets.bottom + Spacing.xl },
-        ]}
+        contentContainerStyle={{
+          paddingTop: headerHeight + Spacing.lg,
+          paddingBottom: tabBarHeight + Spacing.xl,
+          paddingHorizontal: Spacing.lg,
+        }}
         showsVerticalScrollIndicator={false}
       >
-        <Animated.View entering={FadeInDown.duration(400)} style={styles.header}>
-          <ThemedText style={styles.title}>Projetos da Empresa</ThemedText>
+        <Animated.View entering={FadeInDown.duration(400)} style={styles.pageHeader}>
+          <View>
+            <ThemedText style={styles.pageTitle}>Projetos / UHEs</ThemedText>
+            <ThemedText style={styles.pageSubtitle}>
+              {totalProjetos} projeto{totalProjetos !== 1 ? "s" : ""} em {complexos.length} complexos
+            </ThemedText>
+          </View>
           <Pressable
-            style={[styles.addButton, { backgroundColor: Colors.light.primary }]}
+            style={[styles.addBtn, { backgroundColor: Colors.light.primary }]}
             onPress={() => handleOpenModal()}
           >
-            <Feather name="plus" size={20} color="#fff" />
-            <ThemedText style={styles.addButtonText}>Novo Projeto</ThemedText>
+            <Feather name="plus" size={18} color="#fff" />
+            <ThemedText style={styles.addBtnText} lightColor="#fff" darkColor="#fff">
+              Novo projeto
+            </ThemedText>
           </Pressable>
         </Animated.View>
 
-        {projetos.length === 0 ? (
-          <Animated.View entering={FadeInDown.duration(400).delay(100)} style={styles.emptyState}>
+        {isLoading ? (
+          <ActivityIndicator
+            size="large"
+            color={Colors.light.primary}
+            style={{ marginTop: 60 }}
+          />
+        ) : complexos.length === 0 ? (
+          <View style={styles.emptyState}>
             <Feather name="folder" size={48} color={theme.tabIconDefault} />
-            <ThemedText style={[styles.emptyText, { color: theme.tabIconDefault }]}>
-              Nenhum projeto cadastrado
+            <ThemedText style={styles.emptyTitle}>Nenhum complexo cadastrado</ThemedText>
+            <ThemedText style={styles.emptySubtitle}>
+              Cadastre os complexos primeiro no painel administrativo
             </ThemedText>
-            <ThemedText style={[styles.emptySubtext, { color: theme.tabIconDefault }]}>
-              Clique em "Novo Projeto" para começar
-            </ThemedText>
-          </Animated.View>
+          </View>
         ) : (
-          projetos.map((projeto: Projeto, index: number) => (
+          complexos.map((complexo, idx) => (
             <Animated.View
-              key={projeto.id}
-              entering={FadeInDown.duration(400).delay(100 + index * 50)}
+              key={complexo.id}
+              entering={FadeInDown.duration(400).delay(idx * 60)}
+              style={[styles.complexoCard, { backgroundColor: theme.backgroundDefault }]}
             >
               <Pressable
-                style={[styles.projetoCard, { backgroundColor: theme.backgroundDefault }]}
-                onPress={() => handleOpenModal(projeto)}
+                style={styles.complexoHeader}
+                onPress={() => {
+                  Haptics.selectionAsync();
+                  setExpandedComplexo(expandedComplexo === complexo.id ? null : complexo.id);
+                }}
               >
-                <View style={styles.projetoHeader}>
-                  <View style={[styles.projetoIcon, { backgroundColor: Colors.light.primary + "15" }]}>
-                    <Feather name="folder" size={20} color={Colors.light.primary} />
-                  </View>
-                  <View style={styles.projetoInfo}>
-                    <ThemedText style={styles.projetoNome}>{projeto.nome}</ThemedText>
-                    {projeto.codigo ? (
-                      <ThemedText style={[styles.projetoCodigo, { color: theme.tabIconDefault }]}>
-                        {projeto.codigo}
-                      </ThemedText>
-                    ) : null}
-                  </View>
-                  <View style={[styles.statusBadge, { backgroundColor: projeto.ativo ? "#22c55e20" : "#ef444420" }]}>
-                    <ThemedText style={[styles.statusText, { color: projeto.ativo ? "#22c55e" : "#ef4444" }]}>
-                      {projeto.ativo ? "Ativo" : "Inativo"}
-                    </ThemedText>
-                  </View>
+                <View style={[styles.complexoIcon, { backgroundColor: Colors.light.primary + "15" }]}>
+                  <Feather name="layers" size={18} color={Colors.light.primary} />
                 </View>
-                {projeto.reservatorio ? (
-                  <View style={styles.projetoDetails}>
-                    <Feather name="droplet" size={14} color={theme.tabIconDefault} />
-                    <ThemedText style={[styles.detailText, { color: theme.tabIconDefault }]}>
-                      {projeto.reservatorio}
-                    </ThemedText>
-                  </View>
-                ) : null}
-                {projeto.municipios ? (
-                  <View style={styles.projetoDetails}>
-                    <Feather name="map-pin" size={14} color={theme.tabIconDefault} />
-                    <ThemedText style={[styles.detailText, { color: theme.tabIconDefault }]} numberOfLines={1}>
-                      {projeto.municipios}
-                    </ThemedText>
-                  </View>
-                ) : null}
+                <View style={{ flex: 1 }}>
+                  <ThemedText style={styles.complexoNome}>{complexo.nome}</ThemedText>
+                  <ThemedText style={styles.complexoCount}>
+                    {complexo.totalUhes} UHE{complexo.totalUhes !== 1 ? "s" : ""} cadastrada{complexo.totalUhes !== 1 ? "s" : ""}
+                  </ThemedText>
+                </View>
+                <View style={styles.complexoActions}>
+                  <Pressable
+                    style={[styles.addUHEInlineBtn, { backgroundColor: Colors.light.primary }]}
+                    onPress={() => handleOpenModal(complexo.id)}
+                  >
+                    <Feather name="plus" size={14} color="#fff" />
+                  </Pressable>
+                  <Feather
+                    name={expandedComplexo === complexo.id ? "chevron-up" : "chevron-down"}
+                    size={18}
+                    color={theme.tabIconDefault}
+                  />
+                </View>
               </Pressable>
+
+              {expandedComplexo === complexo.id ? (
+                <View style={[styles.uhesList, { borderTopColor: theme.border }]}>
+                  {complexo.uhes.length === 0 ? (
+                    <View style={styles.emptyUHEs}>
+                      <ThemedText style={styles.emptyUHEsText}>
+                        Nenhum projeto cadastrado neste complexo
+                      </ThemedText>
+                      <Pressable
+                        style={[styles.addFirstBtn, { borderColor: Colors.light.primary }]}
+                        onPress={() => handleOpenModal(complexo.id)}
+                      >
+                        <Feather name="plus" size={14} color={Colors.light.primary} />
+                        <ThemedText
+                          style={styles.addFirstBtnText}
+                          lightColor={Colors.light.primary}
+                          darkColor={Colors.light.primary}
+                        >
+                          Adicionar primeiro projeto
+                        </ThemedText>
+                      </Pressable>
+                    </View>
+                  ) : (
+                    complexo.uhes.map((uhe) => (
+                      <Pressable
+                        key={uhe.id}
+                        style={[styles.uheItem, { backgroundColor: theme.backgroundRoot }]}
+                        onPress={() => handleOpenModal(complexo.id, uhe)}
+                      >
+                        <View style={styles.uheIcon}>
+                          <Feather name="zap" size={16} color="#F59E0B" />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                          <ThemedText style={styles.uheName}>{uhe.nome}</ThemedText>
+                          <View style={styles.uheDetails}>
+                            {uhe.codigo ? (
+                              <ThemedText style={styles.uheDetail}>{uhe.codigo}</ThemedText>
+                            ) : null}
+                            {uhe.municipios ? (
+                              <ThemedText style={styles.uheDetail} numberOfLines={1}>
+                                {uhe.municipios}
+                              </ThemedText>
+                            ) : null}
+                          </View>
+                        </View>
+                        <View style={[styles.statusBadge, { backgroundColor: uhe.ativo ? "#22c55e20" : "#ef444420" }]}>
+                          <ThemedText
+                            style={[styles.statusText, { color: uhe.ativo ? "#22c55e" : "#ef4444" }]}
+                          >
+                            {uhe.ativo ? "Ativo" : "Inativo"}
+                          </ThemedText>
+                        </View>
+                      </Pressable>
+                    ))
+                  )}
+                </View>
+              ) : null}
             </Animated.View>
           ))
         )}
       </ScrollView>
 
-      <Modal visible={modalVisible} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: theme.backgroundDefault }]}>
-            <View style={styles.modalHeader}>
+      <Modal
+        visible={modalVisible}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={[styles.modal, { backgroundColor: theme.backgroundRoot }]}>
+          <View style={styles.modalHeader}>
+            <View>
               <ThemedText style={styles.modalTitle}>
-                {editingProjeto ? "Editar Projeto" : "Novo Projeto"}
+                {editingProjeto ? "Editar projeto" : "Novo projeto / UHE"}
               </ThemedText>
-              <Pressable onPress={() => setModalVisible(false)}>
-                <Feather name="x" size={24} color={theme.text} />
-              </Pressable>
+              <ThemedText style={styles.modalSubtitle}>
+                {editingProjeto
+                  ? "Edite as informações do projeto"
+                  : "Preencha os dados do projeto dentro do complexo"}
+              </ThemedText>
             </View>
+            <Pressable onPress={() => setModalVisible(false)}>
+              <Feather name="x" size={24} color={theme.text} />
+            </Pressable>
+          </View>
 
-            <ScrollView style={styles.modalForm} showsVerticalScrollIndicator={false}>
-              <ThemedText style={styles.inputLabel}>Nome *</ThemedText>
-              <TextInput
-                style={[styles.input, { backgroundColor: theme.backgroundDefault, color: theme.text }]}
-                value={formData.nome}
-                onChangeText={(text) => setFormData({ ...formData, nome: text })}
-                placeholder="Ex: UHE Itupararanga"
-                placeholderTextColor={theme.tabIconDefault}
+          <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
+            <ThemedText style={styles.fieldLabel}>Complexo *</ThemedText>
+            <Pressable
+              style={[
+                styles.fieldInput,
+                { backgroundColor: theme.backgroundDefault, borderColor: formComplexoId ? Colors.light.primary : theme.border },
+              ]}
+              onPress={() => {
+                Haptics.selectionAsync();
+                setShowComplexoDropdown(!showComplexoDropdown);
+              }}
+            >
+              <Feather
+                name="layers"
+                size={16}
+                color={formComplexoId ? Colors.light.primary : theme.tabIconDefault}
+                style={{ marginRight: 8 }}
               />
-
-              <ThemedText style={styles.inputLabel}>Código</ThemedText>
-              <TextInput
-                style={[styles.input, { backgroundColor: theme.backgroundDefault, color: theme.text }]}
-                value={formData.codigo}
-                onChangeText={(text) => setFormData({ ...formData, codigo: text })}
-                placeholder="Ex: UHE-ITP"
-                placeholderTextColor={theme.tabIconDefault}
-              />
-
-              <ThemedText style={styles.inputLabel}>Descrição</ThemedText>
-              <TextInput
-                style={[styles.input, styles.textArea, { backgroundColor: theme.backgroundDefault, color: theme.text }]}
-                value={formData.descricao}
-                onChangeText={(text) => setFormData({ ...formData, descricao: text })}
-                placeholder="Descrição do projeto"
-                placeholderTextColor={theme.tabIconDefault}
-                multiline
-                numberOfLines={3}
-              />
-
-              <ThemedText style={styles.inputLabel}>Reservatório</ThemedText>
-              <TextInput
-                style={[styles.input, { backgroundColor: theme.backgroundDefault, color: theme.text }]}
-                value={formData.reservatorio}
-                onChangeText={(text) => setFormData({ ...formData, reservatorio: text })}
-                placeholder="Nome do reservatório"
-                placeholderTextColor={theme.tabIconDefault}
-              />
-
-              <ThemedText style={styles.inputLabel}>Rio Principal</ThemedText>
-              <TextInput
-                style={[styles.input, { backgroundColor: theme.backgroundDefault, color: theme.text }]}
-                value={formData.rio_principal}
-                onChangeText={(text) => setFormData({ ...formData, rio_principal: text })}
-                placeholder="Ex: Rio Sorocaba"
-                placeholderTextColor={theme.tabIconDefault}
-              />
-
-              <ThemedText style={styles.inputLabel}>Municípios</ThemedText>
-              <TextInput
-                style={[styles.input, { backgroundColor: theme.backgroundDefault, color: theme.text }]}
-                value={formData.municipios}
-                onChangeText={(text) => setFormData({ ...formData, municipios: text })}
-                placeholder="Ex: Ibiúna, Piedade, São Roque"
-                placeholderTextColor={theme.tabIconDefault}
-              />
-            </ScrollView>
-
-            <View style={styles.modalActions}>
-              <Pressable
-                style={[styles.cancelButton, { borderColor: theme.border }]}
-                onPress={() => setModalVisible(false)}
+              <ThemedText
+                style={styles.fieldInputText}
+                lightColor={formComplexoId ? "#1F2937" : theme.tabIconDefault}
+                darkColor={formComplexoId ? "#E5E7EB" : theme.tabIconDefault}
               >
-                <ThemedText>Cancelar</ThemedText>
-              </Pressable>
-              <Pressable
-                style={[styles.saveButton, { backgroundColor: Colors.light.primary }]}
-                onPress={handleSave}
-                disabled={createMutation.isPending || updateMutation.isPending}
-              >
-                <ThemedText style={styles.saveButtonText}>
-                  {createMutation.isPending || updateMutation.isPending ? "Salvando..." : "Salvar"}
-                </ThemedText>
-              </Pressable>
-            </View>
+                {selectedFormComplexo ? selectedFormComplexo.nome : "Selecione o complexo"}
+              </ThemedText>
+              <Feather name="chevron-down" size={16} color={theme.tabIconDefault} />
+            </Pressable>
+
+            {showComplexoDropdown ? (
+              <View style={[styles.dropdown, { backgroundColor: theme.backgroundDefault, borderColor: theme.border }]}>
+                {complexos.map((c) => (
+                  <Pressable
+                    key={c.id}
+                    style={[
+                      styles.dropdownItem,
+                      formComplexoId === c.id && { backgroundColor: Colors.light.primary + "15" },
+                    ]}
+                    onPress={() => {
+                      setFormComplexoId(c.id);
+                      setShowComplexoDropdown(false);
+                      Haptics.selectionAsync();
+                    }}
+                  >
+                    <ThemedText
+                      style={styles.dropdownItemText}
+                      lightColor={formComplexoId === c.id ? Colors.light.primary : "#374151"}
+                      darkColor={formComplexoId === c.id ? Colors.light.primary : "#E5E7EB"}
+                    >
+                      {c.nome}
+                    </ThemedText>
+                    {formComplexoId === c.id ? (
+                      <Feather name="check" size={16} color={Colors.light.primary} />
+                    ) : null}
+                  </Pressable>
+                ))}
+              </View>
+            ) : null}
+
+            {[
+              { label: "Nome do projeto / UHE *", key: "nome", placeholder: "Ex: UHE Itupararanga", icon: "zap" },
+              { label: "Código", key: "codigo", placeholder: "Ex: UHE-ITP", icon: "hash" },
+              { label: "Reservatório", key: "reservatorio", placeholder: "Nome do reservatório", icon: "droplet" },
+              { label: "Rio principal", key: "rio_principal", placeholder: "Ex: Rio Sorocaba", icon: "navigation" },
+              { label: "Municípios", key: "municipios", placeholder: "Ex: Ibiúna, Piedade, São Roque", icon: "map-pin" },
+              { label: "Descrição", key: "descricao", placeholder: "Informações adicionais", icon: "info" },
+            ].map((field) => (
+              <View key={field.key}>
+                <ThemedText style={styles.fieldLabel}>{field.label}</ThemedText>
+                <View
+                  style={[
+                    styles.fieldInput,
+                    { backgroundColor: theme.backgroundDefault, borderColor: theme.border },
+                  ]}
+                >
+                  <Feather
+                    name={field.icon as any}
+                    size={16}
+                    color={theme.tabIconDefault}
+                    style={{ marginRight: 8 }}
+                  />
+                  <TextInput
+                    style={[styles.fieldInputText, { color: theme.text }]}
+                    placeholder={field.placeholder}
+                    placeholderTextColor={theme.tabIconDefault}
+                    value={(formData as any)[field.key]}
+                    onChangeText={(text) => setFormData((prev) => ({ ...prev, [field.key]: text }))}
+                    autoCapitalize={field.key === "codigo" ? "characters" : "words"}
+                  />
+                </View>
+              </View>
+            ))}
+          </ScrollView>
+
+          <View style={[styles.modalFooter, { borderTopColor: theme.border }]}>
+            <Pressable
+              style={[styles.cancelBtn, { borderColor: theme.border }]}
+              onPress={() => setModalVisible(false)}
+            >
+              <ThemedText style={styles.cancelBtnText}>Cancelar</ThemedText>
+            </Pressable>
+            <Pressable
+              style={[styles.saveBtn, { backgroundColor: Colors.light.primary }]}
+              onPress={handleSave}
+              disabled={createMutation.isPending}
+            >
+              {createMutation.isPending ? (
+                <ActivityIndicator color="#fff" size="small" />
+              ) : (
+                <>
+                  <Feather name="save" size={16} color="#fff" />
+                  <ThemedText style={styles.saveBtnText} lightColor="#fff" darkColor="#fff">
+                    Salvar projeto
+                  </ThemedText>
+                </>
+              )}
+            </Pressable>
           </View>
         </View>
       </Modal>
@@ -320,157 +450,174 @@ export default function GerenciarProjetosScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  content: {
-    paddingHorizontal: Spacing.lg,
-  },
-  header: {
+  container: { flex: 1 },
+  pageHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: Spacing.xl,
   },
-  title: {
-    fontSize: 20,
-    fontWeight: "700",
-  },
-  addButton: {
+  pageTitle: { fontSize: 22, fontWeight: "700" },
+  pageSubtitle: { fontSize: 13, color: Colors.light.textSecondary, marginTop: 2 },
+  addBtn: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    borderRadius: BorderRadius.md,
-    gap: Spacing.xs,
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 10,
   },
-  addButtonText: {
-    color: "#fff",
-    fontWeight: "600",
-    fontSize: 14,
-  },
+  addBtnText: { fontSize: 13, fontWeight: "700" },
   emptyState: {
     alignItems: "center",
-    paddingVertical: Spacing["2xl"],
+    paddingVertical: 60,
+    gap: Spacing.md,
   },
-  emptyText: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginTop: Spacing.md,
-  },
-  emptySubtext: {
-    fontSize: 14,
-    marginTop: Spacing.xs,
-  },
-  projetoCard: {
-    padding: Spacing.lg,
-    borderRadius: BorderRadius.lg,
+  emptyTitle: { fontSize: 17, fontWeight: "700" },
+  emptySubtitle: { fontSize: 13, color: Colors.light.textSecondary, textAlign: "center" },
+  complexoCard: {
+    borderRadius: 16,
     marginBottom: Spacing.md,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2,
   },
-  projetoHeader: {
+  complexoHeader: {
     flexDirection: "row",
     alignItems: "center",
+    gap: Spacing.md,
+    padding: Spacing.lg,
   },
-  projetoIcon: {
+  complexoIcon: {
     width: 40,
     height: 40,
-    borderRadius: BorderRadius.md,
+    borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
   },
-  projetoInfo: {
-    flex: 1,
-    marginLeft: Spacing.md,
-  },
-  projetoNome: {
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  projetoCodigo: {
-    fontSize: 13,
-    marginTop: 2,
-  },
-  statusBadge: {
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: 4,
-    borderRadius: BorderRadius.sm,
-  },
-  statusText: {
-    fontSize: 12,
-    fontWeight: "600",
-  },
-  projetoDetails: {
+  complexoNome: { fontSize: 15, fontWeight: "700" },
+  complexoCount: { fontSize: 12, color: Colors.light.textSecondary, marginTop: 2 },
+  complexoActions: {
     flexDirection: "row",
     alignItems: "center",
-    gap: Spacing.xs,
+    gap: Spacing.sm,
+  },
+  addUHEInlineBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  uhesList: {
+    paddingHorizontal: Spacing.lg,
+    paddingBottom: Spacing.lg,
+    borderTopWidth: 1,
+  },
+  emptyUHEs: {
+    alignItems: "center",
+    paddingVertical: Spacing.xl,
+    gap: Spacing.md,
+  },
+  emptyUHEsText: { fontSize: 13, color: Colors.light.textSecondary, textAlign: "center" },
+  addFirstBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 8,
+    borderWidth: 1.5,
+    borderStyle: "dashed",
+  },
+  addFirstBtnText: { fontSize: 13, fontWeight: "600" },
+  uheItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.md,
+    padding: Spacing.md,
+    borderRadius: 10,
     marginTop: Spacing.sm,
-    marginLeft: 52,
   },
-  detailText: {
-    fontSize: 13,
-    flex: 1,
+  uheIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    backgroundColor: "#FEF3C720",
+    alignItems: "center",
+    justifyContent: "center",
   },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "flex-end",
+  uheName: { fontSize: 14, fontWeight: "600" },
+  uheDetails: { flexDirection: "row", gap: Spacing.sm, flexWrap: "wrap", marginTop: 2 },
+  uheDetail: { fontSize: 11, color: Colors.light.textSecondary },
+  statusBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
   },
-  modalContent: {
-    borderTopLeftRadius: BorderRadius.xl,
-    borderTopRightRadius: BorderRadius.xl,
-    padding: Spacing.xl,
-    maxHeight: "90%",
-  },
+  statusText: { fontSize: 11, fontWeight: "600" },
+  modal: { flex: 1 },
   modalHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "flex-start",
+    padding: Spacing.xl,
+    paddingTop: Spacing["3xl"],
+  },
+  modalTitle: { fontSize: 20, fontWeight: "700" },
+  modalSubtitle: { fontSize: 13, color: Colors.light.textSecondary, marginTop: 2 },
+  modalBody: { flex: 1, paddingHorizontal: Spacing.xl },
+  fieldLabel: { fontSize: 13, fontWeight: "600", marginBottom: 6, marginTop: Spacing.md },
+  fieldInput: {
+    flexDirection: "row",
     alignItems: "center",
-    marginBottom: Spacing.xl,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    paddingHorizontal: 12,
+    height: 48,
   },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: "700",
+  fieldInputText: { flex: 1, fontSize: 14 },
+  dropdown: {
+    borderRadius: 10,
+    borderWidth: 1,
+    marginTop: 4,
+    overflow: "hidden",
   },
-  modalForm: {
-    marginBottom: Spacing.lg,
+  dropdownItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
   },
-  inputLabel: {
-    fontSize: 14,
-    fontWeight: "600",
-    marginBottom: Spacing.xs,
-    marginTop: Spacing.md,
-  },
-  input: {
-    borderRadius: BorderRadius.md,
-    padding: Spacing.md,
-    fontSize: 16,
-  },
-  textArea: {
-    minHeight: 80,
-    textAlignVertical: "top",
-  },
-  modalActions: {
+  dropdownItemText: { fontSize: 14 },
+  modalFooter: {
     flexDirection: "row",
     gap: Spacing.md,
+    padding: Spacing.xl,
+    borderTopWidth: 1,
   },
-  cancelButton: {
+  cancelBtn: {
     flex: 1,
     alignItems: "center",
-    paddingVertical: Spacing.md,
-    borderRadius: BorderRadius.md,
+    paddingVertical: 14,
+    borderRadius: 12,
     borderWidth: 1,
   },
-  saveButton: {
-    flex: 1,
+  cancelBtnText: { fontSize: 15, fontWeight: "600" },
+  saveBtn: {
+    flex: 2,
+    flexDirection: "row",
     alignItems: "center",
-    paddingVertical: Spacing.md,
-    borderRadius: BorderRadius.md,
+    justifyContent: "center",
+    gap: 8,
+    paddingVertical: 14,
+    borderRadius: 12,
   },
-  saveButtonText: {
-    color: "#fff",
-    fontWeight: "600",
-  },
+  saveBtnText: { fontSize: 15, fontWeight: "700" },
 });

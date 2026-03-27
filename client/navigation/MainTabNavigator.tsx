@@ -8,7 +8,7 @@ import HomeStackNavigator from "@/navigation/HomeStackNavigator";
 import ProfileStackNavigator from "@/navigation/ProfileStackNavigator";
 import VistoriasStackNavigator, { VistoriasStackParamList } from "@/navigation/VistoriasStackNavigator";
 import IAStackNavigator from "@/navigation/IAStackNavigator";
-import AdminDashboardScreen from "@/screens/AdminDashboardScreen";
+import AdminStackNavigator from "@/navigation/AdminStackNavigator";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -85,8 +85,9 @@ export default function MainTabNavigator() {
       {user?.is_admin || user?.tipo_usuario === "Coordenador" ? (
         <Tab.Screen
           name="AdminTab"
-          component={AdminDashboardScreen}
+          component={AdminStackNavigator}
           options={{
+            headerShown: false,
             title: user?.is_admin ? "Admin" : "Painel",
             tabBarIcon: ({ color, size }) => (
               <Feather name={user?.is_admin ? "shield" : "bar-chart-2"} size={size} color={color} />
