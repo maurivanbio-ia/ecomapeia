@@ -221,6 +221,8 @@ export default function NovaVistoriaScreen() {
     observacoes_usos: "",
   });
   
+  const [emCondominio, setEmCondominio] = useState(false);
+
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [loadingWeather, setLoadingWeather] = useState(false);
 
@@ -349,6 +351,7 @@ export default function NovaVistoriaScreen() {
         observacoes: editData.observacoes || "",
         observacoes_usos: editData.observacoes_usos || "",
       });
+      setEmCondominio(!!(editData.loteamento_condominio && editData.loteamento_condominio.trim().length > 0));
 
       if (editData.coordenadas_utm && editData.coordenadas_utm.length > 0) {
         setUtmPoints(editData.coordenadas_utm.map((c: any, i: number) => ({
@@ -1143,6 +1146,54 @@ export default function NovaVistoriaScreen() {
             <Feather name="file-text" size={18} /> 01 – Identificação Propriedade
           </ThemedText>
           {renderInput("Localização", "localizacao", "Descrição da localização")}
+
+          <View style={styles.inputGroup}>
+            <ThemedText style={styles.label}>Em condomínio?</ThemedText>
+            <View style={styles.selectRow}>
+              {["SIM", "NÃO"].map((option) => {
+                const selected = (option === "SIM") === emCondominio;
+                return (
+                  <Pressable
+                    key={option}
+                    onPress={() => {
+                      Haptics.selectionAsync();
+                      const isYes = option === "SIM";
+                      setEmCondominio(isYes);
+                      if (!isYes) updateField("loteamento_condominio", "");
+                    }}
+                    style={[
+                      styles.selectOption,
+                      {
+                        backgroundColor: selected ? Colors.light.primary : theme.backgroundDefault,
+                        borderColor: selected ? Colors.light.primary : theme.border,
+                      },
+                    ]}
+                  >
+                    <ThemedText style={[styles.selectText, { color: selected ? "#FFFFFF" : theme.text }]}>
+                      {option}
+                    </ThemedText>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
+
+          {emCondominio ? (
+            <View style={styles.inputGroup}>
+              <ThemedText style={styles.label}>Nome do Condomínio / Loteamento</ThemedText>
+              <TextInput
+                style={[
+                  styles.input,
+                  { backgroundColor: theme.backgroundDefault, borderColor: Colors.light.primary, color: theme.text },
+                ]}
+                placeholder="Ex: Cond. Lago Azul"
+                placeholderTextColor={theme.tabIconDefault}
+                value={formData.loteamento_condominio}
+                onChangeText={(v) => updateField("loteamento_condominio", v)}
+              />
+            </View>
+          ) : null}
+
           {renderInput("Município", "municipio", "Ex: Ibiúna")}
           {renderInput("UF", "uf", "Ex: SP")}
           {renderInput("Setor", "setor", "Ex: 13")}
