@@ -7,6 +7,7 @@ import { registerChatRoutes } from "./replit_integrations/chat";
 import pdfRoutes from "./routes/pdf";
 import docxRoutes from "./routes/docx";
 import kmzRoutes from "./routes/kmz";
+import reportsRoutes from "./routes/reports";
 import tenantRoutes from "./routes/tenant";
 import complexosRoutes from "./routes/complexos";
 import aiRoutes from "./ai-routes";
@@ -55,6 +56,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Register KMZ export routes
   app.use("/api/kmz", kmzRoutes);
+  
+  // Register Summary Reports routes (by complexo/UHE)
+  app.use("/api/reports", reportsRoutes);
   
   // Auth routes
   app.post("/api/auth/login", async (req: Request, res: Response) => {

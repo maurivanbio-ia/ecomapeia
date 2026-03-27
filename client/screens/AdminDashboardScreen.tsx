@@ -16,6 +16,8 @@ import { Feather } from "@expo/vector-icons";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
+import * as Print from "expo-print";
+import * as Sharing from "expo-sharing";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
@@ -72,6 +74,37 @@ export default function AdminDashboardScreen({ navigation }: any) {
     municipios: "",
     descricao: "",
   });
+
+  const [downloadingReport, setDownloadingReport] = useState<string | null>(null);
+
+  const downloadReport = async (endpoint: string, key: string) => {
+    try {
+      setDownloadingReport(key);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      const url = new URL(endpoint, getApiUrl()).toString();
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("Erro ao buscar relatório");
+      const html = await res.text();
+
+      if (Platform.OS === "web") {
+        const win = window.open();
+        if (win) { win.document.write(html); win.document.close(); }
+      } else {
+        const { uri } = await Print.printToFileAsync({ html });
+        if (await Sharing.isAvailableAsync()) {
+          await Sharing.shareAsync(uri, {
+            mimeType: "application/pdf",
+            dialogTitle: "Compartilhar Relatório PDF",
+          });
+        }
+      }
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch (err: any) {
+      Alert.alert("Erro", err.message || "Não foi possível gerar o relatório.");
+    } finally {
+      setDownloadingReport(null);
+    }
+  };
 
   const { data: stats, isLoading } = useQuery<AdminStats>({
     queryKey: ["/api/complexos/admin/stats"],
@@ -242,6 +275,21 @@ export default function AdminDashboardScreen({ navigation }: any) {
             ))}
           </View>
 
+          <Pressable
+            style={[styles.relatorioGeralBtn, { borderColor: "#6366F1" }]}
+            onPress={() => downloadReport("/api/reports/all", "all")}
+            disabled={downloadingReport !== null}
+          >
+            {downloadingReport === "all" ? (
+              <ActivityIndicator size="small" color="#6366F1" />
+            ) : (
+              <Feather name="download" size={16} color="#6366F1" />
+            )}
+            <ThemedText style={styles.relatorioGeralText} lightColor="#6366F1" darkColor="#6366F1">
+              {downloadingReport === "all" ? "Gerando..." : "Relatório Geral — Todos os Complexos"}
+            </ThemedText>
+          </Pressable>
+
           <ThemedText style={styles.sectionTitle}>Complexos Hidrelétricos</ThemedText>
 
           {stats?.complexos.map((complexo, idx) => (
@@ -293,6 +341,23 @@ export default function AdminDashboardScreen({ navigation }: any) {
                       {complexo.totalUsuarios} usuários
                     </ThemedText>
                   </View>
+                  <Pressable
+                    style={styles.relatorioBtn}
+                    onPress={(e) => {
+                      e.stopPropagation?.();
+                      downloadReport(`/api/reports/complexo/${complexo.id}`, `complexo-${complexo.id}`);
+                    }}
+                    disabled={downloadingReport !== null}
+                  >
+                    {downloadingReport === `complexo-${complexo.id}` ? (
+                      <ActivityIndicator size="small" color={Colors.light.primary} />
+                    ) : (
+                      <Feather name="download" size={13} color={Colors.light.primary} />
+                    )}
+                    <ThemedText style={styles.relatorioBtnText} lightColor={Colors.light.primary} darkColor={Colors.light.primary}>
+                      Relatório
+                    </ThemedText>
+                  </Pressable>
                 </View>
               </Pressable>
 
@@ -339,6 +404,17 @@ export default function AdminDashboardScreen({ navigation }: any) {
                             </ThemedText>
                           ) : null}
                         </View>
+                        <Pressable
+                          style={styles.uheRelatorioBtn}
+                          onPress={() => downloadReport(`/api/reports/uhe/${uhe.id}`, `uhe-${uhe.id}`)}
+                          disabled={downloadingReport !== null}
+                        >
+                          {downloadingReport === `uhe-${uhe.id}` ? (
+                            <ActivityIndicator size="small" color="#F59E0B" />
+                          ) : (
+                            <Feather name="download" size={14} color="#F59E0B" />
+                          )}
+                        </Pressable>
                       </View>
                     ))
                   )}
