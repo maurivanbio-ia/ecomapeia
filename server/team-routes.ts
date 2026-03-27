@@ -1,7 +1,7 @@
 import { Router, Request, Response } from "express";
 import { db } from "./db";
 import { equipes, membros_equipe, notificacoes, atribuicoes_vistoria, usuarios, vistorias } from "@shared/schema";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, ilike } from "drizzle-orm";
 
 const router = Router();
 
@@ -307,7 +307,7 @@ router.get("/historico-propriedade", async (req: Request, res: Response) => {
     let query = db.select().from(vistorias);
     
     if (proprietario) {
-      query = query.where(eq(vistorias.proprietario, proprietario as string));
+      query = query.where(ilike(vistorias.proprietario, `%${proprietario}%`));
     }
 
     const history = await query.orderBy(desc(vistorias.data_vistoria));
