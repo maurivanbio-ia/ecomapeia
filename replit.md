@@ -78,6 +78,19 @@ The application integrates Replit AI, leveraging OpenAI's gpt-5.2 model for vari
 -   **New JSONB columns in vistorias:** `car_info`, `embargo_check`, `compliance_analysis` store environmental compliance data
 -   **Field naming convention:** Database uses snake_case (car_info), API transforms to camelCase (carInfo) for frontend/reports
 
+### Coordinator Report Download (Mar 2026)
+
+-   **Report endpoints:** `server/routes/reports.ts` provides 3 GET endpoints:
+    -   `/api/reports/all` — full report with all complexos + UHEs
+    -   `/api/reports/complexo/:complexoId` — report filtered to one complexo
+    -   `/api/reports/uhe/:uheId` — report filtered to one UHE
+-   **CBA Logo:** All reports embed the CBA logo (same as the individual vistoria notification PDF) via base64 from `server/assets/cba_logo.png`
+-   **UI:** `AdminDashboardScreen` (coordinator and admin panel) now has:
+    -   "Relatório Geral — Todos os Complexos" button above the complexo list
+    -   "Relatório" download button on each complexo row
+    -   Download icon on each UHE row inside expanded complexo
+-   **Download flow:** On native, generates PDF via `expo-print` + `expo-sharing`; on web, opens HTML in new tab
+
 ### Multi-Tenant & Admin Features (Mar 2026)
 
 -   **Multi-tenant architecture:** 4 Complexos (Juquiá, Sorocaba, Paranapanema, Salto do Rio Verdinho), empresa EcoBrasil (id:4)
