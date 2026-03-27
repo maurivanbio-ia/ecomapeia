@@ -84,6 +84,8 @@ export default function ProfileScreen() {
       return response.json();
     },
     enabled: !!user?.id,
+    staleTime: 0,
+    refetchOnMount: "always",
   });
 
   useEffect(() => {
@@ -292,13 +294,28 @@ export default function ProfileScreen() {
                 <Feather name="briefcase" size={20} color="#fff" />
               </View>
               <View style={styles.tenantInfo}>
-                {tenantData?.empresa ? (
+                {tenantData?.projetoAtual ? (
+                  <>
+                    <ThemedText style={styles.tenantEmpresaNome} numberOfLines={1}>
+                      {tenantData.projetoAtual.nome}
+                    </ThemedText>
+                    {tenantData?.empresa ? (
+                      <ThemedText style={[styles.tenantProjetoNome, { color: theme.tabIconDefault }]} numberOfLines={1}>
+                        {tenantData.empresa.nome}
+                      </ThemedText>
+                    ) : (
+                      <ThemedText style={[styles.tenantProjetoNome, { color: Colors.light.primary }]} numberOfLines={1}>
+                        UHE/PCH selecionada
+                      </ThemedText>
+                    )}
+                  </>
+                ) : tenantData?.empresa ? (
                   <>
                     <ThemedText style={styles.tenantEmpresaNome}>
                       {tenantData.empresa.nome}
                     </ThemedText>
                     <ThemedText style={[styles.tenantProjetoNome, { color: theme.tabIconDefault }]}>
-                      {tenantData.projetoAtual?.nome || "Nenhum projeto selecionado"}
+                      Nenhum projeto selecionado
                     </ThemedText>
                   </>
                 ) : (

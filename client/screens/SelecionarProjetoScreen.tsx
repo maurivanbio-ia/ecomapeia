@@ -19,6 +19,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest, getApiUrl } from "@/lib/query-client";
+import { useNavigation } from "@react-navigation/native";
 
 interface Empresa {
   id: number;
@@ -74,6 +75,7 @@ export default function SelecionarProjetoScreen() {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const navigation = useNavigation();
   const [selectedProjetoId, setSelectedProjetoId] = useState<number | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -102,6 +104,7 @@ export default function SelecionarProjetoScreen() {
       queryClient.invalidateQueries({ queryKey: ["/api/tenant/usuarios"] });
       queryClient.invalidateQueries({ queryKey: ["/api/vistorias"] });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      navigation.goBack();
     },
   });
 
@@ -114,7 +117,7 @@ export default function SelecionarProjetoScreen() {
   const handleSelectProjeto = async (projetoId: number) => {
     Haptics.selectionAsync();
     setSelectedProjetoId(projetoId);
-    await selectProjetoMutation.mutateAsync(projetoId);
+    selectProjetoMutation.mutate(projetoId);
   };
 
   if (isLoading) {
