@@ -78,6 +78,15 @@ The application integrates Replit AI, leveraging OpenAI's gpt-5.2 model for vari
 -   **New JSONB columns in vistorias:** `car_info`, `embargo_check`, `compliance_analysis` store environmental compliance data
 -   **Field naming convention:** Database uses snake_case (car_info), API transforms to camelCase (carInfo) for frontend/reports
 
+### Multi-Tenant & Admin Features (Mar 2026)
+
+-   **Multi-tenant architecture:** 4 Complexos (Juquiá, Sorocaba, Paranapanema, Salto do Rio Verdinho), empresa EcoBrasil (id:4)
+-   **AdminStackNavigator:** Admin tab now uses a stack (AdminDashboard → GerenciarProjetos), enabling navigation between admin screens
+-   **GerenciarProjetosScreen:** Manage projetos/UHEs organized by complexo; lists complexos with expandable UHE cards; create form with complexo selector, nome, código, reservatório, rio principal, municípios
+-   **Automatic Sync:** `useAutoSync` hook monitors network connectivity via `@react-native-community/netinfo`; triggers sync automatically when connection transitions from offline → online (WiFi, 4G, 5G); implemented as global context (`AutoSyncContext`) to share state across screens
+-   **SyncStatusBanner:** Fixed overlay banner (animated slide-in) showing sync status: syncing/success/error/offline; appears at top of screen and dismisses after 4-5 seconds
+-   **Online/Offline indicator:** HomeScreen shows connection status badge (green Online / gray Offline) next to quick actions; sync button grays out when offline
+
 ### Advanced Features (Feb 2026)
 
 -   **Weather Integration:** Real-time weather data via Open-Meteo API (free, no key required) displayed during inspections

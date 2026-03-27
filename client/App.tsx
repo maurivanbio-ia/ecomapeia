@@ -15,15 +15,23 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { ThemeProvider, useThemeContext } from "@/contexts/ThemeContext";
 import { InteractiveTutorial } from "@/components/InteractiveTutorial";
+import { SyncStatusBanner } from "@/components/SyncStatusBanner";
+import { AutoSyncProvider, useAutoSyncContext } from "@/contexts/AutoSyncContext";
 
 function AppContent() {
   const { isDark } = useThemeContext();
-  
+  const { syncStatus, isConnected, lastSyncAt } = useAutoSyncContext();
+
   return (
     <>
       <NavigationContainer>
         <RootStackNavigator />
       </NavigationContainer>
+      <SyncStatusBanner
+        status={syncStatus}
+        isConnected={isConnected}
+        lastSyncAt={lastSyncAt}
+      />
       <StatusBar style={isDark ? "light" : "dark"} />
       <InteractiveTutorial />
     </>
@@ -40,7 +48,9 @@ export default function App() {
               <SafeAreaProvider>
                 <GestureHandlerRootView style={styles.root}>
                   <KeyboardProvider>
-                    <AppContent />
+                    <AutoSyncProvider>
+                      <AppContent />
+                    </AutoSyncProvider>
                   </KeyboardProvider>
                 </GestureHandlerRootView>
               </SafeAreaProvider>

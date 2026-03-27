@@ -32,8 +32,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 import type { MainTabParamList } from "@/navigation/MainTabNavigator";
-import { getPendingCount, syncPendingVistorias } from "@/lib/offlineStorage";
-import { apiRequest } from "@/lib/query-client";
+import { getPendingCount } from "@/lib/offlineStorage";
+import { useAutoSyncContext } from "@/contexts/AutoSyncContext";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -59,9 +59,9 @@ export default function HomeScreen() {
   const { user } = useAuth();
   const { t } = useLanguage();
   const navigation = useNavigation<NavigationProp>();
+  const { isSyncing: syncing, isConnected, triggerSync } = useAutoSyncContext();
   const [refreshing, setRefreshing] = React.useState(false);
   const [pendingCount, setPendingCount] = useState(0);
-  const [syncing, setSyncing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "synced" | "pending">("all");
 
@@ -121,45 +121,16 @@ export default function HomeScreen() {
       Alert.alert(t.syncNow, "Todas as vistorias já estão sincronizadas.");
       return;
     }
-
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    setSyncing(true);
-
-    try {
-      let totalSynced = 0;
-      let totalErrors = 0;
-
-      // 1. Sync offline (AsyncStorage) items
-      if (pendingCount > 0) {
-        const offlineResult = await syncPendingVistorias(async (data) => {
-          await apiRequest("POST", "/api/vistorias", data);
-        });
-        totalSynced += offlineResult.synced;
-        totalErrors += offlineResult.errors;
-      }
-
-      // 2. Sync server-side vistorias with pending status
-      if (serverPendingCount > 0 && user?.id) {
-        const syncRes = await apiRequest("POST", "/api/vistorias/sync", { usuario_id: user.id });
-        const syncData = await syncRes.json();
-        totalSynced += syncData.synced || 0;
-      }
-
-      await refetch();
-      const newPending = await getPendingCount();
-      setPendingCount(newPending);
-
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      Alert.alert(
-        t.success,
-        `${totalSynced} vistoria(s) sincronizada(s) com sucesso.${totalErrors > 0 ? ` ${totalErrors} erro(s).` : ""}`
-      );
-    } catch (error) {
+    if (!isConnected) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Alert.alert(t.error, "Falha na sincronização. Tente novamente.");
-    } finally {
-      setSyncing(false);
+      Alert.alert("Sem conexão", "Conecte-se à internet (WiFi, 4G ou 5G) para sincronizar.");
+      return;
     }
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    await triggerSync();
+    await refetch();
+    const newPending = await getPendingCount();
+    setPendingCount(newPending);
   };
 
   return (
@@ -236,7 +207,29 @@ export default function HomeScreen() {
 
         {/* Quick Actions */}
         <Animated.View entering={FadeInDown.duration(500).delay(200)}>
-          <ThemedText style={styles.sectionTitle}>{t.home}</ThemedText>
+          <View style={styles.sectionTitleRow}>
+            <ThemedText style={styles.sectionTitle}>{t.home}</ThemedText>
+            <View
+              style={[
+                styles.connBadge,
+                { backgroundColor: isConnected ? "#22c55e18" : "#6b728018" },
+              ]}
+            >
+              <View
+                style={[
+                  styles.connDot,
+                  { backgroundColor: isConnected ? "#22c55e" : "#6b7280" },
+                ]}
+              />
+              <ThemedText
+                style={styles.connLabel}
+                lightColor={isConnected ? "#16a34a" : "#6b7280"}
+                darkColor={isConnected ? "#4ade80" : "#9ca3af"}
+              >
+                {isConnected ? "Online" : "Offline"}
+              </ThemedText>
+            </View>
+          </View>
           <View style={styles.actionsGrid}>
             <QuickActionCard
               icon="plus-circle"
@@ -248,7 +241,7 @@ export default function HomeScreen() {
             <QuickActionCard
               icon="upload-cloud"
               label={t.syncNow}
-              color={Colors.light.primary}
+              color={isConnected ? Colors.light.primary : "#6b7280"}
               onPress={handleSyncPending}
               theme={theme}
               loading={syncing}
@@ -499,10 +492,32 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  sectionTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: Spacing.lg,
+  },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "600",
-    marginBottom: Spacing.lg,
+  },
+  connBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 20,
+  },
+  connDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+  },
+  connLabel: {
+    fontSize: 12,
+    fontWeight: "600",
   },
   actionsGrid: {
     flexDirection: "row",
