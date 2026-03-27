@@ -83,6 +83,7 @@ interface VistoriaData {
   complianceAnalysis?: ComplianceAnalysis;
   carInfo?: CARInfo;
   weather_data?: WeatherData;
+  projeto_nome?: string;
 }
 
 function getCBALogoBase64(): string {
@@ -381,7 +382,7 @@ function generatePDFHTML(vistoria: VistoriaData): string {
     ${logoBase64 ? `<img src="${logoBase64}" class="logo" alt="CBA Logo" />` : `<div style="width: 180px;"></div>`}
     <div class="header-title">
       <h1>RELATÓRIO DE OCORRÊNCIA - NOTIFICAÇÃO</h1>
-      <h2>UHE Itupararanga</h2>
+      <h2>${vistoria.projeto_nome || "EcoBrasil"}</h2>
     </div>
     <div class="doc-code">
       <strong>${vistoria.numero_notificacao || "-"}</strong>

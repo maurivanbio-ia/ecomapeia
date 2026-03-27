@@ -69,6 +69,7 @@ interface VistoriaData {
   horaVistoria?: string;
   weatherData?: WeatherData;
   weather_data?: WeatherData;
+  projeto_nome?: string;
 }
 
 interface LatLng {

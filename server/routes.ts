@@ -18,7 +18,7 @@ import featuresRoutes from "./features-routes";
 import teamRoutes from "./team-routes";
 import { db } from "./db";
 import { eq as eqOp } from "drizzle-orm";
-import { empresas, complexos } from "@shared/schema";
+import { empresas, complexos, projetos } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Register AI chat routes
@@ -181,6 +181,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const usosSoloDB = await storage.getUsosSolo(vistoria.id);
       const fotosDB = await storage.getFotos(vistoria.id);
 
+      let projetoNome: string | null = null;
+      if (vistoria.projeto_id) {
+        const projeto = await db.select({ nome: projetos.nome, codigo: projetos.codigo })
+          .from(projetos)
+          .where(eqOp(projetos.id, vistoria.projeto_id))
+          .limit(1);
+        if (projeto.length > 0) {
+          projetoNome = projeto[0].codigo
+            ? `${projeto[0].codigo} – ${projeto[0].nome}`
+            : projeto[0].nome;
+        }
+      }
+
       const vistoriaWithCamelCase = {
         ...vistoria,
         carInfo: vistoria.car_info,
@@ -188,6 +201,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         complianceAnalysis: vistoria.compliance_analysis,
         horaVistoria: vistoria.hora_vistoria,
         weatherData: vistoria.weather_data,
+        projeto_nome: projetoNome,
       };
 
       const usosSolo = usosSoloDB.map(u => ({
