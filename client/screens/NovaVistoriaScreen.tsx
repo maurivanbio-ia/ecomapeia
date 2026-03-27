@@ -1452,25 +1452,36 @@ export default function NovaVistoriaScreen() {
                                 keyboardType="numeric"
                               />
                             ) : null}
-                            <Pressable
-                              onPress={() => pickImageForUsoInstance(instLabel)}
-                              disabled={processingPhoto}
-                              style={[
-                                styles.usoSoloCameraBtn,
-                                {
-                                  backgroundColor: instPhoto
-                                    ? Colors.light.success + "20"
-                                    : Colors.light.primary + "15",
-                                  borderColor: instPhoto ? Colors.light.success : Colors.light.primary,
-                                },
-                              ]}
-                            >
-                              {instPhoto ? (
-                                <Image source={{ uri: instPhoto.uri }} style={styles.usoSoloInstThumb} />
-                              ) : (
+                            {instPhoto ? (
+                              <View style={styles.usoSoloInstPhotoWrap}>
+                                <Pressable
+                                  onPress={() => pickImageForUsoInstance(instLabel)}
+                                  disabled={processingPhoto}
+                                >
+                                  <Image source={{ uri: instPhoto.uri }} style={styles.usoSoloInstThumb} />
+                                </Pressable>
+                                <Pressable
+                                  onPress={() => removePhoto(instPhoto.id)}
+                                  style={styles.usoSoloInstDeleteBtn}
+                                >
+                                  <Feather name="x" size={9} color="#fff" />
+                                </Pressable>
+                              </View>
+                            ) : (
+                              <Pressable
+                                onPress={() => pickImageForUsoInstance(instLabel)}
+                                disabled={processingPhoto}
+                                style={[
+                                  styles.usoSoloCameraBtn,
+                                  {
+                                    backgroundColor: Colors.light.primary + "15",
+                                    borderColor: Colors.light.primary,
+                                  },
+                                ]}
+                              >
                                 <Feather name="camera" size={15} color={Colors.light.primary} />
-                              )}
-                            </Pressable>
+                              </Pressable>
+                            )}
                           </View>
                         );
                       })}
@@ -2738,10 +2749,27 @@ const styles = StyleSheet.create({
     minWidth: 80,
   },
   usoSoloInstThumb: {
-    width: 28,
-    height: 28,
-    borderRadius: 4,
+    width: 36,
+    height: 36,
+    borderRadius: 5,
     resizeMode: "cover",
+  },
+  usoSoloInstPhotoWrap: {
+    position: "relative",
+    width: 36,
+    height: 36,
+  },
+  usoSoloInstDeleteBtn: {
+    position: "absolute",
+    top: -5,
+    right: -5,
+    backgroundColor: "#FF4444",
+    borderRadius: 8,
+    width: 16,
+    height: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 1,
   },
   usoSoloCheck: {
     width: 24,
