@@ -15,6 +15,7 @@ import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
+import * as FileSystem from "expo-file-system";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -75,6 +76,39 @@ interface VistoriaData {
 interface LatLng {
   latitude: number;
   longitude: number;
+}
+
+async function uriToBase64DataUri(uri: string): Promise<string> {
+  if (!uri) return uri;
+  if (uri.startsWith("data:")) return uri;
+  if (Platform.OS === "web") return uri;
+  try {
+    const base64 = await FileSystem.readAsStringAsync(uri, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+    const ext = uri.split(".").pop()?.toLowerCase() || "jpeg";
+    const mime = ext === "png" ? "image/png" : ext === "gif" ? "image/gif" : "image/jpeg";
+    return `data:${mime};base64,${base64}`;
+  } catch {
+    return uri;
+  }
+}
+
+async function preparePhotosForReport(
+  fotos?: Array<{ uri: string; legenda?: string }>
+): Promise<Array<{ uri: string; legenda?: string }>> {
+  if (!fotos?.length) return fotos || [];
+  return Promise.all(
+    fotos.map(async (foto) => ({
+      ...foto,
+      uri: await uriToBase64DataUri(foto.uri),
+    }))
+  );
+}
+
+async function prepareUriForReport(uri?: string | null): Promise<string | null | undefined> {
+  if (!uri) return uri;
+  return uriToBase64DataUri(uri);
 }
 
 function utmToLatLng(easting: number, northing: number, zone: number, isNorth: boolean): LatLng {
@@ -180,17 +214,26 @@ export default function DetalhesVistoriaScreen() {
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       
-      // Ensure all environmental data fields are properly mapped for PDF generation
+      const [preparedFotos, preparedCroqui, preparedSig, preparedSigTec] = await Promise.all([
+        preparePhotosForReport(vistoria.fotos),
+        prepareUriForReport((vistoria as any).croqui_imagem || mapImageUri),
+        prepareUriForReport((vistoria as any).assinatura_uri),
+        prepareUriForReport((vistoria as any).assinatura_tecnico_uri),
+      ]);
+
       const pdfData = {
         ...vistoria,
-        // Map camelCase fields to what the PDF template expects
+        fotos: preparedFotos,
+        croqui_imagem: preparedCroqui,
+        assinatura_uri: preparedSig,
+        assinatura_tecnico_uri: preparedSigTec,
         carInfo: vistoria.carInfo || (vistoria as any).car_info,
         embargoCheck: vistoria.embargoCheck || (vistoria as any).embargo_check,
         complianceAnalysis: vistoria.complianceAnalysis || (vistoria as any).compliance_analysis,
         weather_data: vistoria.weatherData || vistoria.weather_data,
         hora_vistoria: vistoria.horaVistoria || vistoria.hora_vistoria,
         usos_solo: vistoria.usosSolo,
-        coordenadas_utm: vistoria.coordenadas_utm || vistoria.coordenadas?.map((c, i) => ({
+        coordenadas_utm: vistoria.coordenadas_utm || vistoria.coordenadas?.map((c) => ({
           e: c.latitude?.toFixed(6) || "",
           n: c.longitude?.toFixed(6) || ""
         })),
@@ -228,6 +271,22 @@ export default function DetalhesVistoriaScreen() {
 
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+      const [preparedFotos, preparedCroqui, preparedSig, preparedSigTec] = await Promise.all([
+        preparePhotosForReport(vistoria.fotos),
+        prepareUriForReport((vistoria as any).croqui_imagem || mapImageUri),
+        prepareUriForReport((vistoria as any).assinatura_uri),
+        prepareUriForReport((vistoria as any).assinatura_tecnico_uri),
+      ]);
+
+      const wordData = {
+        ...vistoria,
+        fotos: preparedFotos,
+        croqui_imagem: preparedCroqui,
+        assinatura_uri: preparedSig,
+        assinatura_tecnico_uri: preparedSigTec,
+        usos_solo: vistoria.usosSolo,
+      };
       
       const apiUrl = getApiUrl();
       const url = new URL("/api/docx/generate", apiUrl);
@@ -237,7 +296,7 @@ export default function DetalhesVistoriaScreen() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(vistoria),
+        body: JSON.stringify(wordData),
       });
 
       if (!response.ok) {
