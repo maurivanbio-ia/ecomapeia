@@ -433,6 +433,20 @@ export default function DetalhesVistoriaScreen() {
             <Feather name="file" size={18} color="#FFFFFF" />
             <ThemedText style={styles.actionBtnText}>Word</ThemedText>
           </Pressable>
+          <Pressable
+            onPress={handleEdit}
+            style={[styles.actionBtn, { backgroundColor: "#F59E0B" }]}
+          >
+            <Feather name="edit-2" size={18} color="#FFFFFF" />
+            <ThemedText style={styles.actionBtnText}>Editar</ThemedText>
+          </Pressable>
+          <Pressable
+            onPress={handleDelete}
+            style={[styles.actionBtn, { backgroundColor: "#EF4444" }]}
+          >
+            <Feather name="trash-2" size={18} color="#FFFFFF" />
+            <ThemedText style={styles.actionBtnText}>Excluir</ThemedText>
+          </Pressable>
         </View>
 
         <View
