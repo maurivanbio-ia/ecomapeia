@@ -301,10 +301,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/vistorias/:id", async (req: Request, res: Response) => {
     try {
-      const vistoria = await storage.updateVistoria(req.params.id, req.body);
+      const id = req.params.id;
+      const { coordenadas, coordenadas_utm, usosSolo, usos_solo, fotos, ...vistoriaData } = req.body;
+
+      const vistoria = await storage.updateVistoria(id, vistoriaData);
       
       if (!vistoria) {
         return res.status(404).json({ message: "Vistoria não encontrada" });
+      }
+
+      // Re-save usos_solo (delete then insert)
+      const usosArray = usos_solo || usosSolo;
+      if (usosArray && Array.isArray(usosArray)) {
+        await storage.deleteUsosSolo(id);
+        for (const uso of usosArray) {
+          await storage.createUsoSolo({
+            vistoria_id: id,
+            tipo_uso: uso.tipo_uso || uso.tipo || "",
+            area_m2: uso.area_m2 ?? (parseFloat(uso.valor) || null),
+          });
+        }
+      }
+
+      // Re-save coordenadas (delete then insert)
+      const coordsArray = coordenadas_utm || coordenadas;
+      if (coordsArray && Array.isArray(coordsArray)) {
+        await storage.deleteCoordenadas(id);
+        for (const coord of coordsArray) {
+          await storage.createCoordenada({
+            vistoria_id: id,
+            tipo: "utm",
+            latitude: parseFloat(coord.n) || 0,
+            longitude: parseFloat(coord.e) || 0,
+            ordem: coord.ordem ?? 0,
+          });
+        }
+      }
+
+      // Re-save fotos (delete then insert)
+      if (fotos && Array.isArray(fotos)) {
+        await storage.deleteFotos(id);
+        for (const foto of fotos) {
+          await storage.createFoto({
+            vistoria_id: id,
+            url_imagem: foto.url_imagem || foto.uri || "",
+            legenda: foto.legenda || "",
+            ordem: foto.ordem ?? 0,
+          });
+        }
       }
 
       return res.json(vistoria);
