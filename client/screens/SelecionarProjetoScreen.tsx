@@ -95,10 +95,7 @@ export default function SelecionarProjetoScreen() {
 
   const selectProjetoMutation = useMutation({
     mutationFn: async (projetoId: number) => {
-      return apiRequest(`/api/tenant/usuarios/${user?.id}/projeto`, {
-        method: "POST",
-        body: JSON.stringify({ projeto_id: projetoId }),
-      });
+      return apiRequest("POST", `/api/tenant/usuarios/${user?.id}/projeto`, { projeto_id: projetoId });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/tenant/usuarios"] });
