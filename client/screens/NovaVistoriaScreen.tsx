@@ -31,6 +31,7 @@ import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollV
 import MapPolygonView from "@/components/MapPolygonView";
 import DatePickerField from "@/components/DatePickerField";
 import SignatureCapture from "@/components/SignatureCapture";
+import VoiceTranscribeButton from "@/components/VoiceTranscribeButton";
 import { captureCurrentUTM, requestLocationPermission } from "@/lib/gpsUtils";
 import { saveVistoriaOffline } from "@/lib/offlineStorage";
 import { PhotoWatermarkProcessor, getCurrentLocation, createWatermarkData, WatermarkData } from "@/lib/photoWatermark";
@@ -1901,6 +1902,16 @@ export default function NovaVistoriaScreen() {
           <ThemedText style={styles.sectionTitle}>
             <Feather name="edit-3" size={18} /> Observações
           </ThemedText>
+          <VoiceTranscribeButton
+            onTranscription={(text) => {
+              setFormData((prev) => ({
+                ...prev,
+                observacoes: prev.observacoes
+                  ? `${prev.observacoes}\n${text}`
+                  : text,
+              }));
+            }}
+          />
           {renderInput("Observações Gerais", "observacoes", "Observações adicionais...", { multiline: true })}
         </View>
 
