@@ -17,6 +17,7 @@ import { ThemeProvider, useThemeContext } from "@/contexts/ThemeContext";
 import { InteractiveTutorial } from "@/components/InteractiveTutorial";
 import { SyncStatusBanner } from "@/components/SyncStatusBanner";
 import { AutoSyncProvider, useAutoSyncContext } from "@/contexts/AutoSyncContext";
+import { FeatureFlagsProvider } from "@/contexts/FeatureFlagsContext";
 
 function AppContent() {
   const { isDark } = useThemeContext();
@@ -48,9 +49,11 @@ export default function App() {
               <SafeAreaProvider>
                 <GestureHandlerRootView style={styles.root}>
                   <KeyboardProvider>
-                    <AutoSyncProvider>
-                      <AppContent />
-                    </AutoSyncProvider>
+                    <FeatureFlagsProvider>
+                      <AutoSyncProvider>
+                        <AppContent />
+                      </AutoSyncProvider>
+                    </FeatureFlagsProvider>
                   </KeyboardProvider>
                 </GestureHandlerRootView>
               </SafeAreaProvider>

@@ -25,6 +25,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useThemeContext } from "@/contexts/ThemeContext";
+import { useFeatureFlags } from "@/contexts/FeatureFlagsContext";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 import { Language } from "@/lib/translations";
 import { isBiometricAvailable, getBiometricType, authenticateWithBiometrics } from "@/lib/biometricAuth";
@@ -68,6 +69,8 @@ export default function ProfileScreen() {
   const [biometricAvailable, setBiometricAvailable] = useState(false);
   const [biometricType, setBiometricType] = useState("Biometria");
   const [biometricEnabled, setBiometricEnabled] = useState(false);
+
+  const { flags, setFlag } = useFeatureFlags();
 
   const { data: vistorias = [] } = useQuery<any[]>({
     queryKey: [`/api/vistorias?usuario_id=${user?.id}`],
@@ -416,6 +419,66 @@ export default function ProfileScreen() {
               label={t.shareApp}
               onPress={() => setShareModalVisible(true)}
               theme={theme}
+            />
+          </View>
+        </Animated.View>
+
+        {/* Data Collection Features */}
+        <Animated.View entering={FadeInDown.duration(500).delay(280)}>
+          <ThemedText style={styles.sectionTitle}>Coleta de Dados</ThemedText>
+          <View style={[styles.settingsCard, { backgroundColor: theme.backgroundDefault }]}>
+            <SettingsItem
+              icon="shield"
+              label="Unidades de Conservação"
+              theme={theme}
+              showSwitch
+              switchValue={flags.uc}
+              onSwitchChange={() => { Haptics.selectionAsync(); setFlag("uc", !flags.uc); }}
+            />
+            <View style={[styles.divider, { backgroundColor: theme.border }]} />
+            <SettingsItem
+              icon="alert-triangle"
+              label="Risco de Embargo"
+              theme={theme}
+              showSwitch
+              switchValue={flags.embargo}
+              onSwitchChange={() => { Haptics.selectionAsync(); setFlag("embargo", !flags.embargo); }}
+            />
+            <View style={[styles.divider, { backgroundColor: theme.border }]} />
+            <SettingsItem
+              icon="cloud"
+              label="Condicoes Climaticas"
+              theme={theme}
+              showSwitch
+              switchValue={flags.weather}
+              onSwitchChange={() => { Haptics.selectionAsync(); setFlag("weather", !flags.weather); }}
+            />
+            <View style={[styles.divider, { backgroundColor: theme.border }]} />
+            <SettingsItem
+              icon="map"
+              label="MapBiomas (CAR)"
+              theme={theme}
+              showSwitch
+              switchValue={flags.mapbiomas}
+              onSwitchChange={() => { Haptics.selectionAsync(); setFlag("mapbiomas", !flags.mapbiomas); }}
+            />
+            <View style={[styles.divider, { backgroundColor: theme.border }]} />
+            <SettingsItem
+              icon="wind"
+              label="Focos de Incendio (INPE)"
+              theme={theme}
+              showSwitch
+              switchValue={flags.fireHotspots}
+              onSwitchChange={() => { Haptics.selectionAsync(); setFlag("fireHotspots", !flags.fireHotspots); }}
+            />
+            <View style={[styles.divider, { backgroundColor: theme.border }]} />
+            <SettingsItem
+              icon="check-circle"
+              label="Analise de Conformidade (IA)"
+              theme={theme}
+              showSwitch
+              switchValue={flags.compliance}
+              onSwitchChange={() => { Haptics.selectionAsync(); setFlag("compliance", !flags.compliance); }}
             />
           </View>
         </Animated.View>

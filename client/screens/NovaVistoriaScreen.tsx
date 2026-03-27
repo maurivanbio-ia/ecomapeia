@@ -26,6 +26,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/hooks/useAuth";
+import { useFeatureFlags } from "@/contexts/FeatureFlagsContext";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 import { apiRequest, getApiUrl } from "@/lib/query-client";
 import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollViewCompat";
@@ -180,6 +181,7 @@ export default function NovaVistoriaScreen() {
     staleTime: 0,
   });
   const projetoAtualId = tenantData?.projetoAtual?.id ?? null;
+  const { flags } = useFeatureFlags();
 
   const {
     isTracking,
@@ -830,10 +832,10 @@ export default function NovaVistoriaScreen() {
           const lng = utm.longitude;
           
           if (lat && lng) {
-            fetchCARByCoordinates(lat, lng);
-            fetchUCByCoordinates(lat, lng);
-            checkEmbargoByCoordinates(lat, lng, carInfo?.carCode);
-            fetchWeatherByCoordinates(lat, lng);
+            if (flags.mapbiomas) fetchCARByCoordinates(lat, lng);
+            if (flags.uc) fetchUCByCoordinates(lat, lng);
+            if (flags.embargo) checkEmbargoByCoordinates(lat, lng, carInfo?.carCode);
+            if (flags.weather) fetchWeatherByCoordinates(lat, lng);
             Alert.alert(
               "Primeira Coordenada Capturada",
               `E: ${utm.easting.toFixed(2)}\nN: ${utm.northing.toFixed(2)}\n\nAnalisando dados ambientais e clima...`
@@ -912,10 +914,10 @@ export default function NovaVistoriaScreen() {
         setManualChecksTriggered(true);
         
         // Trigger all environmental checks
-        fetchCARByCoordinates(latLng.latitude, latLng.longitude);
-        fetchUCByCoordinates(latLng.latitude, latLng.longitude);
-        checkEmbargoByCoordinates(latLng.latitude, latLng.longitude, carInfo?.carCode);
-        fetchWeatherByCoordinates(latLng.latitude, latLng.longitude);
+        if (flags.mapbiomas) fetchCARByCoordinates(latLng.latitude, latLng.longitude);
+        if (flags.uc) fetchUCByCoordinates(latLng.latitude, latLng.longitude);
+        if (flags.embargo) checkEmbargoByCoordinates(latLng.latitude, latLng.longitude, carInfo?.carCode);
+        if (flags.weather) fetchWeatherByCoordinates(latLng.latitude, latLng.longitude);
         
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         Alert.alert(
@@ -1546,7 +1548,7 @@ export default function NovaVistoriaScreen() {
             </View>
           ) : null}
 
-          {carInfo ? (
+          {flags.mapbiomas ? (carInfo ? (
             <View style={[styles.carInfoCard, { backgroundColor: Colors.light.accent + "15", borderColor: Colors.light.accent }]}>
               <View style={styles.carInfoHeader}>
                 <Feather name="map-pin" size={18} color={Colors.light.accent} />
@@ -1573,9 +1575,9 @@ export default function NovaVistoriaScreen() {
                 Buscando código CAR no MapBiomas...
               </ThemedText>
             </View>
-          ) : null}
+          ) : null) : null}
 
-          {ucInfo ? (
+          {flags.uc ? (ucInfo ? (
             <View style={[styles.carInfoCard, { 
               backgroundColor: ucInfo.isInside ? Colors.light.warning + "20" : Colors.light.success + "15", 
               borderColor: ucInfo.isInside ? Colors.light.warning : Colors.light.success 
@@ -1611,9 +1613,9 @@ export default function NovaVistoriaScreen() {
                 Buscando Unidade de Conservação mais próxima...
               </ThemedText>
             </View>
-          ) : null}
+          ) : null) : null}
 
-          {embargoCheck ? (
+          {flags.embargo ? (embargoCheck ? (
             <View style={[styles.carInfoCard, { 
               backgroundColor: embargoCheck.level === "HIGH" ? "#e5393520" : 
                               embargoCheck.level === "MEDIUM" ? Colors.light.warning + "20" : 
@@ -1665,9 +1667,9 @@ export default function NovaVistoriaScreen() {
                 Verificando sobreposição com áreas protegidas...
               </ThemedText>
             </View>
-          ) : null}
+          ) : null) : null}
 
-          {weatherData ? (
+          {flags.weather ? (weatherData ? (
             <View style={[styles.carInfoCard, { backgroundColor: "#e3f2fd", borderColor: "#2196f3" }]}>
               <View style={styles.carInfoHeader}>
                 <Feather name="cloud" size={18} color="#2196f3" />
@@ -1708,9 +1710,9 @@ export default function NovaVistoriaScreen() {
                 Buscando informações climáticas...
               </ThemedText>
             </View>
-          ) : null}
+          ) : null) : null}
 
-          {polygonCoordinates.length > 0 ? (
+          {flags.mapbiomas && polygonCoordinates.length > 0 ? (
             <TouchableOpacity
               style={[styles.mapBiomasButton, { backgroundColor: "#4caf50" }]}
               onPress={() => {
@@ -1729,7 +1731,7 @@ export default function NovaVistoriaScreen() {
             </TouchableOpacity>
           ) : null}
 
-          {embargoCheck && polygonCoordinates.length > 0 && !loadingCompliance ? (
+          {flags.compliance && embargoCheck && polygonCoordinates.length > 0 && !loadingCompliance ? (
             <TouchableOpacity
               style={[styles.complianceButton, { backgroundColor: theme.primary }]}
               onPress={() => {
