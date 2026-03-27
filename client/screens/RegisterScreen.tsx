@@ -22,7 +22,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 import { getApiUrl } from "@/lib/query-client";
 
-import logoImage from "../../assets/images/ecomapeia-logo-new.png";
+import logoImage from "../../assets/images/ecomapeia-logo-clean.png";
 import bgImage from "../../assets/images/hidroeletrica-bg.png";
 
 const TUTORIAL_COMPLETED_KEY = "@mapeia_tutorial_completed";
@@ -421,6 +421,7 @@ const styles = StyleSheet.create({
   logoImage: {
     width: Math.min(SCREEN_WIDTH - 40, 280),
     height: 120,
+    backgroundColor: "transparent",
   },
   formCard: {
     backgroundColor: "rgba(255, 255, 255, 0.97)",

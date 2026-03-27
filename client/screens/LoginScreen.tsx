@@ -26,7 +26,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 import { useAuth } from "@/hooks/useAuth";
 
-import logoImage from "../../assets/images/ecomapeia-logo-new.png";
+import logoImage from "../../assets/images/ecomapeia-logo-clean.png";
 import bgImage from "../../assets/images/hidroeletrica-bg.png";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -300,10 +300,12 @@ const styles = StyleSheet.create({
     height: 320,
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor: "transparent",
   },
   logoImage: {
     width: "100%",
     height: "100%",
+    backgroundColor: "transparent",
   },
   formCard: {
     backgroundColor: "#FFFFFF",

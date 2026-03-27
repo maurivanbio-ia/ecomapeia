@@ -2,7 +2,7 @@ import React from "react";
 import { View, StyleSheet } from "react-native";
 import { Image } from "expo-image";
 
-import logoImage from "../../assets/images/ecomapeia-logo-new.png";
+import logoImage from "../../assets/images/ecomapeia-logo-clean.png";
 
 interface HeaderTitleProps {
   title?: string;
