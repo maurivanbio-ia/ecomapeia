@@ -5,6 +5,7 @@ import {
   ScrollView,
   Pressable,
   ActivityIndicator,
+  RefreshControl,
 } from "react-native";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Feather } from "@expo/vector-icons";
@@ -74,8 +75,9 @@ export default function SelecionarProjetoScreen() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [selectedProjetoId, setSelectedProjetoId] = useState<number | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const { data: tenantData, isLoading } = useQuery<TenantData>({
+  const { data: tenantData, isLoading, refetch } = useQuery<TenantData>({
     queryKey: ["/api/tenant/usuarios", user?.id, "tenant"],
     queryFn: async () => {
       const response = await fetch(
@@ -85,6 +87,8 @@ export default function SelecionarProjetoScreen() {
       return response.json();
     },
     enabled: !!user?.id,
+    staleTime: 0,
+    refetchOnMount: "always",
   });
 
   const selectProjetoMutation = useMutation({
@@ -100,6 +104,12 @@ export default function SelecionarProjetoScreen() {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     },
   });
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  };
 
   const handleSelectProjeto = async (projetoId: number) => {
     Haptics.selectionAsync();
@@ -147,6 +157,14 @@ export default function SelecionarProjetoScreen() {
           { paddingBottom: insets.bottom + Spacing.xl },
         ]}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={Colors.light.primary}
+            colors={[Colors.light.primary]}
+          />
+        }
       >
         {tenantData?.empresa ? (
           <Animated.View entering={FadeInDown.duration(400)}>
