@@ -10,6 +10,7 @@ import {
   Modal,
   TouchableOpacity,
   ScrollView,
+  Platform,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
@@ -1953,16 +1954,18 @@ export default function NovaVistoriaScreen() {
           <ThemedText style={styles.sectionTitle}>
             <Feather name="edit-3" size={18} /> Observações
           </ThemedText>
-          <VoiceTranscribeButton
-            onTranscription={(text) => {
-              setFormData((prev) => ({
-                ...prev,
-                observacoes: prev.observacoes
-                  ? `${prev.observacoes}\n${text}`
-                  : text,
-              }));
-            }}
-          />
+          {Platform.OS !== "web" ? (
+            <VoiceTranscribeButton
+              onTranscription={(text) => {
+                setFormData((prev) => ({
+                  ...prev,
+                  observacoes: prev.observacoes
+                    ? `${prev.observacoes}\n${text}`
+                    : text,
+                }));
+              }}
+            />
+          ) : null}
           {renderInput("Observações Gerais", "observacoes", "Observações adicionais...", { multiline: true })}
         </View>
 
