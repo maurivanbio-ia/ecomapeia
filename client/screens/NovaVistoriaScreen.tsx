@@ -49,11 +49,16 @@ const TIPO_INTERVENCAO_OPTIONS = [
   "USOS IRREGULARES",
 ];
 
+interface UsoSoloInstancia {
+  area: string;
+}
+
 interface UsoSolo {
   tipo: string;
   valor: string;
   unidade: string;
   checked: boolean;
+  instancias: UsoSoloInstancia[];
 }
 
 interface FormData {
@@ -230,22 +235,22 @@ export default function NovaVistoriaScreen() {
   const [loadingWeather, setLoadingWeather] = useState(false);
 
   const [usosSolo, setUsosSolo] = useState<UsoSolo[]>([
-    { tipo: "Acesso", valor: "", unidade: "m²", checked: false },
-    { tipo: "Edificação", valor: "", unidade: "m²", checked: false },
-    { tipo: "Píer fixo", valor: "", unidade: "m²", checked: false },
-    { tipo: "Píer Flutuante", valor: "", unidade: "m²", checked: false },
-    { tipo: "Área de Lazer", valor: "", unidade: "m²", checked: false },
-    { tipo: "Praia artificial", valor: "", unidade: "m²", checked: false },
-    { tipo: "Rampa para Embarcação", valor: "", unidade: "m²", checked: false },
-    { tipo: "Embarcações", valor: "", unidade: "und.", checked: false },
-    { tipo: "Lavoura", valor: "", unidade: "m²", checked: false },
-    { tipo: "Pastagem", valor: "", unidade: "m²", checked: false },
-    { tipo: "Avanço de cerca", valor: "", unidade: "m", checked: false },
-    { tipo: "Captação de água", valor: "", unidade: "m³", checked: false },
-    { tipo: "Plantio de exóticas", valor: "", unidade: "indivíduos", checked: false },
-    { tipo: "Área sem edificações", valor: "", unidade: "", checked: false },
-    { tipo: "Área com vegetação nativa", valor: "", unidade: "", checked: false },
-    { tipo: "Outros", valor: "", unidade: "", checked: false },
+    { tipo: "Acesso", valor: "", unidade: "m²", checked: false, instancias: [] },
+    { tipo: "Edificação", valor: "", unidade: "m²", checked: false, instancias: [] },
+    { tipo: "Píer fixo", valor: "", unidade: "m²", checked: false, instancias: [] },
+    { tipo: "Píer Flutuante", valor: "", unidade: "m²", checked: false, instancias: [] },
+    { tipo: "Área de Lazer", valor: "", unidade: "m²", checked: false, instancias: [] },
+    { tipo: "Praia artificial", valor: "", unidade: "m²", checked: false, instancias: [] },
+    { tipo: "Rampa para Embarcação", valor: "", unidade: "m²", checked: false, instancias: [] },
+    { tipo: "Embarcações", valor: "", unidade: "und.", checked: false, instancias: [] },
+    { tipo: "Lavoura", valor: "", unidade: "m²", checked: false, instancias: [] },
+    { tipo: "Pastagem", valor: "", unidade: "m²", checked: false, instancias: [] },
+    { tipo: "Avanço de cerca", valor: "", unidade: "m", checked: false, instancias: [] },
+    { tipo: "Captação de água", valor: "", unidade: "m³", checked: false, instancias: [] },
+    { tipo: "Plantio de exóticas", valor: "", unidade: "indivíduos", checked: false, instancias: [] },
+    { tipo: "Área sem edificações", valor: "", unidade: "", checked: false, instancias: [] },
+    { tipo: "Área com vegetação nativa", valor: "", unidade: "", checked: false, instancias: [] },
+    { tipo: "Outros", valor: "", unidade: "", checked: false, instancias: [] },
   ]);
 
   const [utmPoints, setUtmPoints] = useState<UTMPoint[]>([
@@ -258,6 +263,7 @@ export default function NovaVistoriaScreen() {
     uri: string;
     watermarkData: WatermarkData;
     autoLegenda?: string;
+    replaceExisting?: boolean;
   } | null>(null);
   const [processingPhoto, setProcessingPhoto] = useState(false);
   const [mapImageUri, setMapImageUri] = useState<string | null>(null);
@@ -374,11 +380,28 @@ export default function NovaVistoriaScreen() {
       }
 
       if (editData.usosSolo && editData.usosSolo.length > 0) {
+        const instancedGroups: Record<string, { area: string }[]> = {};
+        const plainUsos: { tipo: string; valor: string }[] = [];
+        for (const u of editData.usosSolo as any[]) {
+          const m = u.tipo?.match(/^(.+)\s(\d+)$/);
+          if (m) {
+            const base = m[1] as string;
+            const idx = parseInt(m[2]) - 1;
+            if (!instancedGroups[base]) instancedGroups[base] = [];
+            instancedGroups[base][idx] = { area: u.valor || "" };
+          } else {
+            plainUsos.push(u);
+          }
+        }
         setUsosSolo((prev) =>
           prev.map((uso) => {
-            const match = editData.usosSolo.find((u: any) => u.tipo === uso.tipo);
-            if (match) {
-              return { ...uso, checked: true, valor: match.valor || "" };
+            if (instancedGroups[uso.tipo]) {
+              const insts = instancedGroups[uso.tipo].map((i) => i || { area: "" });
+              return { ...uso, checked: true, valor: String(insts.length), instancias: insts };
+            }
+            const plain = plainUsos.find((u) => u.tipo === uso.tipo);
+            if (plain) {
+              return { ...uso, checked: true, valor: plain.valor || "", instancias: [] };
             }
             return uso;
           })
@@ -496,7 +519,27 @@ export default function NovaVistoriaScreen() {
 
   const updateUsoSoloValor = (index: number, valor: string) => {
     setUsosSolo((prev) =>
-      prev.map((uso, i) => (i === index ? { ...uso, valor } : uso))
+      prev.map((uso, i) => {
+        if (i !== index) return uso;
+        if (!uso.unidade) return { ...uso, valor };
+        const count = Math.min(Math.max(parseInt(valor) || 0, 0), 20);
+        const newInstancias = Array.from({ length: count }, (_, j) => ({
+          area: uso.instancias[j]?.area || "",
+        }));
+        return { ...uso, valor, instancias: newInstancias };
+      })
+    );
+  };
+
+  const updateInstanciaArea = (usoIndex: number, instIndex: number, area: string) => {
+    setUsosSolo((prev) =>
+      prev.map((uso, i) => {
+        if (i !== usoIndex) return uso;
+        const newInstancias = uso.instancias.map((inst, j) =>
+          j === instIndex ? { ...inst, area } : inst
+        );
+        return { ...uso, instancias: newInstancias };
+      })
     );
   };
 
@@ -514,11 +557,16 @@ export default function NovaVistoriaScreen() {
 
       const usosSoloData = usosSolo
         .filter((uso) => uso.checked)
-        .map((uso) => ({
-          tipo: uso.tipo,
-          valor: uso.valor,
-          unidade: uso.unidade,
-        }));
+        .flatMap((uso) => {
+          if (uso.instancias.length > 0) {
+            return uso.instancias.map((inst, idx) => ({
+              tipo: `${uso.tipo} ${idx + 1}`,
+              valor: inst.area,
+              unidade: uso.unidade,
+            }));
+          }
+          return [{ tipo: uso.tipo, valor: uso.valor, unidade: uso.unidade }];
+        });
 
       const method = isEditMode ? "PUT" : "POST";
       const url = isEditMode ? `/api/vistorias/${editVistoriaId}` : "/api/vistorias";
@@ -961,6 +1009,33 @@ export default function NovaVistoriaScreen() {
     }
   };
 
+  const pickImageForUsoInstance = async (instanceLabel: string) => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permissão Necessária", "Precisamos de acesso à câmera para tirar fotos.");
+      return;
+    }
+    const location = await getCurrentLocation();
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ["images"],
+      quality: 0.8,
+      allowsEditing: false,
+    });
+    if (!result.canceled && result.assets[0]) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      const photoId = Date.now().toString();
+      const watermarkData = createWatermarkData(location);
+      setProcessingPhoto(true);
+      setPendingWatermark({
+        id: photoId,
+        uri: result.assets[0].uri,
+        watermarkData,
+        autoLegenda: instanceLabel,
+        replaceExisting: true,
+      });
+    }
+  };
+
   const pickImageForUso = async (usoTipo: string) => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== "granted") {
@@ -987,17 +1062,20 @@ export default function NovaVistoriaScreen() {
   const handleWatermarkProcessed = (id: string, newUri: string) => {
     const watermarkData = pendingWatermark?.watermarkData;
     const autoLegenda = pendingWatermark?.autoLegenda || "";
-    setPhotos((prev) => [
-      ...prev,
-      {
-        id,
-        uri: newUri,
-        legenda: autoLegenda,
-        saved: !!autoLegenda,
-        timestamp: watermarkData?.timestamp,
-        coordinates: watermarkData?.coordinates,
-      },
-    ]);
+    const replace = pendingWatermark?.replaceExisting;
+    const newPhoto = {
+      id,
+      uri: newUri,
+      legenda: autoLegenda,
+      saved: !!autoLegenda,
+      timestamp: watermarkData?.timestamp,
+      coordinates: watermarkData?.coordinates,
+    };
+    setPhotos((prev) =>
+      replace && autoLegenda
+        ? [...prev.filter((p) => p.legenda !== autoLegenda), newPhoto]
+        : [...prev, newPhoto]
+    );
     setPendingWatermark(null);
     setProcessingPhoto(false);
   };
@@ -1005,17 +1083,20 @@ export default function NovaVistoriaScreen() {
   const handleWatermarkError = (id: string) => {
     if (pendingWatermark) {
       const autoLegenda = pendingWatermark.autoLegenda || "";
-      setPhotos((prev) => [
-        ...prev,
-        {
-          id,
-          uri: pendingWatermark.uri,
-          legenda: autoLegenda,
-          saved: !!autoLegenda,
-          timestamp: pendingWatermark.watermarkData?.timestamp,
-          coordinates: pendingWatermark.watermarkData?.coordinates,
-        },
-      ]);
+      const replace = pendingWatermark.replaceExisting;
+      const newPhoto = {
+        id,
+        uri: pendingWatermark.uri,
+        legenda: autoLegenda,
+        saved: !!autoLegenda,
+        timestamp: pendingWatermark.watermarkData?.timestamp,
+        coordinates: pendingWatermark.watermarkData?.coordinates,
+      };
+      setPhotos((prev) =>
+        replace && autoLegenda
+          ? [...prev.filter((p) => p.legenda !== autoLegenda), newPhoto]
+          : [...prev, newPhoto]
+      );
     }
     setPendingWatermark(null);
     setProcessingPhoto(false);
@@ -1304,7 +1385,7 @@ export default function NovaVistoriaScreen() {
                               color: theme.text,
                             },
                           ]}
-                          placeholder="Quantidade"
+                          placeholder="Qtd."
                           placeholderTextColor={theme.tabIconDefault}
                           value={uso.valor}
                           onChangeText={(v) => updateUsoSoloValor(index, v)}
@@ -1312,12 +1393,11 @@ export default function NovaVistoriaScreen() {
                         />
                       ) : null}
                     </View>
-                    {uso.checked ? (
+                    {uso.checked && !uso.unidade ? (
                       <Pressable
                         onPress={() => pickImageForUso(uso.tipo)}
                         disabled={processingPhoto}
                         style={[styles.usoSoloCameraBtn, { backgroundColor: Colors.light.primary + "18", borderColor: Colors.light.primary }]}
-                        testID={`btn-foto-uso-${index}`}
                       >
                         <Feather name="camera" size={15} color={Colors.light.primary} />
                         {usoPhotos.length > 0 ? (
@@ -1328,7 +1408,8 @@ export default function NovaVistoriaScreen() {
                       </Pressable>
                     ) : null}
                   </View>
-                  {uso.checked && usoPhotos.length > 0 ? (
+
+                  {uso.checked && !uso.unidade && usoPhotos.length > 0 ? (
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.usoSoloPhotoStrip}>
                       {usoPhotos.map((p) => (
                         <View key={p.id} style={styles.usoSoloPhotoThumb}>
@@ -1336,15 +1417,64 @@ export default function NovaVistoriaScreen() {
                           <ThemedText style={styles.usoSoloThumbLabel} numberOfLines={1}>
                             {p.legenda}
                           </ThemedText>
-                          <Pressable
-                            onPress={() => removePhoto(p.id)}
-                            style={styles.usoSoloThumbRemove}
-                          >
+                          <Pressable onPress={() => removePhoto(p.id)} style={styles.usoSoloThumbRemove}>
                             <Feather name="x" size={10} color="#fff" />
                           </Pressable>
                         </View>
                       ))}
                     </ScrollView>
+                  ) : null}
+
+                  {uso.checked && uso.unidade && uso.instancias.length > 0 ? (
+                    <View style={[styles.usoSoloInstancias, { borderColor: theme.border }]}>
+                      {uso.instancias.map((inst, instIdx) => {
+                        const instLabel = `${uso.tipo} ${instIdx + 1}`;
+                        const instPhoto = photos.find((p) => p.legenda === instLabel);
+                        return (
+                          <View key={instIdx} style={styles.usoSoloInstRow}>
+                            <ThemedText style={[styles.usoSoloInstLabel, { color: Colors.light.primary }]}>
+                              {uso.tipo} {instIdx + 1}
+                            </ThemedText>
+                            {uso.unidade !== "und." ? (
+                              <TextInput
+                                style={[
+                                  styles.usoSoloInstInput,
+                                  {
+                                    backgroundColor: theme.backgroundDefault,
+                                    borderColor: theme.border,
+                                    color: theme.text,
+                                  },
+                                ]}
+                                placeholder={`Tamanho (${uso.unidade})`}
+                                placeholderTextColor={theme.tabIconDefault}
+                                value={inst.area}
+                                onChangeText={(v) => updateInstanciaArea(index, instIdx, v)}
+                                keyboardType="numeric"
+                              />
+                            ) : null}
+                            <Pressable
+                              onPress={() => pickImageForUsoInstance(instLabel)}
+                              disabled={processingPhoto}
+                              style={[
+                                styles.usoSoloCameraBtn,
+                                {
+                                  backgroundColor: instPhoto
+                                    ? Colors.light.success + "20"
+                                    : Colors.light.primary + "15",
+                                  borderColor: instPhoto ? Colors.light.success : Colors.light.primary,
+                                },
+                              ]}
+                            >
+                              {instPhoto ? (
+                                <Image source={{ uri: instPhoto.uri }} style={styles.usoSoloInstThumb} />
+                              ) : (
+                                <Feather name="camera" size={15} color={Colors.light.primary} />
+                              )}
+                            </Pressable>
+                          </View>
+                        );
+                      })}
+                    </View>
                   ) : null}
                 </View>
               );
@@ -2578,6 +2708,40 @@ const styles = StyleSheet.create({
     height: 16,
     alignItems: "center",
     justifyContent: "center",
+  },
+  usoSoloInstancias: {
+    marginTop: Spacing.xs,
+    marginLeft: 32,
+    borderLeftWidth: 2,
+    paddingLeft: Spacing.sm,
+    gap: Spacing.xs,
+  },
+  usoSoloInstRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.xs,
+    marginBottom: 4,
+  },
+  usoSoloInstLabel: {
+    fontSize: 13,
+    fontWeight: "600",
+    width: 90,
+    flexShrink: 0,
+  },
+  usoSoloInstInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderRadius: BorderRadius.sm,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 5,
+    fontSize: 13,
+    minWidth: 80,
+  },
+  usoSoloInstThumb: {
+    width: 28,
+    height: 28,
+    borderRadius: 4,
+    resizeMode: "cover",
   },
   usoSoloCheck: {
     width: 24,
