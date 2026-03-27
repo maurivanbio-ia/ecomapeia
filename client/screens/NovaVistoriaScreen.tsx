@@ -2020,18 +2020,16 @@ export default function NovaVistoriaScreen() {
           <ThemedText style={styles.sectionTitle}>
             <Feather name="edit-3" size={18} /> Observações
           </ThemedText>
-          {Platform.OS !== "web" ? (
-            <VoiceTranscribeButton
-              onTranscription={(text) => {
-                setFormData((prev) => ({
-                  ...prev,
-                  observacoes: prev.observacoes
-                    ? `${prev.observacoes}\n${text}`
-                    : text,
-                }));
-              }}
-            />
-          ) : null}
+          <VoiceTranscribeButton
+            onTranscription={(text) => {
+              setFormData((prev) => ({
+                ...prev,
+                observacoes: prev.observacoes
+                  ? `${prev.observacoes}\n${text}`
+                  : text,
+              }));
+            }}
+          />
           {renderInput("Observações Gerais", "observacoes", "Observações adicionais...", { multiline: true })}
         </View>
 
