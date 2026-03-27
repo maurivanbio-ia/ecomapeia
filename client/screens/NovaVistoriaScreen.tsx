@@ -257,6 +257,7 @@ export default function NovaVistoriaScreen() {
     id: string;
     uri: string;
     watermarkData: WatermarkData;
+    autoLegenda?: string;
   } | null>(null);
   const [processingPhoto, setProcessingPhoto] = useState(false);
   const [mapImageUri, setMapImageUri] = useState<string | null>(null);
@@ -960,15 +961,39 @@ export default function NovaVistoriaScreen() {
     }
   };
 
+  const pickImageForUso = async (usoTipo: string) => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permissão Necessária", "Precisamos de acesso à câmera para tirar fotos.");
+      return;
+    }
+    const location = await getCurrentLocation();
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ["images"],
+      quality: 0.8,
+      allowsEditing: false,
+    });
+    if (!result.canceled && result.assets[0]) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      const photoId = Date.now().toString();
+      const watermarkData = createWatermarkData(location);
+      const nextIdx = photos.filter((p) => p.legenda.startsWith(usoTipo + " ")).length + 1;
+      const autoLegenda = `${usoTipo} ${nextIdx}`;
+      setProcessingPhoto(true);
+      setPendingWatermark({ id: photoId, uri: result.assets[0].uri, watermarkData, autoLegenda });
+    }
+  };
+
   const handleWatermarkProcessed = (id: string, newUri: string) => {
     const watermarkData = pendingWatermark?.watermarkData;
+    const autoLegenda = pendingWatermark?.autoLegenda || "";
     setPhotos((prev) => [
       ...prev,
       {
         id,
         uri: newUri,
-        legenda: "",
-        saved: false,
+        legenda: autoLegenda,
+        saved: !!autoLegenda,
         timestamp: watermarkData?.timestamp,
         coordinates: watermarkData?.coordinates,
       },
@@ -979,13 +1004,14 @@ export default function NovaVistoriaScreen() {
 
   const handleWatermarkError = (id: string) => {
     if (pendingWatermark) {
+      const autoLegenda = pendingWatermark.autoLegenda || "";
       setPhotos((prev) => [
         ...prev,
         {
           id,
           uri: pendingWatermark.uri,
-          legenda: "",
-          saved: false,
+          legenda: autoLegenda,
+          saved: !!autoLegenda,
           timestamp: pendingWatermark.watermarkData?.timestamp,
           coordinates: pendingWatermark.watermarkData?.coordinates,
         },
@@ -1245,46 +1271,84 @@ export default function NovaVistoriaScreen() {
           </ThemedText>
           
           <View style={styles.usosSoloGrid}>
-            {usosSolo.map((uso, index) => (
-              <View key={uso.tipo} style={styles.usoSoloItem}>
-                <Pressable
-                  onPress={() => toggleUsoSolo(index)}
-                  style={[
-                    styles.usoSoloCheck,
-                    {
-                      backgroundColor: uso.checked ? Colors.light.primary : theme.backgroundDefault,
-                      borderColor: uso.checked ? Colors.light.primary : theme.border,
-                    },
-                  ]}
-                >
-                  {uso.checked ? (
-                    <Feather name="check" size={14} color="#FFFFFF" />
-                  ) : null}
-                </Pressable>
-                <View style={styles.usoSoloContent}>
-                  <ThemedText style={styles.usoSoloLabel}>
-                    {uso.tipo} {uso.unidade ? `(${uso.unidade})` : ""}
-                  </ThemedText>
-                  {uso.checked && uso.unidade ? (
-                    <TextInput
+            {usosSolo.map((uso, index) => {
+              const usoPhotos = photos.filter((p) => p.legenda.startsWith(uso.tipo + " "));
+              return (
+                <View key={uso.tipo} style={styles.usoSoloItem}>
+                  <View style={styles.usoSoloRow}>
+                    <Pressable
+                      onPress={() => toggleUsoSolo(index)}
                       style={[
-                        styles.usoSoloInput,
+                        styles.usoSoloCheck,
                         {
-                          backgroundColor: theme.backgroundDefault,
-                          borderColor: theme.border,
-                          color: theme.text,
+                          backgroundColor: uso.checked ? Colors.light.primary : theme.backgroundDefault,
+                          borderColor: uso.checked ? Colors.light.primary : theme.border,
                         },
                       ]}
-                      placeholder="Quantidade"
-                      placeholderTextColor={theme.tabIconDefault}
-                      value={uso.valor}
-                      onChangeText={(v) => updateUsoSoloValor(index, v)}
-                      keyboardType="numeric"
-                    />
+                    >
+                      {uso.checked ? (
+                        <Feather name="check" size={14} color="#FFFFFF" />
+                      ) : null}
+                    </Pressable>
+                    <View style={styles.usoSoloContent}>
+                      <ThemedText style={styles.usoSoloLabel}>
+                        {uso.tipo} {uso.unidade ? `(${uso.unidade})` : ""}
+                      </ThemedText>
+                      {uso.checked && uso.unidade ? (
+                        <TextInput
+                          style={[
+                            styles.usoSoloInput,
+                            {
+                              backgroundColor: theme.backgroundDefault,
+                              borderColor: theme.border,
+                              color: theme.text,
+                            },
+                          ]}
+                          placeholder="Quantidade"
+                          placeholderTextColor={theme.tabIconDefault}
+                          value={uso.valor}
+                          onChangeText={(v) => updateUsoSoloValor(index, v)}
+                          keyboardType="numeric"
+                        />
+                      ) : null}
+                    </View>
+                    {uso.checked ? (
+                      <Pressable
+                        onPress={() => pickImageForUso(uso.tipo)}
+                        disabled={processingPhoto}
+                        style={[styles.usoSoloCameraBtn, { backgroundColor: Colors.light.primary + "18", borderColor: Colors.light.primary }]}
+                        testID={`btn-foto-uso-${index}`}
+                      >
+                        <Feather name="camera" size={15} color={Colors.light.primary} />
+                        {usoPhotos.length > 0 ? (
+                          <ThemedText style={[styles.usoSoloCameraCount, { color: Colors.light.primary }]}>
+                            {usoPhotos.length}
+                          </ThemedText>
+                        ) : null}
+                      </Pressable>
+                    ) : null}
+                  </View>
+                  {uso.checked && usoPhotos.length > 0 ? (
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.usoSoloPhotoStrip}>
+                      {usoPhotos.map((p) => (
+                        <View key={p.id} style={styles.usoSoloPhotoThumb}>
+                          <Image source={{ uri: p.uri }} style={styles.usoSoloThumbImg} />
+                          <ThemedText style={styles.usoSoloThumbLabel} numberOfLines={1}>
+                            {p.legenda}
+                          </ThemedText>
+                          <Pressable
+                            onPress={() => removePhoto(p.id)}
+                            style={styles.usoSoloThumbRemove}
+                          >
+                            <Feather name="x" size={10} color="#fff" />
+                          </Pressable>
+                        </View>
+                      ))}
+                    </ScrollView>
                   ) : null}
                 </View>
-              </View>
-            ))}
+              );
+            })}
           </View>
 
           {renderInput("Observação (usos)", "observacoes_usos", "Observações sobre os usos encontrados...", { multiline: true })}
@@ -2462,10 +2526,60 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.lg,
   },
   usoSoloItem: {
-    flexDirection: "row",
-    alignItems: "flex-start",
+    flexDirection: "column",
     marginBottom: Spacing.sm,
     paddingVertical: Spacing.xs,
+  },
+  usoSoloRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+  },
+  usoSoloCameraBtn: {
+    borderWidth: 1,
+    borderRadius: BorderRadius.sm,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 4,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginLeft: Spacing.xs,
+  },
+  usoSoloCameraCount: {
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  usoSoloPhotoStrip: {
+    marginTop: Spacing.xs,
+    marginLeft: 32,
+  },
+  usoSoloPhotoThumb: {
+    marginRight: Spacing.sm,
+    position: "relative",
+    width: 68,
+    alignItems: "center",
+  },
+  usoSoloThumbImg: {
+    width: 64,
+    height: 64,
+    borderRadius: BorderRadius.sm,
+    resizeMode: "cover",
+  },
+  usoSoloThumbLabel: {
+    fontSize: 10,
+    textAlign: "center",
+    marginTop: 2,
+    width: 68,
+  },
+  usoSoloThumbRemove: {
+    position: "absolute",
+    top: 2,
+    right: 2,
+    backgroundColor: "#FF4444",
+    borderRadius: 8,
+    width: 16,
+    height: 16,
+    alignItems: "center",
+    justifyContent: "center",
   },
   usoSoloCheck: {
     width: 24,

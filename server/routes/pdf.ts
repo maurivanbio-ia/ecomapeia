@@ -138,18 +138,52 @@ function generatePDFHTML(vistoria: VistoriaData): string {
         .join("")
     : `<tr><td colspan="3" style="text-align: center;">-</td></tr>`;
 
-  const fotosHTML = vistoria.fotos?.length
-    ? vistoria.fotos
-        .map(
-          (foto, idx) => `
-          <div class="foto-item">
-            <img src="${foto.uri}" alt="Foto ${idx + 1}" />
-            <p class="foto-legenda">${foto.legenda || `Registro Fotográfico ${idx + 1}`}</p>
-          </div>
-        `
-        )
-        .join("")
-    : `<p style="text-align: center; color: #666;">Nenhum registro fotográfico</p>`;
+  const USO_TIPOS = [
+    "Acesso", "Edificação", "Píer fixo", "Píer Flutuante", "Área de Lazer",
+    "Praia artificial", "Rampa para Embarcação", "Embarcações", "Lavoura",
+    "Pastagem", "Avanço de cerca", "Captação de água", "Plantio de exóticas",
+    "Área sem edificações", "Área com vegetação nativa", "Outros",
+  ];
+
+  const fotosHTML = (() => {
+    if (!vistoria.fotos?.length) {
+      return `<p style="text-align: center; color: #666;">Nenhum registro fotográfico</p>`;
+    }
+    type FotoItem = { uri: string; legenda?: string };
+    const usoGroups: Record<string, FotoItem[]> = {};
+    const generalFotos: FotoItem[] = [];
+    for (const foto of vistoria.fotos) {
+      const matchedTipo = USO_TIPOS.find(
+        (t) => foto.legenda && foto.legenda.startsWith(t + " ") && /\d+$/.test(foto.legenda)
+      );
+      if (matchedTipo) {
+        if (!usoGroups[matchedTipo]) usoGroups[matchedTipo] = [];
+        usoGroups[matchedTipo].push(foto);
+      } else {
+        generalFotos.push(foto);
+      }
+    }
+    const renderFoto = (foto: FotoItem, idx: number) => `
+      <div class="foto-item">
+        <img src="${foto.uri}" alt="Foto ${idx + 1}" />
+        <p class="foto-legenda">${foto.legenda || `Registro Fotográfico ${idx + 1}`}</p>
+      </div>`;
+    let html = "";
+    let counter = 0;
+    for (const tipo of USO_TIPOS) {
+      const group = usoGroups[tipo];
+      if (!group || group.length === 0) continue;
+      html += `<div style="grid-column:1/-1;margin:12px 0 6px;font-weight:700;font-size:11pt;color:#1a5276;border-bottom:1px solid #aed6f1;padding-bottom:4px;">${tipo} (${group.length} foto${group.length > 1 ? "s" : ""})</div>`;
+      html += group.map((f) => renderFoto(f, ++counter)).join("");
+    }
+    if (generalFotos.length > 0) {
+      if (Object.keys(usoGroups).length > 0) {
+        html += `<div style="grid-column:1/-1;margin:12px 0 6px;font-weight:700;font-size:11pt;color:#555;border-bottom:1px solid #ccc;padding-bottom:4px;">Outras Fotos (${generalFotos.length})</div>`;
+      }
+      html += generalFotos.map((f) => renderFoto(f, ++counter)).join("");
+    }
+    return html;
+  })();
 
   const croquiHTML = vistoria.croqui_imagem
     ? `<img src="${vistoria.croqui_imagem}" alt="Croqui" class="croqui-image" />`
