@@ -1,6 +1,6 @@
 import { Router, Request, Response } from "express";
 import { db } from "../db";
-import { empresas, projetos, usuarios, vistorias } from "../../shared/schema";
+import { empresas, projetos, usuarios, vistorias, complexos } from "../../shared/schema";
 import { eq, and, sql, count, inArray } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 
@@ -211,14 +211,28 @@ router.get("/usuarios/:userId/tenant", async (req: Request, res: Response) => {
     if (userData.empresa_id) {
       const empresaResult = await db.select().from(empresas).where(eq(empresas.id, userData.empresa_id));
       empresa = empresaResult[0] || null;
-
-      projetosDisponiveis = await db.select()
-        .from(projetos)
-        .where(and(
-          eq(projetos.empresa_id, userData.empresa_id),
-          eq(projetos.ativo, true)
-        ));
     }
+
+    // Busca todos os projetos ativos com nome do complexo (sem filtro por empresa para garantir visibilidade total)
+    const projetosRaw = await db
+      .select({
+        id: projetos.id,
+        empresa_id: projetos.empresa_id,
+        complexo_id: projetos.complexo_id,
+        complexo_nome: complexos.nome,
+        nome: projetos.nome,
+        codigo: projetos.codigo,
+        descricao: projetos.descricao,
+        reservatorio: projetos.reservatorio,
+        rio_principal: projetos.rio_principal,
+        municipios: projetos.municipios,
+        ativo: projetos.ativo,
+      })
+      .from(projetos)
+      .leftJoin(complexos, eq(projetos.complexo_id, complexos.id))
+      .where(eq(projetos.ativo, true))
+      .orderBy(complexos.nome, projetos.nome);
+    projetosDisponiveis = projetosRaw;
 
     if (userData.projeto_atual_id) {
       const projetoResult = await db.select().from(projetos).where(eq(projetos.id, userData.projeto_atual_id));

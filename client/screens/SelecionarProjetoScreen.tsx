@@ -31,10 +31,13 @@ interface Empresa {
 interface Projeto {
   id: number;
   empresa_id: number;
+  complexo_id: number | null;
+  complexo_nome: string | null;
   nome: string;
   codigo: string | null;
   descricao: string | null;
   reservatorio: string | null;
+  rio_principal: string | null;
   municipios: string | null;
 }
 
@@ -43,6 +46,26 @@ interface TenantData {
   projetoAtual: Projeto | null;
   projetosDisponiveis: Projeto[];
   isAdmin: boolean;
+}
+
+interface ComplexoGroup {
+  nome: string;
+  projetos: Projeto[];
+}
+
+const COMPLEXO_COLORS: Record<string, string> = {
+  "Juquiá": "#1B6B3A",
+  "Sorocaba": "#2563EB",
+  "Paranapanema": "#7C3AED",
+  "Salto do Rio Verdinho": "#B45309",
+};
+
+function getComplexoColor(nome: string | null): string {
+  if (!nome) return Colors.light.primary;
+  for (const key of Object.keys(COMPLEXO_COLORS)) {
+    if (nome.includes(key)) return COMPLEXO_COLORS[key];
+  }
+  return Colors.light.primary;
 }
 
 export default function SelecionarProjetoScreen() {
@@ -94,6 +117,27 @@ export default function SelecionarProjetoScreen() {
 
   const currentProjetoId = selectedProjetoId || tenantData?.projetoAtual?.id;
 
+  // Group projects by complexo
+  const projetosDisponiveis = tenantData?.projetosDisponiveis ?? [];
+  const groupsMap: Record<string, ComplexoGroup> = {};
+  const semComplexo: Projeto[] = [];
+
+  for (const projeto of projetosDisponiveis) {
+    if (projeto.complexo_nome) {
+      if (!groupsMap[projeto.complexo_nome]) {
+        groupsMap[projeto.complexo_nome] = { nome: projeto.complexo_nome, projetos: [] };
+      }
+      groupsMap[projeto.complexo_nome].projetos.push(projeto);
+    } else {
+      semComplexo.push(projeto);
+    }
+  }
+
+  const groups: ComplexoGroup[] = Object.values(groupsMap);
+  if (semComplexo.length > 0) {
+    groups.push({ nome: "Outros", projetos: semComplexo });
+  }
+
   return (
     <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
       <ScrollView
@@ -140,89 +184,116 @@ export default function SelecionarProjetoScreen() {
         ) : null}
 
         <Animated.View entering={FadeInDown.duration(400).delay(100)}>
-          <ThemedText style={styles.sectionTitle}>Selecionar Projeto</ThemedText>
+          <ThemedText style={styles.sectionTitle}>Selecionar Projeto / UHE</ThemedText>
           <ThemedText style={[styles.sectionSubtitle, { color: theme.tabIconDefault }]}>
-            Escolha o projeto para visualizar as vistorias
+            Escolha a UHE para visualizar as vistorias
           </ThemedText>
         </Animated.View>
 
-        {tenantData?.projetosDisponiveis && tenantData.projetosDisponiveis.length > 0 ? (
-          <View style={styles.projetosGrid}>
-            {tenantData.projetosDisponiveis.map((projeto, index) => {
-              const isSelected = currentProjetoId === projeto.id;
+        {groups.length > 0 ? (
+          <View style={styles.groupsContainer}>
+            {groups.map((group, groupIndex) => {
+              const color = getComplexoColor(group.nome);
               return (
                 <Animated.View
-                  key={projeto.id}
-                  entering={FadeInDown.duration(400).delay(150 + index * 50)}
+                  key={group.nome}
+                  entering={FadeInDown.duration(400).delay(150 + groupIndex * 60)}
+                  style={styles.complexoGroup}
                 >
-                  <Pressable
-                    style={[
-                      styles.projetoCard,
-                      {
-                        backgroundColor: theme.backgroundDefault,
-                        borderColor: isSelected
-                          ? Colors.light.primary
-                          : theme.border,
-                        borderWidth: isSelected ? 2 : 1,
-                      },
-                    ]}
-                    onPress={() => handleSelectProjeto(projeto.id)}
-                  >
-                    <View style={styles.projetoHeader}>
-                      <View
-                        style={[
-                          styles.projetoIcon,
-                          {
-                            backgroundColor: isSelected
-                              ? Colors.light.primary
-                              : theme.tabIconDefault,
-                          },
-                        ]}
-                      >
-                        <Feather
-                          name="map-pin"
-                          size={20}
-                          color="#fff"
-                        />
-                      </View>
-                      {isSelected ? (
-                        <View style={[styles.selectedBadge, { backgroundColor: Colors.light.primary }]}>
-                          <Feather name="check" size={12} color="#fff" />
-                          <ThemedText style={styles.selectedBadgeText}>Ativo</ThemedText>
-                        </View>
-                      ) : null}
+                  <View style={[styles.complexoHeader, { borderLeftColor: color }]}>
+                    <View style={[styles.complexoIconSmall, { backgroundColor: color }]}>
+                      <Feather name="layers" size={14} color="#fff" />
                     </View>
-
-                    <ThemedText style={styles.projetoNome} numberOfLines={2}>
-                      {projeto.nome}
+                    <ThemedText style={[styles.complexoTitle, { color }]}>
+                      {group.nome}
                     </ThemedText>
-
-                    {projeto.codigo ? (
-                      <View style={[styles.codigoBadge, { backgroundColor: theme.backgroundRoot }]}>
-                        <ThemedText style={[styles.codigoText, { color: theme.tabIconDefault }]}>
-                          {projeto.codigo}
-                        </ThemedText>
-                      </View>
-                    ) : null}
-
-                    {projeto.reservatorio ? (
-                      <ThemedText
-                        style={[styles.projetoReservatorio, { color: theme.tabIconDefault }]}
-                        numberOfLines={1}
-                      >
-                        {projeto.reservatorio}
+                    <View style={[styles.countBadge, { backgroundColor: color + "20" }]}>
+                      <ThemedText style={[styles.countText, { color }]}>
+                        {group.projetos.length} {group.projetos.length === 1 ? "UHE" : "UHEs"}
                       </ThemedText>
-                    ) : null}
+                    </View>
+                  </View>
 
-                    {projeto.municipios ? (
-                      <ThemedText
-                        style={[styles.projetoMunicipios, { color: theme.tabIconDefault }]}
-                        numberOfLines={2}
-                      >
-                        {projeto.municipios}
-                      </ThemedText>
-                    ) : null}
-                  </Pressable>
+                  <View style={styles.projetosGrid}>
+                    {group.projetos.map((projeto, index) => {
+                      const isSelected = currentProjetoId === projeto.id;
+                      return (
+                        <Animated.View
+                          key={projeto.id}
+                          entering={FadeInDown.duration(300).delay(180 + groupIndex * 60 + index * 40)}
+                        >
+                          <Pressable
+                            style={[
+                              styles.projetoCard,
+                              {
+                                backgroundColor: isSelected ? color + "12" : theme.backgroundDefault,
+                                borderColor: isSelected ? color : theme.border,
+                                borderWidth: isSelected ? 2 : 1,
+                              },
+                            ]}
+                            onPress={() => handleSelectProjeto(projeto.id)}
+                          >
+                            <View style={styles.projetoHeader}>
+                              <View
+                                style={[
+                                  styles.projetoIcon,
+                                  { backgroundColor: isSelected ? color : theme.tabIconDefault + "40" },
+                                ]}
+                              >
+                                <Feather
+                                  name="zap"
+                                  size={18}
+                                  color={isSelected ? "#fff" : theme.tabIconDefault}
+                                />
+                              </View>
+                              {isSelected ? (
+                                <View style={[styles.selectedBadge, { backgroundColor: color }]}>
+                                  <Feather name="check" size={12} color="#fff" />
+                                  <ThemedText style={styles.selectedBadgeText}>Ativo</ThemedText>
+                                </View>
+                              ) : null}
+                            </View>
+
+                            <ThemedText style={[styles.projetoNome, isSelected ? { color } : {}]} numberOfLines={2}>
+                              {projeto.nome}
+                            </ThemedText>
+
+                            {projeto.codigo ? (
+                              <View style={[styles.codigoBadge, { backgroundColor: theme.backgroundRoot }]}>
+                                <ThemedText style={[styles.codigoText, { color: theme.tabIconDefault }]}>
+                                  {projeto.codigo}
+                                </ThemedText>
+                              </View>
+                            ) : null}
+
+                            {projeto.reservatorio ? (
+                              <View style={styles.infoRow}>
+                                <Feather name="droplet" size={12} color={theme.tabIconDefault} />
+                                <ThemedText
+                                  style={[styles.infoText, { color: theme.tabIconDefault }]}
+                                  numberOfLines={1}
+                                >
+                                  {projeto.reservatorio}
+                                </ThemedText>
+                              </View>
+                            ) : null}
+
+                            {projeto.municipios ? (
+                              <View style={styles.infoRow}>
+                                <Feather name="map-pin" size={12} color={theme.tabIconDefault} />
+                                <ThemedText
+                                  style={[styles.infoText, { color: theme.tabIconDefault }]}
+                                  numberOfLines={2}
+                                >
+                                  {projeto.municipios}
+                                </ThemedText>
+                              </View>
+                            ) : null}
+                          </Pressable>
+                        </Animated.View>
+                      );
+                    })}
+                  </View>
                 </Animated.View>
               );
             })}
@@ -235,7 +306,7 @@ export default function SelecionarProjetoScreen() {
                 Nenhum projeto disponível
               </ThemedText>
               <ThemedText style={[styles.emptySubtitle, { color: theme.tabIconDefault }]}>
-                Entre em contato com o administrador para ser adicionado a um projeto
+                Acesse Gerenciar Projetos para adicionar UHEs
               </ThemedText>
             </View>
           </Animated.View>
@@ -293,12 +364,47 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginBottom: Spacing.lg,
   },
-  projetosGrid: {
+  groupsContainer: {
+    gap: Spacing.xl,
+  },
+  complexoGroup: {
     gap: Spacing.md,
+  },
+  complexoHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+    paddingLeft: Spacing.sm,
+    borderLeftWidth: 3,
+    marginBottom: Spacing.xs,
+  },
+  complexoIconSmall: {
+    width: 26,
+    height: 26,
+    borderRadius: BorderRadius.sm,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  complexoTitle: {
+    fontSize: 15,
+    fontWeight: "700",
+    flex: 1,
+  },
+  countBadge: {
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 3,
+    borderRadius: BorderRadius.full,
+  },
+  countText: {
+    fontSize: 11,
+    fontWeight: "600",
+  },
+  projetosGrid: {
+    gap: Spacing.sm,
   },
   projetoCard: {
     borderRadius: BorderRadius.lg,
-    padding: Spacing.lg,
+    padding: Spacing.md,
   },
   projetoHeader: {
     flexDirection: "row",
@@ -307,8 +413,8 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
   },
   projetoIcon: {
-    width: 40,
-    height: 40,
+    width: 36,
+    height: 36,
     borderRadius: BorderRadius.md,
     alignItems: "center",
     justifyContent: "center",
@@ -327,28 +433,30 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   projetoNome: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "600",
     marginBottom: Spacing.xs,
   },
   codigoBadge: {
     alignSelf: "flex-start",
     paddingHorizontal: Spacing.sm,
-    paddingVertical: 4,
+    paddingVertical: 3,
     borderRadius: BorderRadius.sm,
     marginBottom: Spacing.xs,
   },
   codigoText: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: "500",
   },
-  projetoReservatorio: {
-    fontSize: 13,
+  infoRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 5,
     marginTop: 4,
   },
-  projetoMunicipios: {
+  infoText: {
     fontSize: 12,
-    marginTop: 4,
+    flex: 1,
   },
   emptyState: {
     alignItems: "center",
