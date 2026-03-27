@@ -17,22 +17,16 @@ function createTransporter() {
   });
 }
 
-function getLogoBase64(): string {
-  try {
-    const candidates = [
-      path.join(process.cwd(), "assets/images/ecomapeia-logo-clean.png"),
-      path.join(process.cwd(), "assets/images/ecomapeia-logo-transparent.png"),
-      path.join(process.cwd(), "assets/images/ecomapeia-logo.png"),
-    ];
-    for (const p of candidates) {
-      if (fs.existsSync(p)) {
-        return fs.readFileSync(p).toString("base64");
-      }
-    }
-  } catch {
-    /* ignore */
+function findLogoPath(): string | null {
+  const candidates = [
+    path.join(process.cwd(), "assets/images/ecomapeia-logo-clean.png"),
+    path.join(process.cwd(), "assets/images/ecomapeia-logo-transparent.png"),
+    path.join(process.cwd(), "assets/images/ecomapeia-logo.png"),
+  ];
+  for (const p of candidates) {
+    if (fs.existsSync(p)) return p;
   }
-  return "";
+  return null;
 }
 
 export async function sendPasswordResetEmail(to: string, code: string, nome: string): Promise<boolean> {
@@ -43,10 +37,12 @@ export async function sendPasswordResetEmail(to: string, code: string, nome: str
     return false;
   }
 
-  const logoB64 = getLogoBase64();
-  const logoImg = logoB64
-    ? `<img src="data:image/png;base64,${logoB64}" alt="EcoMapeIA" style="height:52px;width:auto;display:block;margin:0 auto;" />`
-    : `<div style="font-size:28px;font-weight:800;color:#0f5132;letter-spacing:-0.5px;font-family:Arial,sans-serif;">EcoMape<span style="color:#f0a800;">IA</span></div>`;
+  const logoPath = findLogoPath();
+  const hasLogo = !!logoPath;
+
+  const logoImg = hasLogo
+    ? `<img src="cid:ecomapeia-logo" alt="EcoMapeIA" style="height:54px;width:auto;display:block;margin:0 auto;" />`
+    : `<div style="font-size:28px;font-weight:800;color:#0f5132;font-family:Arial,sans-serif;">EcoMape<span style="color:#f0a800;">IA</span></div>`;
 
   const html = `
 <!DOCTYPE html>
@@ -56,7 +52,7 @@ export async function sendPasswordResetEmail(to: string, code: string, nome: str
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>EcoMapeIA — Redefinição de Senha</title>
 </head>
-<body style="margin:0;padding:0;background:#eef3ee;font-family:Arial,'Helvetica Neue',sans-serif;-webkit-font-smoothing:antialiased;">
+<body style="margin:0;padding:0;background:#eef3ee;font-family:Arial,'Helvetica Neue',sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#eef3ee;padding:32px 16px;">
     <tr>
       <td align="center">
@@ -64,14 +60,14 @@ export async function sendPasswordResetEmail(to: string, code: string, nome: str
 
           <!-- TOP RIBBON -->
           <tr>
-            <td style="height:5px;background:linear-gradient(90deg,#0f5132 0%,#22a55e 50%,#f0a800 100%);border-radius:6px 6px 0 0;"></td>
+            <td height="5" style="background:linear-gradient(90deg,#0f5132 0%,#22a55e 50%,#f0a800 100%);border-radius:6px 6px 0 0;font-size:0;line-height:0;">&nbsp;</td>
           </tr>
 
           <!-- HEADER: white with logo -->
           <tr>
-            <td style="background:#ffffff;padding:32px 40px 24px;text-align:center;border-left:1px solid #e0e8e0;border-right:1px solid #e0e8e0;">
+            <td style="background:#ffffff;padding:32px 40px 20px;text-align:center;border-left:1px solid #ddeedd;border-right:1px solid #ddeedd;">
               ${logoImg}
-              <div style="margin-top:10px;font-size:12px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#7aaa8a;">
+              <div style="margin-top:12px;font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:#7aaa8a;font-family:Arial,sans-serif;">
                 Sistema de Vistoria Ambiental
               </div>
             </td>
@@ -79,47 +75,45 @@ export async function sendPasswordResetEmail(to: string, code: string, nome: str
 
           <!-- DIVIDER -->
           <tr>
-            <td style="height:2px;background:linear-gradient(90deg,#e8f5ee 0%,#22a55e 30%,#0f5132 50%,#22a55e 70%,#e8f5ee 100%);border-left:1px solid #e0e8e0;border-right:1px solid #e0e8e0;"></td>
+            <td height="2" style="background:linear-gradient(90deg,#e4f2e8 0%,#22a55e 30%,#0f5132 50%,#22a55e 70%,#e4f2e8 100%);font-size:0;line-height:0;border-left:1px solid #ddeedd;border-right:1px solid #ddeedd;">&nbsp;</td>
           </tr>
 
           <!-- BODY -->
           <tr>
-            <td style="background:#ffffff;padding:36px 40px 32px;border-left:1px solid #e0e8e0;border-right:1px solid #e0e8e0;">
+            <td style="background:#ffffff;padding:36px 40px 32px;border-left:1px solid #ddeedd;border-right:1px solid #ddeedd;">
 
-              <!-- Greeting -->
-              <p style="margin:0 0 8px;font-size:17px;font-weight:700;color:#0f5132;">
-                Olá, ${nome}!
+              <p style="margin:0 0 8px;font-size:17px;font-weight:700;color:#0f5132;font-family:Arial,sans-serif;">
+                Ol&#225;, ${nome}!
               </p>
-              <p style="margin:0 0 28px;font-size:14px;color:#4a5a4a;line-height:1.65;">
-                Recebemos uma solicitação de redefinição de senha para sua conta no
+              <p style="margin:0 0 28px;font-size:14px;color:#4a5a4a;line-height:1.65;font-family:Arial,sans-serif;">
+                Recebemos uma solicita&#231;&#227;o de redefini&#231;&#227;o de senha para sua conta no
                 <strong style="color:#0f5132;">EcoMapeIA</strong>.
-                Use o código abaixo no aplicativo para criar uma nova senha:
+                Use o c&#243;digo abaixo no aplicativo para criar uma nova senha:
               </p>
 
               <!-- Code Box -->
-              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:28px;">
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:28px;border-radius:14px;overflow:hidden;border:1.5px solid #22a55e;">
                 <tr>
-                  <td style="background:linear-gradient(135deg,#f0faf4 0%,#e6f7ee 100%);border:1.5px solid #22a55e;border-radius:14px;padding:0;overflow:hidden;">
-                    <!-- top accent line -->
-                    <div style="height:3px;background:linear-gradient(90deg,#0f5132,#22a55e,#0f5132);border-radius:14px 14px 0 0;"></div>
-                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <td height="3" style="background:linear-gradient(90deg,#0f5132,#22a55e,#0f5132);font-size:0;line-height:0;">&nbsp;</td>
+                </tr>
+                <tr>
+                  <td style="background:linear-gradient(160deg,#f0faf4 0%,#e6f7ee 100%);padding:22px 20px 8px;text-align:center;">
+                    <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#1a7a46;font-family:Arial,sans-serif;margin-bottom:14px;">
+                      C&#243;digo de Verifica&#231;&#227;o
+                    </div>
+                    <div style="font-size:48px;font-weight:800;color:#0f5132;letter-spacing:12px;font-family:'Courier New',monospace;line-height:1;">
+                      ${code}
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="background:linear-gradient(160deg,#f0faf4 0%,#e6f7ee 100%);padding:10px 20px 22px;text-align:center;">
+                    <table cellpadding="0" cellspacing="0" border="0" style="display:inline-table;margin:0 auto;">
                       <tr>
-                        <td style="text-align:center;padding:20px 20px 6px;">
-                          <div style="font-size:10.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#1a7a46;margin-bottom:14px;">
-                            Código de Verificação
-                          </div>
-                          <div style="font-size:48px;font-weight:800;color:#0f5132;letter-spacing:12px;font-family:'Courier New',monospace;line-height:1;">
-                            ${code}
-                          </div>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td style="text-align:center;padding:10px 20px 20px;">
-                          <div style="display:inline-block;background:#ffffff;border:1px solid #c0e8ce;border-radius:20px;padding:5px 16px;">
-                            <span style="font-size:12px;color:#1a7a46;font-weight:600;">
-                              Válido por <strong>15 minutos</strong>
-                            </span>
-                          </div>
+                        <td style="background:#ffffff;border:1px solid #c0e8ce;border-radius:20px;padding:5px 18px;">
+                          <span style="font-size:12px;color:#1a7a46;font-weight:600;font-family:Arial,sans-serif;">
+                            V&#225;lido por <strong>15 minutos</strong>
+                          </span>
                         </td>
                       </tr>
                     </table>
@@ -131,9 +125,9 @@ export async function sendPasswordResetEmail(to: string, code: string, nome: str
               <table width="100%" cellpadding="0" cellspacing="0" border="0">
                 <tr>
                   <td style="background:#fffbeb;border:1px solid #fde68a;border-left:4px solid #f59e0b;border-radius:0 10px 10px 0;padding:14px 16px;">
-                    <p style="margin:0;font-size:13px;color:#92400e;line-height:1.55;">
-                      <strong>Não solicitou a redefinição?</strong><br/>
-                      Ignore este e-mail. Sua senha permanece a mesma e nenhuma ação é necessária.
+                    <p style="margin:0;font-size:13px;color:#92400e;line-height:1.55;font-family:Arial,sans-serif;">
+                      <strong>N&#227;o solicitou a redefini&#231;&#227;o?</strong><br/>
+                      Ignore este e-mail. Sua senha permanece a mesma e nenhuma a&#231;&#227;o &#233; necess&#225;ria.
                     </p>
                   </td>
                 </tr>
@@ -145,34 +139,43 @@ export async function sendPasswordResetEmail(to: string, code: string, nome: str
           <!-- FOOTER -->
           <tr>
             <td style="background:#0f5132;padding:20px 40px;border-radius:0 0 6px 6px;text-align:center;">
-              <p style="margin:0 0 4px;font-size:12px;color:rgba(255,255,255,0.9);font-weight:600;">
+              <p style="margin:0 0 4px;font-size:12px;color:rgba(255,255,255,0.90);font-weight:600;font-family:Arial,sans-serif;">
                 EcoMapeIA &bull; EcoBrasil Ambiental
               </p>
-              <p style="margin:0;font-size:11px;color:rgba(255,255,255,0.5);">
-                Este é um e-mail automático — por favor, não responda.
+              <p style="margin:0;font-size:11px;color:rgba(255,255,255,0.50);font-family:Arial,sans-serif;">
+                Este &#233; um e-mail autom&#225;tico &#8212; por favor, n&#227;o responda.
               </p>
             </td>
           </tr>
 
-          <!-- BOTTOM SPACING -->
-          <tr><td style="height:24px;"></td></tr>
+          <tr><td height="24" style="font-size:0;line-height:0;">&nbsp;</td></tr>
 
         </table>
       </td>
     </tr>
   </table>
 </body>
-</html>
-  `;
+</html>`;
+
+  const attachments: nodemailer.SendMailOptions["attachments"] = [];
+  if (hasLogo && logoPath) {
+    attachments.push({
+      filename: "ecomapeia-logo.png",
+      path: logoPath,
+      cid: "ecomapeia-logo",
+      contentDisposition: "inline",
+    });
+  }
 
   try {
     await transporter.sendMail({
       from: `"EcoMapeIA" <${process.env.SMTP_USER}>`,
       to,
-      subject: `${code} — Código de redefinição de senha EcoMapeIA`,
+      subject: `${code} \u2014 C\u00f3digo de redefini\u00e7\u00e3o de senha EcoMapeIA`,
       html,
+      attachments,
     });
-    console.log(`[Email] Código de reset enviado para ${to}`);
+    console.log(`[Email] C\u00f3digo de reset enviado para ${to}`);
     return true;
   } catch (err) {
     console.error("[Email] Falha ao enviar e-mail:", err);
