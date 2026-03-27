@@ -52,6 +52,7 @@ export function useGPSTracking(): UseGPSTrackingResult {
 
   const subscriptionRef = useRef<Location.LocationSubscription | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const isTrackingRef = useRef(false);
 
   const totalDistance = trackPoints.reduce((acc, point, index) => {
     if (index === 0) return 0;
@@ -59,13 +60,39 @@ export function useGPSTracking(): UseGPSTrackingResult {
     return acc + calculateDistance(prev.latitude, prev.longitude, point.latitude, point.longitude);
   }, 0);
 
+  const safeRemoveSubscription = useCallback(() => {
+    if (subscriptionRef.current) {
+      try {
+        subscriptionRef.current.remove();
+      } catch (e) {
+        // expo-location removeSubscription may not be available on web
+      }
+      subscriptionRef.current = null;
+    }
+  }, []);
+
+  const stopTracking = useCallback(() => {
+    safeRemoveSubscription();
+
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+
+    isTrackingRef.current = false;
+    setIsTracking(false);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+  }, [safeRemoveSubscription]);
+
   const startTracking = useCallback(async (): Promise<boolean> => {
+    if (isTrackingRef.current) return false;
+
     try {
       setError(null);
 
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        setError("Permissão de localização negada");
+        setError("Permissão de localização negada. Ative o GPS nas configurações.");
         return false;
       }
 
@@ -84,6 +111,7 @@ export function useGPSTracking(): UseGPSTrackingResult {
       setTrackPoints([initialPoint]);
       setCurrentLocation(initialPoint);
       setStartTime(Date.now());
+      isTrackingRef.current = true;
       setIsTracking(true);
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -91,7 +119,7 @@ export function useGPSTracking(): UseGPSTrackingResult {
       subscriptionRef.current = await Location.watchPositionAsync(
         {
           accuracy: Location.Accuracy.High,
-          timeInterval: 5000,
+          timeInterval: 8000,
           distanceInterval: 5,
         },
         (newLocation) => {
@@ -128,34 +156,13 @@ export function useGPSTracking(): UseGPSTrackingResult {
 
       return true;
     } catch (err) {
-      setError("Erro ao iniciar rastreamento");
+      setError("Erro ao iniciar rastreamento. Verifique se o GPS está ativado.");
       console.error("GPS Tracking error:", err);
+      isTrackingRef.current = false;
+      setIsTracking(false);
       return false;
     }
   }, []);
-
-  const safeRemoveSubscription = useCallback(() => {
-    if (subscriptionRef.current) {
-      try {
-        subscriptionRef.current.remove();
-      } catch (e) {
-        // expo-location removeSubscription may not be available on web
-      }
-      subscriptionRef.current = null;
-    }
-  }, []);
-
-  const stopTracking = useCallback(() => {
-    safeRemoveSubscription();
-
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
-    }
-
-    setIsTracking(false);
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-  }, [safeRemoveSubscription]);
 
   const clearTrack = useCallback(() => {
     setTrackPoints([]);
@@ -177,6 +184,7 @@ export function useGPSTracking(): UseGPSTrackingResult {
       if (timerRef.current) {
         clearInterval(timerRef.current);
       }
+      isTrackingRef.current = false;
     };
   }, []);
 

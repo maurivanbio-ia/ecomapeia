@@ -130,8 +130,7 @@ export function PhotoWatermarkProcessor({
         <View style={styles.logoContainer}>
           <View style={styles.brandContainer}>
             <Text style={styles.brandEco}>Eco</Text>
-            <Text style={styles.brandMape}>Mape</Text>
-            <Text style={styles.brandIA}>IA</Text>
+            <Text style={styles.brandBrasil}>Brasil</Text>
           </View>
         </View>
         
@@ -187,17 +186,8 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
   },
-  brandMape: {
-    color: "#60A5FA",
-    fontSize: 18,
-    fontWeight: "800",
-    fontFamily: Platform.OS === "ios" ? "System" : "sans-serif-medium",
-    textShadowColor: "rgba(0, 0, 0, 0.5)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
-  },
-  brandIA: {
-    color: "#FBBF24",
+  brandBrasil: {
+    color: "#FFFFFF",
     fontSize: 18,
     fontWeight: "800",
     fontFamily: Platform.OS === "ios" ? "System" : "sans-serif-medium",
