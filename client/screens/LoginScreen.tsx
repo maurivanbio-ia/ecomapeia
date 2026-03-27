@@ -107,15 +107,15 @@ export default function LoginScreen({ navigation, route }: any) {
             entering={FadeInUp.duration(600).delay(300)}
             style={styles.formCard}
           >
-            <ThemedText style={styles.formTitle} lightColor="#1E3A5F" darkColor="#1E3A5F">
+            <ThemedText style={styles.formTitle} lightColor="#FFFFFF" darkColor="#FFFFFF">
               Acesse sua conta
             </ThemedText>
-            <ThemedText style={styles.formSubtitle} lightColor="#6B7280" darkColor="#6B7280">
+            <ThemedText style={styles.formSubtitle} lightColor="rgba(255,255,255,0.70)" darkColor="rgba(255,255,255,0.70)">
               Entre com suas credenciais para continuar
             </ThemedText>
 
             <View style={styles.inputGroup}>
-              <ThemedText style={styles.inputLabel} lightColor="#374151" darkColor="#374151">
+              <ThemedText style={styles.inputLabel} lightColor="rgba(255,255,255,0.85)" darkColor="rgba(255,255,255,0.85)">
                 E-mail
               </ThemedText>
               <View
@@ -127,13 +127,13 @@ export default function LoginScreen({ navigation, route }: any) {
                 <Feather
                   name="mail"
                   size={18}
-                  color={emailFocused ? "#1A7A52" : "#9CA3AF"}
+                  color={emailFocused ? "#4ADE80" : "rgba(255,255,255,0.55)"}
                   style={styles.inputIcon}
                 />
                 <TextInput
                   style={styles.input}
                   placeholder="seu@email.com"
-                  placeholderTextColor="#9CA3AF"
+                  placeholderTextColor="rgba(255,255,255,0.40)"
                   value={email}
                   onChangeText={setEmail}
                   onFocus={() => setEmailFocused(true)}
@@ -147,7 +147,7 @@ export default function LoginScreen({ navigation, route }: any) {
             </View>
 
             <View style={styles.inputGroup}>
-              <ThemedText style={styles.inputLabel} lightColor="#374151" darkColor="#374151">
+              <ThemedText style={styles.inputLabel} lightColor="rgba(255,255,255,0.85)" darkColor="rgba(255,255,255,0.85)">
                 Senha
               </ThemedText>
               <View
@@ -159,13 +159,13 @@ export default function LoginScreen({ navigation, route }: any) {
                 <Feather
                   name="lock"
                   size={18}
-                  color={senhaFocused ? "#1A7A52" : "#9CA3AF"}
+                  color={senhaFocused ? "#4ADE80" : "rgba(255,255,255,0.55)"}
                   style={styles.inputIcon}
                 />
                 <TextInput
                   style={styles.input}
                   placeholder="Digite sua senha"
-                  placeholderTextColor="#9CA3AF"
+                  placeholderTextColor="rgba(255,255,255,0.40)"
                   value={senha}
                   onChangeText={setSenha}
                   onFocus={() => setSenhaFocused(true)}
@@ -182,7 +182,7 @@ export default function LoginScreen({ navigation, route }: any) {
                   <Feather
                     name={showPassword ? "eye-off" : "eye"}
                     size={18}
-                    color="#9CA3AF"
+                    color="rgba(255,255,255,0.55)"
                   />
                 </Pressable>
               </View>
@@ -222,8 +222,8 @@ export default function LoginScreen({ navigation, route }: any) {
             <Pressable style={styles.forgotButton}>
               <ThemedText
                 style={styles.forgotText}
-                lightColor="#1A7A52"
-                darkColor="#1A7A52"
+                lightColor="rgba(255,255,255,0.75)"
+                darkColor="rgba(255,255,255,0.75)"
               >
                 Esqueceu sua senha?
               </ThemedText>
@@ -308,15 +308,12 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
   },
   formCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "rgba(0, 25, 12, 0.50)",
     borderRadius: 24,
     paddingHorizontal: Spacing.xl,
     paddingVertical: Spacing["2xl"],
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.15,
-    shadowRadius: 24,
-    elevation: 12,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.15)",
     marginBottom: Spacing["2xl"],
   },
   formTitle: {
@@ -342,23 +339,23 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F9FAFB",
+    backgroundColor: "rgba(255, 255, 255, 0.10)",
     borderRadius: 12,
     borderWidth: 1.5,
-    borderColor: "#E5E7EB",
+    borderColor: "rgba(255, 255, 255, 0.20)",
     height: 52,
     paddingHorizontal: Spacing.md,
   },
   inputContainerFocused: {
-    borderColor: "#1A7A52",
-    backgroundColor: "#F0FDF4",
+    borderColor: "rgba(74, 222, 128, 0.70)",
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
   },
   inputIcon: {
     marginRight: Spacing.sm,
   },
   input: {
     flex: 1,
-    color: "#1F2937",
+    color: "#FFFFFF",
     fontSize: 15,
     height: "100%",
   },
@@ -369,7 +366,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: Spacing.xs,
-    backgroundColor: "#FEF2F2",
+    backgroundColor: "rgba(220, 50, 50, 0.20)",
+    borderWidth: 1,
+    borderColor: "rgba(220, 50, 50, 0.40)",
     borderRadius: 10,
     padding: Spacing.md,
     marginBottom: Spacing.md,
