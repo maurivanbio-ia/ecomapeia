@@ -32,9 +32,10 @@ import bgImage from "../../assets/images/hidroeletrica-bg.png";
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
-export default function LoginScreen() {
+export default function LoginScreen({ navigation, route }: any) {
   const insets = useSafeAreaInsets();
   const { login, isLoading, error } = useAuth();
+  const registeredSuccess = route?.params?.registered;
 
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
@@ -230,6 +231,33 @@ export default function LoginScreen() {
           </Animated.View>
 
           <Animated.View
+            entering={FadeIn.duration(800).delay(500)}
+            style={styles.createAccountContainer}
+          >
+            {registeredSuccess ? (
+              <View style={styles.successBanner}>
+                <Feather name="check-circle" size={16} color="#16A34A" />
+                <ThemedText style={styles.successText} lightColor="#16A34A" darkColor="#16A34A">
+                  Conta criada! Faça login para continuar.
+                </ThemedText>
+              </View>
+            ) : null}
+            <View style={styles.createAccountRow}>
+              <ThemedText style={styles.createAccountLabel} lightColor="rgba(255,255,255,0.7)" darkColor="rgba(255,255,255,0.7)">
+                Ainda não tem conta?
+              </ThemedText>
+              <Pressable
+                onPress={() => navigation?.navigate("Register")}
+                testID="button-criar-conta"
+              >
+                <ThemedText style={styles.createAccountLink} lightColor="#4ADE80" darkColor="#4ADE80">
+                  Criar conta
+                </ThemedText>
+              </Pressable>
+            </View>
+          </Animated.View>
+
+          <Animated.View
             entering={FadeIn.duration(800).delay(600)}
             style={styles.footerContainer}
           >
@@ -383,6 +411,36 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   footerCompany: {
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  createAccountContainer: {
+    marginTop: Spacing.lg,
+    alignItems: "center",
+    gap: Spacing.sm,
+  },
+  createAccountRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  createAccountLabel: {
+    fontSize: 14,
+  },
+  createAccountLink: {
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  successBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: "rgba(240, 253, 244, 0.9)",
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  successText: {
     fontSize: 13,
     fontWeight: "600",
   },

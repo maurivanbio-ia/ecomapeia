@@ -36,10 +36,30 @@ export const insertEmpresaSchema = createInsertSchema(empresas).pick({
 export type InsertEmpresa = z.infer<typeof insertEmpresaSchema>;
 export type Empresa = typeof empresas.$inferSelect;
 
-// Projetos (Projects) table - cada projeto pertence a uma empresa
+// Complexos table - agrupamento de UHEs por complexo hidrelétrico
+export const complexos = pgTable("complexos", {
+  id: serial("id").primaryKey(),
+  empresa_id: integer("empresa_id").references(() => empresas.id).notNull(),
+  nome: text("nome").notNull(),
+  descricao: text("descricao"),
+  ativo: boolean("ativo").default(true),
+  created_at: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+});
+
+export const insertComplexoSchema = createInsertSchema(complexos).pick({
+  empresa_id: true,
+  nome: true,
+  descricao: true,
+});
+
+export type InsertComplexo = z.infer<typeof insertComplexoSchema>;
+export type Complexo = typeof complexos.$inferSelect;
+
+// Projetos (Projects) table - cada projeto é uma UHE, pertence a um complexo
 export const projetos = pgTable("projetos", {
   id: serial("id").primaryKey(),
   empresa_id: integer("empresa_id").references(() => empresas.id).notNull(),
+  complexo_id: integer("complexo_id").references(() => complexos.id),
   nome: text("nome").notNull(),
   descricao: text("descricao"),
   codigo: text("codigo"), // Ex: "UHE-ITP", "UHE-JRM"
@@ -54,6 +74,7 @@ export const projetos = pgTable("projetos", {
 
 export const insertProjetoSchema = createInsertSchema(projetos).pick({
   empresa_id: true,
+  complexo_id: true,
   nome: true,
   descricao: true,
   codigo: true,
@@ -109,8 +130,9 @@ export const usuarios = pgTable("usuarios", {
   tipo_usuario: text("tipo_usuario").notNull().default("Fiscal"),
   senha_hash: text("senha_hash").notNull(),
   empresa_id: integer("empresa_id").references(() => empresas.id),
-  is_admin: boolean("is_admin").default(false), // Admin pode gerenciar múltiplas empresas
-  projeto_atual_id: integer("projeto_atual_id").references(() => projetos.id), // Projeto atualmente selecionado
+  complexo_id: integer("complexo_id").references(() => complexos.id),
+  is_admin: boolean("is_admin").default(false),
+  projeto_atual_id: integer("projeto_atual_id").references(() => projetos.id),
   created_at: timestamp("created_at").defaultNow(),
 });
 
@@ -120,6 +142,7 @@ export const insertUsuarioSchema = createInsertSchema(usuarios).pick({
   tipo_usuario: true,
   senha_hash: true,
   empresa_id: true,
+  complexo_id: true,
   is_admin: true,
 });
 
@@ -294,7 +317,8 @@ export const registerSchema = z.object({
   nome: z.string().min(2, "Nome deve ter no mínimo 2 caracteres"),
   email: z.string().email("Email inválido"),
   senha: z.string().min(6, "Senha deve ter no mínimo 6 caracteres"),
-  tipo_usuario: z.enum(["Fiscal", "Técnico"]).default("Fiscal"),
+  tipo_usuario: z.enum(["Fiscal", "Técnico", "Coordenador", "Gerente"]).default("Fiscal"),
+  complexo_id: z.number().optional(),
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;

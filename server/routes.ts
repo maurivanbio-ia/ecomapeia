@@ -8,12 +8,16 @@ import pdfRoutes from "./routes/pdf";
 import docxRoutes from "./routes/docx";
 import kmzRoutes from "./routes/kmz";
 import tenantRoutes from "./routes/tenant";
+import complexosRoutes from "./routes/complexos";
 import aiRoutes from "./ai-routes";
 import mapbiomasRoutes from "./mapbiomas-routes";
 import environmentalRoutes from "./environmental-routes";
 import conservationRoutes from "./conservation-routes";
 import featuresRoutes from "./features-routes";
 import teamRoutes from "./team-routes";
+import { db } from "./db";
+import { eq as eqOp } from "drizzle-orm";
+import { empresas, complexos } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Register AI chat routes
@@ -39,6 +43,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Register Multi-tenant routes (Empresas e Projetos)
   app.use("/api/tenant", tenantRoutes);
+
+  // Register Complexos / UHEs / Admin routes
+  app.use("/api/complexos", complexosRoutes);
   
   // Register PDF routes
   app.use("/api/pdf", pdfRoutes);
@@ -97,7 +104,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const { nome, email, senha, tipo_usuario } = result.data;
+      const { nome, email, senha, tipo_usuario, complexo_id } = result.data;
       
       const existingUser = await storage.getUsuarioByEmail(email);
       if (existingUser) {
@@ -105,12 +112,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const senha_hash = await bcrypt.hash(senha, 10);
-      
+
+      let empresa_id: number | undefined;
+      if (complexo_id) {
+        const [complexo] = await db.select().from(complexos).where(eqOp(complexos.id, complexo_id));
+        if (complexo) empresa_id = complexo.empresa_id;
+      }
+
       const usuario = await storage.createUsuario({
         nome,
         email,
         tipo_usuario,
         senha_hash,
+        empresa_id,
+        complexo_id,
       });
 
       const { senha_hash: _, ...userWithoutPassword } = usuario;
