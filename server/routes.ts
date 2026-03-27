@@ -148,12 +148,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/vistorias", async (req: Request, res: Response) => {
     try {
       const usuarioId = req.query.usuario_id as string;
-      
+      const projetoId = req.query.projeto_id ? parseInt(req.query.projeto_id as string) : null;
+
       if (!usuarioId) {
         return res.status(400).json({ message: "usuario_id é obrigatório" });
       }
 
-      const vistorias = await storage.getVistoriasByUsuario(usuarioId);
+      let vistorias;
+      if (projetoId) {
+        vistorias = await storage.getVistoriasByProjeto(projetoId);
+      } else {
+        vistorias = await storage.getVistoriasByUsuario(usuarioId);
+      }
+
       const vistoriasWithSyncStatus = vistorias.map(v => ({ ...v, status_upload: "synced" }));
       return res.json(vistoriasWithSyncStatus);
     } catch (error) {

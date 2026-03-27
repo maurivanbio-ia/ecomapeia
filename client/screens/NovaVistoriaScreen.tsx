@@ -166,6 +166,19 @@ export default function NovaVistoriaScreen() {
   const editVistoriaId = (route.params as any)?.editVistoriaId as string | undefined;
   const isEditMode = !!editVistoriaId;
 
+  // Fetch user's currently selected project to associate with new vistorias
+  const { data: tenantData } = useQuery<{ projetoAtual: { id: number; nome: string } | null }>({
+    queryKey: ["/api/tenant/usuarios", user?.id, "tenant"],
+    queryFn: async () => {
+      const response = await fetch(new URL(`/api/tenant/usuarios/${user?.id}/tenant`, getApiUrl()).toString());
+      if (!response.ok) throw new Error("Failed");
+      return response.json();
+    },
+    enabled: !!user?.id,
+    staleTime: 0,
+  });
+  const projetoAtualId = tenantData?.projetoAtual?.id ?? null;
+
   const {
     isTracking,
     trackPoints,
@@ -572,7 +585,11 @@ export default function NovaVistoriaScreen() {
       return response.json();
     },
     onSuccess: () => {
+      // Invalidate both possible query keys (with and without projeto_id filter)
       queryClient.invalidateQueries({ queryKey: [`/api/vistorias?usuario_id=${user?.id}`] });
+      if (projetoAtualId) {
+        queryClient.invalidateQueries({ queryKey: [`/api/vistorias?usuario_id=${user?.id}&projeto_id=${projetoAtualId}`] });
+      }
       if (isEditMode) {
         queryClient.invalidateQueries({ queryKey: [`/api/vistorias/${editVistoriaId}`] });
       }
@@ -600,7 +617,7 @@ export default function NovaVistoriaScreen() {
       return;
     }
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    createVistoria.mutate(formData);
+    createVistoria.mutate({ ...formData, projeto_id: projetoAtualId } as any);
   };
 
   const updateField = (field: keyof FormData, value: string) => {

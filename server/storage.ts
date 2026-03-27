@@ -16,7 +16,7 @@ import {
   type Foto,
   type InsertFoto
 } from "@shared/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 
 export interface IStorage {
   getUsuario(id: string): Promise<Usuario | undefined>;
@@ -25,6 +25,7 @@ export interface IStorage {
   
   getVistoria(id: string): Promise<Vistoria | undefined>;
   getVistoriasByUsuario(usuarioId: string): Promise<Vistoria[]>;
+  getVistoriasByProjeto(projetoId: number): Promise<Vistoria[]>;
   createVistoria(vistoria: InsertVistoria): Promise<Vistoria>;
   updateVistoria(id: string, updates: Partial<InsertVistoria>): Promise<Vistoria | undefined>;
   deleteVistoria(id: string): Promise<boolean>;
@@ -66,6 +67,12 @@ export class DatabaseStorage implements IStorage {
   async getVistoriasByUsuario(usuarioId: string): Promise<Vistoria[]> {
     return db.select().from(vistorias)
       .where(eq(vistorias.usuario_id, usuarioId))
+      .orderBy(desc(vistorias.created_at));
+  }
+
+  async getVistoriasByProjeto(projetoId: number): Promise<Vistoria[]> {
+    return db.select().from(vistorias)
+      .where(eq(vistorias.projeto_id, projetoId))
       .orderBy(desc(vistorias.created_at));
   }
 

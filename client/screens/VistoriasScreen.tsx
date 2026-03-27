@@ -29,7 +29,7 @@ import { ThemedView } from "@/components/ThemedView";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/hooks/useAuth";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
-import { apiRequest } from "@/lib/query-client";
+import { apiRequest, getApiUrl } from "@/lib/query-client";
 import { VistoriasStackParamList } from "@/navigation/VistoriasStackNavigator";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -55,12 +55,35 @@ export default function VistoriasScreen() {
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Fetch user's current project selection
+  const { data: tenantData } = useQuery<{
+    projetoAtual: { id: number; nome: string; complexo_nome?: string | null } | null;
+    projetosDisponiveis: any[];
+  }>({
+    queryKey: ["/api/tenant/usuarios", user?.id, "tenant"],
+    queryFn: async () => {
+      const response = await fetch(
+        new URL(`/api/tenant/usuarios/${user?.id}/tenant`, getApiUrl()).toString()
+      );
+      if (!response.ok) throw new Error("Failed");
+      return response.json();
+    },
+    enabled: !!user?.id,
+    staleTime: 0,
+    refetchOnMount: "always",
+  });
+
+  const projetoAtual = tenantData?.projetoAtual ?? null;
+  const vistoriasQueryKey = projetoAtual
+    ? [`/api/vistorias?usuario_id=${user?.id}&projeto_id=${projetoAtual.id}`]
+    : [`/api/vistorias?usuario_id=${user?.id}`];
+
   const deleteVistoria = useMutation({
     mutationFn: async (id: string) => {
       await apiRequest("DELETE", `/api/vistorias/${id}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/vistorias?usuario_id=${user?.id}`] });
+      queryClient.invalidateQueries({ queryKey: vistoriasQueryKey });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     },
     onError: () => {
@@ -90,9 +113,20 @@ export default function VistoriasScreen() {
     }
   };
 
+  const vistoriasUrl = projetoAtual
+    ? `/api/vistorias?usuario_id=${user?.id}&projeto_id=${projetoAtual.id}`
+    : `/api/vistorias?usuario_id=${user?.id}`;
+
   const { data: vistorias = [], isLoading, refetch, isRefetching } = useQuery<Vistoria[]>({
-    queryKey: [`/api/vistorias?usuario_id=${user?.id}`],
+    queryKey: vistoriasQueryKey,
+    queryFn: async () => {
+      const response = await fetch(new URL(vistoriasUrl, getApiUrl()).toString());
+      if (!response.ok) throw new Error("Failed to fetch vistorias");
+      return response.json();
+    },
     enabled: !!user?.id,
+    staleTime: 0,
+    refetchOnMount: "always",
   });
 
   const filteredVistorias = vistorias.filter((v) =>
@@ -119,7 +153,9 @@ export default function VistoriasScreen() {
         lightColor={Colors.light.textSecondary}
         darkColor={Colors.dark.textSecondary}
       >
-        Toque no botão + para criar sua primeira vistoria
+        {projetoAtual
+          ? `Nenhuma vistoria registrada em ${projetoAtual.nome}`
+          : "Toque no botão + para criar sua primeira vistoria"}
       </ThemedText>
     </Animated.View>
   );
@@ -220,6 +256,20 @@ export default function VistoriasScreen() {
           <ThemedText style={[styles.quickActionText, { color: Colors.light.warning }]}>Histórico</ThemedText>
         </Pressable>
       </View>
+
+      {projetoAtual ? (
+        <Animated.View entering={FadeIn.duration(300)} style={styles.projetoFilterBar}>
+          <View style={[styles.projetoFilterCard, { backgroundColor: Colors.light.primary + "15", borderColor: Colors.light.primary + "40" }]}>
+            <Feather name="zap" size={14} color={Colors.light.primary} />
+            <ThemedText style={[styles.projetoFilterText, { color: Colors.light.primary }]} numberOfLines={1}>
+              {projetoAtual.nome}
+            </ThemedText>
+            <View style={[styles.projetoFilterBadge, { backgroundColor: Colors.light.primary }]}>
+              <ThemedText style={styles.projetoFilterBadgeText}>{vistorias.length}</ThemedText>
+            </View>
+          </View>
+        </Animated.View>
+      ) : null}
 
       <View
         style={[
@@ -332,6 +382,37 @@ const styles = StyleSheet.create({
   quickActionText: {
     fontSize: 12,
     fontWeight: "600",
+  },
+  projetoFilterBar: {
+    paddingHorizontal: Spacing.lg,
+    marginBottom: Spacing.sm,
+  },
+  projetoFilterCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 10,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+  },
+  projetoFilterText: {
+    flex: 1,
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  projetoFilterBadge: {
+    minWidth: 22,
+    height: 22,
+    borderRadius: 11,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 6,
+  },
+  projetoFilterBadgeText: {
+    color: "#fff",
+    fontSize: 11,
+    fontWeight: "700",
   },
   searchContainer: {
     flexDirection: "row",
