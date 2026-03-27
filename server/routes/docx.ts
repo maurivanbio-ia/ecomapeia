@@ -971,26 +971,7 @@ async function generateWordDocument(vistoria: VistoriaData): Promise<Buffer> {
           children: [
             new TableCell({
               children: [
-                vistoria.assinatura_uri ? (() => {
-                  const sigBuffer = base64ToBuffer(vistoria.assinatura_uri);
-                  if (sigBuffer) {
-                    try {
-                      return new Paragraph({
-                        children: [
-                          new ImageRun({
-                            data: sigBuffer,
-                            transformation: { width: 150, height: 50 },
-                            type: "png",
-                          }),
-                        ],
-                        alignment: AlignmentType.CENTER,
-                      });
-                    } catch {
-                      return new Paragraph({ children: [], spacing: { before: 300 } });
-                    }
-                  }
-                  return new Paragraph({ children: [], spacing: { before: 300 } });
-                })() : new Paragraph({ children: [], spacing: { before: 300 } }),
+                new Paragraph({ children: [], spacing: { before: 300 } }),
                 new Paragraph({
                   children: [new TextRun({ text: "_________________________", size: 20 })],
                   alignment: AlignmentType.CENTER,
@@ -1009,7 +990,35 @@ async function generateWordDocument(vistoria: VistoriaData): Promise<Buffer> {
             }),
             new TableCell({
               children: [
-                new Paragraph({ children: [], spacing: { before: 300 } }),
+                (() => {
+                  const uri = vistoria.assinatura_uri;
+                  if (uri === "__recusou_assinar__") {
+                    return new Paragraph({
+                      children: [new TextRun({ text: "Recusou-se a assinar", size: 18, bold: true, color: "92400E" })],
+                      alignment: AlignmentType.CENTER,
+                      spacing: { before: 200 },
+                    });
+                  }
+                  if (uri === "__ninguem_no_local__") {
+                    return new Paragraph({
+                      children: [new TextRun({ text: "Ninguem no local", size: 18, bold: true, color: "1E40AF" })],
+                      alignment: AlignmentType.CENTER,
+                      spacing: { before: 200 },
+                    });
+                  }
+                  if (uri) {
+                    const sigBuffer = base64ToBuffer(uri);
+                    if (sigBuffer) {
+                      try {
+                        return new Paragraph({
+                          children: [new ImageRun({ data: sigBuffer, transformation: { width: 150, height: 50 }, type: "png" })],
+                          alignment: AlignmentType.CENTER,
+                        });
+                      } catch {}
+                    }
+                  }
+                  return new Paragraph({ children: [], spacing: { before: 300 } });
+                })(),
                 new Paragraph({
                   children: [new TextRun({ text: "_________________________", size: 20 })],
                   alignment: AlignmentType.CENTER,

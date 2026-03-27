@@ -305,6 +305,24 @@ function generatePDFHTML(vistoria: VistoriaData): string {
       max-height: 60px;
       margin-bottom: 5px;
     }
+    .signature-special {
+      font-size: 9pt;
+      font-weight: bold;
+      padding: 6px 10px;
+      border-radius: 4px;
+      margin-bottom: 5px;
+      display: inline-block;
+    }
+    .signature-refused {
+      background-color: #FFF3CD;
+      color: #92400E;
+      border: 1px solid #F59E0B;
+    }
+    .signature-absent {
+      background-color: #DBEAFE;
+      color: #1E40AF;
+      border: 1px solid #3B82F6;
+    }
     .footer {
       margin-top: 30px;
       text-align: center;
@@ -561,13 +579,19 @@ function generatePDFHTML(vistoria: VistoriaData): string {
 
   <div class="signature-section">
     <div class="signature-box">
-      ${vistoria.assinatura_uri ? `<img src="${vistoria.assinatura_uri}" class="signature-image" alt="Assinatura" />` : ""}
-      <div class="signature-line"></div>
+      <div class="signature-line" style="margin-top: 60px;"></div>
       <div class="signature-label">Responsável Técnico</div>
     </div>
     <div class="signature-box">
-      <div class="signature-line" style="margin-top: 60px;"></div>
-      <div class="signature-label">Proprietário / Caseiro</div>
+      ${vistoria.assinatura_uri === "__recusou_assinar__"
+        ? `<span class="signature-special signature-refused">Recusou-se a assinar</span>`
+        : vistoria.assinatura_uri === "__ninguem_no_local__"
+        ? `<span class="signature-special signature-absent">Ninguem no local</span>`
+        : vistoria.assinatura_uri
+        ? `<img src="${vistoria.assinatura_uri}" class="signature-image" alt="Assinatura" />`
+        : ""}
+      <div class="signature-line"></div>
+      <div class="signature-label">Proprietario / Caseiro</div>
     </div>
   </div>
 
