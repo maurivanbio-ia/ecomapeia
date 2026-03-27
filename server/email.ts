@@ -1,4 +1,6 @@
 import nodemailer from "nodemailer";
+import fs from "fs";
+import path from "path";
 
 function createTransporter() {
   const user = process.env.SMTP_USER;
@@ -15,6 +17,24 @@ function createTransporter() {
   });
 }
 
+function getLogoBase64(): string {
+  try {
+    const candidates = [
+      path.join(process.cwd(), "assets/images/ecomapeia-logo-clean.png"),
+      path.join(process.cwd(), "assets/images/ecomapeia-logo-transparent.png"),
+      path.join(process.cwd(), "assets/images/ecomapeia-logo.png"),
+    ];
+    for (const p of candidates) {
+      if (fs.existsSync(p)) {
+        return fs.readFileSync(p).toString("base64");
+      }
+    }
+  } catch {
+    /* ignore */
+  }
+  return "";
+}
+
 export async function sendPasswordResetEmail(to: string, code: string, nome: string): Promise<boolean> {
   const transporter = createTransporter();
 
@@ -23,6 +43,11 @@ export async function sendPasswordResetEmail(to: string, code: string, nome: str
     return false;
   }
 
+  const logoB64 = getLogoBase64();
+  const logoImg = logoB64
+    ? `<img src="data:image/png;base64,${logoB64}" alt="EcoMapeIA" style="height:52px;width:auto;display:block;margin:0 auto;" />`
+    : `<div style="font-size:28px;font-weight:800;color:#0f5132;letter-spacing:-0.5px;font-family:Arial,sans-serif;">EcoMape<span style="color:#f0a800;">IA</span></div>`;
+
   const html = `
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -30,206 +55,112 @@ export async function sendPasswordResetEmail(to: string, code: string, nome: str
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>EcoMapeIA — Redefinição de Senha</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'Inter', Arial, sans-serif;
-      background: #f0f4f0;
-      padding: 32px 16px;
-      color: #1a2e1a;
-    }
-    .wrapper { max-width: 520px; margin: 0 auto; }
-
-    /* ── Card ── */
-    .card {
-      background: #ffffff;
-      border-radius: 20px;
-      overflow: hidden;
-      box-shadow: 0 8px 40px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06);
-    }
-
-    /* ── Header ── */
-    .header {
-      background: linear-gradient(135deg, #0f5132 0%, #1a7a46 50%, #22a55e 100%);
-      padding: 36px 32px 28px;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-    }
-    .header::before {
-      content: '';
-      position: absolute;
-      top: -60px; right: -60px;
-      width: 180px; height: 180px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.07);
-    }
-    .header::after {
-      content: '';
-      position: absolute;
-      bottom: -40px; left: -40px;
-      width: 130px; height: 130px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.05);
-    }
-    .logo-mark {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 56px; height: 56px;
-      border-radius: 16px;
-      background: rgba(255,255,255,0.18);
-      backdrop-filter: blur(8px);
-      margin-bottom: 14px;
-      border: 1.5px solid rgba(255,255,255,0.30);
-    }
-    .logo-mark svg { width: 32px; height: 32px; }
-    .brand-name {
-      font-size: 26px;
-      font-weight: 800;
-      color: #ffffff;
-      letter-spacing: -0.5px;
-      line-height: 1;
-    }
-    .brand-name span { color: #a8f0c0; }
-    .brand-tagline {
-      font-size: 12.5px;
-      font-weight: 500;
-      color: rgba(255,255,255,0.72);
-      margin-top: 6px;
-      letter-spacing: 0.3px;
-    }
-
-    /* ── Body ── */
-    .body { padding: 36px 32px; }
-    .greeting {
-      font-size: 16px;
-      font-weight: 600;
-      color: #0f5132;
-      margin-bottom: 10px;
-    }
-    .desc {
-      font-size: 14.5px;
-      color: #4a5a4a;
-      line-height: 1.65;
-      margin-bottom: 28px;
-    }
-
-    /* ── Code Box ── */
-    .code-box {
-      background: linear-gradient(135deg, #f0faf4 0%, #e8f7ee 100%);
-      border: 2px solid #22a55e;
-      border-radius: 16px;
-      text-align: center;
-      padding: 28px 20px 20px;
-      margin-bottom: 28px;
-      position: relative;
-      overflow: hidden;
-    }
-    .code-box::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 3px;
-      background: linear-gradient(90deg, #0f5132, #22a55e, #0f5132);
-    }
-    .code-label {
-      font-size: 11px;
-      font-weight: 600;
-      color: #1a7a46;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      margin-bottom: 12px;
-    }
-    .code {
-      font-size: 46px;
-      font-weight: 800;
-      color: #0f5132;
-      letter-spacing: 10px;
-      font-family: 'Courier New', 'SF Mono', monospace;
-      line-height: 1;
-    }
-    .expire {
-      font-size: 12px;
-      color: #7a9a7a;
-      margin-top: 12px;
-      font-weight: 500;
-    }
-    .expire strong { color: #1a7a46; }
-
-    /* ── Warning ── */
-    .warning {
-      background: #fffbeb;
-      border: 1px solid #fcd34d;
-      border-left: 4px solid #f59e0b;
-      padding: 14px 16px;
-      border-radius: 10px;
-      color: #92400e;
-      font-size: 13.5px;
-      line-height: 1.55;
-    }
-
-    /* ── Footer ── */
-    .footer {
-      border-top: 1px solid #e8f0e8;
-      padding: 18px 32px;
-      text-align: center;
-      background: #f9fbf9;
-    }
-    .footer p {
-      font-size: 12px;
-      color: #9aaa9a;
-      line-height: 1.6;
-    }
-    .footer strong { color: #1a7a46; font-weight: 600; }
-  </style>
 </head>
-<body>
-  <div class="wrapper">
-    <div class="card">
+<body style="margin:0;padding:0;background:#eef3ee;font-family:Arial,'Helvetica Neue',sans-serif;-webkit-font-smoothing:antialiased;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#eef3ee;padding:32px 16px;">
+    <tr>
+      <td align="center">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:520px;">
 
-      <!-- Header -->
-      <div class="header">
-        <div class="logo-mark">
-          <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M16 4C10.48 4 6 8.48 6 14c0 3.5 1.8 6.6 4.5 8.4L16 28l5.5-5.6C24.2 20.6 26 17.5 26 14c0-5.52-4.48-10-10-10z" fill="rgba(255,255,255,0.9)"/>
-            <circle cx="16" cy="14" r="4.5" fill="#22a55e"/>
-            <path d="M12 14c0-2.2 1.8-4 4-4" stroke="#0f5132" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
-        </div>
-        <div class="brand-name">Eco<span>MapeIA</span></div>
-        <div class="brand-tagline">Sistema de Vistoria Ambiental</div>
-      </div>
+          <!-- TOP RIBBON -->
+          <tr>
+            <td style="height:5px;background:linear-gradient(90deg,#0f5132 0%,#22a55e 50%,#f0a800 100%);border-radius:6px 6px 0 0;"></td>
+          </tr>
 
-      <!-- Body -->
-      <div class="body">
-        <p class="greeting">Olá, ${nome}!</p>
-        <p class="desc">
-          Recebemos uma solicitação de redefinição de senha para sua conta no EcoMapeIA.
-          Use o código abaixo no aplicativo para criar uma nova senha:
-        </p>
+          <!-- HEADER: white with logo -->
+          <tr>
+            <td style="background:#ffffff;padding:32px 40px 24px;text-align:center;border-left:1px solid #e0e8e0;border-right:1px solid #e0e8e0;">
+              ${logoImg}
+              <div style="margin-top:10px;font-size:12px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#7aaa8a;">
+                Sistema de Vistoria Ambiental
+              </div>
+            </td>
+          </tr>
 
-        <div class="code-box">
-          <div class="code-label">Código de Verificação</div>
-          <div class="code">${code}</div>
-          <div class="expire">Válido por <strong>15 minutos</strong></div>
-        </div>
+          <!-- DIVIDER -->
+          <tr>
+            <td style="height:2px;background:linear-gradient(90deg,#e8f5ee 0%,#22a55e 30%,#0f5132 50%,#22a55e 70%,#e8f5ee 100%);border-left:1px solid #e0e8e0;border-right:1px solid #e0e8e0;"></td>
+          </tr>
 
-        <div class="warning">
-          Se você não solicitou a redefinição de senha, ignore este e-mail.
-          Sua senha permanece a mesma e nenhuma ação é necessária.
-        </div>
-      </div>
+          <!-- BODY -->
+          <tr>
+            <td style="background:#ffffff;padding:36px 40px 32px;border-left:1px solid #e0e8e0;border-right:1px solid #e0e8e0;">
 
-      <!-- Footer -->
-      <div class="footer">
-        <p><strong>EcoMapeIA</strong> &bull; EcoBrasil Ambiental &bull; Todos os direitos reservados</p>
-        <p style="margin-top:4px;">Este é um e-mail automático, por favor não responda.</p>
-      </div>
+              <!-- Greeting -->
+              <p style="margin:0 0 8px;font-size:17px;font-weight:700;color:#0f5132;">
+                Olá, ${nome}!
+              </p>
+              <p style="margin:0 0 28px;font-size:14px;color:#4a5a4a;line-height:1.65;">
+                Recebemos uma solicitação de redefinição de senha para sua conta no
+                <strong style="color:#0f5132;">EcoMapeIA</strong>.
+                Use o código abaixo no aplicativo para criar uma nova senha:
+              </p>
 
-    </div>
-  </div>
+              <!-- Code Box -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:28px;">
+                <tr>
+                  <td style="background:linear-gradient(135deg,#f0faf4 0%,#e6f7ee 100%);border:1.5px solid #22a55e;border-radius:14px;padding:0;overflow:hidden;">
+                    <!-- top accent line -->
+                    <div style="height:3px;background:linear-gradient(90deg,#0f5132,#22a55e,#0f5132);border-radius:14px 14px 0 0;"></div>
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td style="text-align:center;padding:20px 20px 6px;">
+                          <div style="font-size:10.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#1a7a46;margin-bottom:14px;">
+                            Código de Verificação
+                          </div>
+                          <div style="font-size:48px;font-weight:800;color:#0f5132;letter-spacing:12px;font-family:'Courier New',monospace;line-height:1;">
+                            ${code}
+                          </div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="text-align:center;padding:10px 20px 20px;">
+                          <div style="display:inline-block;background:#ffffff;border:1px solid #c0e8ce;border-radius:20px;padding:5px 16px;">
+                            <span style="font-size:12px;color:#1a7a46;font-weight:600;">
+                              Válido por <strong>15 minutos</strong>
+                            </span>
+                          </div>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Warning -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="background:#fffbeb;border:1px solid #fde68a;border-left:4px solid #f59e0b;border-radius:0 10px 10px 0;padding:14px 16px;">
+                    <p style="margin:0;font-size:13px;color:#92400e;line-height:1.55;">
+                      <strong>Não solicitou a redefinição?</strong><br/>
+                      Ignore este e-mail. Sua senha permanece a mesma e nenhuma ação é necessária.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+
+          <!-- FOOTER -->
+          <tr>
+            <td style="background:#0f5132;padding:20px 40px;border-radius:0 0 6px 6px;text-align:center;">
+              <p style="margin:0 0 4px;font-size:12px;color:rgba(255,255,255,0.9);font-weight:600;">
+                EcoMapeIA &bull; EcoBrasil Ambiental
+              </p>
+              <p style="margin:0;font-size:11px;color:rgba(255,255,255,0.5);">
+                Este é um e-mail automático — por favor, não responda.
+              </p>
+            </td>
+          </tr>
+
+          <!-- BOTTOM SPACING -->
+          <tr><td style="height:24px;"></td></tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
 </body>
 </html>
   `;
