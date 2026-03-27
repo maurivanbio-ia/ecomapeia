@@ -21,7 +21,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 import { getApiUrl } from "@/lib/query-client";
 
-import logoImage from "../../assets/images/ecomapeia-logo-transparent.png";
+import logoImage from "../../assets/images/ecomapeia-logo.png";
 import bgImage from "../../assets/images/hidroeletrica-bg.png";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
