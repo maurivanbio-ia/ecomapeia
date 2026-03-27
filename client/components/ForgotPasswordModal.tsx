@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import {
   View,
   StyleSheet,
@@ -35,37 +35,15 @@ export default function ForgotPasswordModal({ visible, onClose }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const codeRefs = useRef<Array<TextInput | null>>([null, null, null, null, null, null]);
-  const [codeDigits, setCodeDigits] = useState(["", "", "", "", "", ""]);
-
-  const fullCode = codeDigits.join("");
-
   const handleClose = () => {
     setStep("email");
     setEmail("");
     setCode("");
-    setCodeDigits(["", "", "", "", "", ""]);
     setNewPassword("");
     setConfirmPassword("");
     setError("");
     setLoading(false);
     onClose();
-  };
-
-  const handleDigitChange = (text: string, index: number) => {
-    const digit = text.replace(/[^0-9]/g, "").slice(-1);
-    const next = [...codeDigits];
-    next[index] = digit;
-    setCodeDigits(next);
-    if (digit && index < 5) {
-      codeRefs.current[index + 1]?.focus();
-    }
-  };
-
-  const handleDigitKeyPress = (key: string, index: number) => {
-    if (key === "Backspace" && !codeDigits[index] && index > 0) {
-      codeRefs.current[index - 1]?.focus();
-    }
   };
 
   const sendCode = async () => {
@@ -90,14 +68,14 @@ export default function ForgotPasswordModal({ visible, onClose }: Props) {
   };
 
   const verifyCode = async () => {
-    if (fullCode.length < 6) return setError("Digite o código de 6 dígitos.");
+    if (code.trim().length < 6) return setError("Digite o código de 6 dígitos.");
     setError("");
     setLoading(true);
     try {
       const res = await fetch(new URL("/api/auth/verify-reset-code", getApiUrl()).toString(), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim().toLowerCase(), code: fullCode }),
+        body: JSON.stringify({ email: email.trim().toLowerCase(), code: code.trim() }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Código inválido.");
@@ -118,7 +96,7 @@ export default function ForgotPasswordModal({ visible, onClose }: Props) {
       const res = await fetch(new URL("/api/auth/reset-password", getApiUrl()).toString(), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim().toLowerCase(), code: fullCode, newPassword }),
+        body: JSON.stringify({ email: email.trim().toLowerCase(), code: code.trim(), newPassword }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Erro ao redefinir senha.");
@@ -131,7 +109,7 @@ export default function ForgotPasswordModal({ visible, onClose }: Props) {
   };
 
   const stepConfig = {
-    email: { icon: "mail" as const, title: "Esqueceu sua senha?", subtitle: "Informe seu e-mail e enviaremos um código de verificação." },
+    email: { icon: "mail" as const, title: "Esqueceu sua senha?", subtitle: "Informe seu e-mail cadastrado e enviaremos um código de verificação." },
     code: { icon: "shield" as const, title: "Código de verificação", subtitle: `Enviamos um código de 6 dígitos para\n${email}` },
     password: { icon: "lock" as const, title: "Nova senha", subtitle: "Crie uma nova senha segura para sua conta." },
     success: { icon: "check-circle" as const, title: "Senha redefinida!", subtitle: "Sua senha foi alterada com sucesso. Você já pode fazer login." },
@@ -154,7 +132,7 @@ export default function ForgotPasswordModal({ visible, onClose }: Props) {
             {/* Header */}
             <View style={styles.cardHeader}>
               <View style={[styles.iconCircle, { backgroundColor: Colors.light.accent + "22" }]}>
-                <Feather name={cfg.icon} size={28} color={Colors.light.accent} />
+                <Feather name={cfg.icon} size={26} color={Colors.light.accent} />
               </View>
               <Pressable style={styles.closeBtn} onPress={handleClose}>
                 <Feather name="x" size={20} color={theme.tabIconDefault} />
@@ -203,23 +181,20 @@ export default function ForgotPasswordModal({ visible, onClose }: Props) {
             {/* Step: Code */}
             {step === "code" && (
               <View style={styles.form}>
-                <View style={styles.codeRow}>
-                  {codeDigits.map((digit, i) => (
-                    <TextInput
-                      key={i}
-                      ref={(r) => { codeRefs.current[i] = r; }}
-                      style={[
-                        styles.codeInput,
-                        { borderColor: digit ? Colors.light.accent : theme.border, backgroundColor: theme.backgroundElevated, color: theme.text },
-                      ]}
-                      value={digit}
-                      onChangeText={(t) => handleDigitChange(t, i)}
-                      onKeyPress={({ nativeEvent }) => handleDigitKeyPress(nativeEvent.key, i)}
-                      keyboardType="number-pad"
-                      maxLength={1}
-                      selectTextOnFocus
-                    />
-                  ))}
+                <View style={[styles.inputWrap, { borderColor: code.length === 6 ? Colors.light.accent : theme.border, backgroundColor: theme.backgroundElevated }]}>
+                  <Feather name="hash" size={16} color={theme.tabIconDefault} style={styles.inputIcon} />
+                  <TextInput
+                    style={[styles.codeInput, { color: theme.text }]}
+                    placeholder="000000"
+                    placeholderTextColor={theme.tabIconDefault}
+                    keyboardType="number-pad"
+                    maxLength={6}
+                    value={code}
+                    onChangeText={(t) => setCode(t.replace(/[^0-9]/g, ""))}
+                    onSubmitEditing={verifyCode}
+                    returnKeyType="done"
+                    autoFocus
+                  />
                 </View>
                 {error ? <ThemedText style={styles.error}>{error}</ThemedText> : null}
                 <Pressable
@@ -236,7 +211,7 @@ export default function ForgotPasswordModal({ visible, onClose }: Props) {
                     </>
                   )}
                 </Pressable>
-                <Pressable style={styles.resendBtn} onPress={() => { setStep("email"); setCodeDigits(["","","","","",""]); setError(""); }}>
+                <Pressable style={styles.resendBtn} onPress={() => { setStep("email"); setCode(""); setError(""); }}>
                   <ThemedText style={[styles.resendText, { color: Colors.light.accent }]}>Reenviar código</ThemedText>
                 </Pressable>
               </View>
@@ -312,7 +287,14 @@ export default function ForgotPasswordModal({ visible, onClose }: Props) {
                     key={s}
                     style={[
                       styles.stepDot,
-                      { backgroundColor: step === s ? Colors.light.accent : (["email", "code", "password"].indexOf(step) > i ? Colors.light.accent + "88" : theme.border) },
+                      {
+                        backgroundColor:
+                          step === s
+                            ? Colors.light.accent
+                            : (["email", "code", "password"].indexOf(step) > i
+                              ? Colors.light.accent + "88"
+                              : theme.border),
+                      },
                     ]}
                   />
                 ))}
@@ -331,7 +313,7 @@ const styles = StyleSheet.create({
   scrollContent: { flexGrow: 1, justifyContent: "center", alignItems: "center", paddingHorizontal: 20, paddingVertical: 40 },
   card: { width: "100%", maxWidth: 400, borderRadius: 20, padding: 24, shadowColor: "#000", shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.18, shadowRadius: 20, elevation: 10 },
   cardHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 16 },
-  iconCircle: { width: 56, height: 56, borderRadius: 28, justifyContent: "center", alignItems: "center" },
+  iconCircle: { width: 52, height: 52, borderRadius: 26, justifyContent: "center", alignItems: "center" },
   closeBtn: { padding: 6 },
   title: { fontSize: 20, fontWeight: "700", marginBottom: 8 },
   subtitle: { fontSize: 13.5, lineHeight: 20, marginBottom: 24 },
@@ -339,13 +321,12 @@ const styles = StyleSheet.create({
   inputWrap: { flexDirection: "row", alignItems: "center", borderWidth: 1.5, borderRadius: 12, paddingHorizontal: 12, height: 50 },
   inputIcon: { marginRight: 8 },
   input: { flex: 1, fontSize: 15 },
+  codeInput: { flex: 1, fontSize: 28, fontWeight: "700", letterSpacing: 8, textAlign: "center" },
   eyeBtn: { padding: 4 },
   error: { color: "#dc2626", fontSize: 13, marginTop: -4 },
   btn: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, borderRadius: 12, height: 50, marginTop: 4 },
   btnDisabled: { opacity: 0.6 },
   btnText: { fontSize: 15, fontWeight: "600" },
-  codeRow: { flexDirection: "row", justifyContent: "space-between", gap: 8, marginBottom: 4 },
-  codeInput: { flex: 1, height: 56, borderWidth: 2, borderRadius: 12, textAlign: "center", fontSize: 24, fontWeight: "700" },
   resendBtn: { alignItems: "center", paddingVertical: 8 },
   resendText: { fontSize: 14, fontWeight: "500" },
   stepRow: { flexDirection: "row", justifyContent: "center", gap: 8, marginTop: 20 },
