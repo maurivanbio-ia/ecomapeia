@@ -161,7 +161,6 @@ function generatePDFHTML(vistoria: VistoriaData): string {
 
   type FotoItem = { uri: string; legenda?: string };
   const usoFotoGroups: Record<string, FotoItem[]> = {};
-  const generalFotos: FotoItem[] = [];
   if (vistoria.fotos?.length) {
     for (const foto of vistoria.fotos) {
       const matchedTipo = USO_TIPOS.find(
@@ -170,8 +169,6 @@ function generatePDFHTML(vistoria: VistoriaData): string {
       if (matchedTipo) {
         if (!usoFotoGroups[matchedTipo]) usoFotoGroups[matchedTipo] = [];
         usoFotoGroups[matchedTipo].push(foto);
-      } else {
-        generalFotos.push(foto);
       }
     }
   }
@@ -198,15 +195,6 @@ function generatePDFHTML(vistoria: VistoriaData): string {
     return html;
   })();
 
-  const fotosHTML = (() => {
-    if (generalFotos.length === 0) {
-      return `<p style="text-align: center; color: #666;">Nenhuma foto geral registrada</p>`;
-    }
-    let html = "";
-    let counter = 0;
-    html += generalFotos.map((f) => renderFoto(f, ++counter)).join("");
-    return html;
-  })();
 
   const croquiHTML = vistoria.croqui_imagem
     ? `<img src="${vistoria.croqui_imagem}" alt="Croqui" class="croqui-image" />`
@@ -623,15 +611,6 @@ function generatePDFHTML(vistoria: VistoriaData): string {
     <div class="section-header">OBSERVAÇÕES GERAIS</div>
     <div class="section-content">
       <p class="obs-text">${vistoria.observacoes || "Sem observações adicionais."}</p>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-header">REGISTROS FOTOGRÁFICOS</div>
-    <div class="section-content">
-      <div class="fotos-grid">
-        ${fotosHTML}
-      </div>
     </div>
   </div>
 
