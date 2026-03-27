@@ -281,19 +281,7 @@ export default function RegisterScreen({ navigation }: RegisterScreenProps) {
               ) : null}
             </View>
 
-            {tipoUsuario === "Coordenador" ? (
-              <View style={styles.coordenadorBanner}>
-                <Feather name="layers" size={18} color="#6366F1" />
-                <View style={{ flex: 1 }}>
-                  <ThemedText style={styles.coordenadorBannerTitle} lightColor="#4338CA" darkColor="#4338CA">
-                    Acesso a todos os complexos
-                  </ThemedText>
-                  <ThemedText style={styles.coordenadorBannerSub} lightColor="#6366F1" darkColor="#6366F1">
-                    Coordenadores visualizam informações de todos os complexos hidrelétricos
-                  </ThemedText>
-                </View>
-              </View>
-            ) : (
+            {tipoUsuario !== "Coordenador" ? (
               <View style={styles.inputGroup}>
                 <ThemedText style={styles.inputLabel} lightColor="#374151" darkColor="#374151">
                   Complexo hidrelétrico *
@@ -361,7 +349,7 @@ export default function RegisterScreen({ navigation }: RegisterScreenProps) {
                   </View>
                 ) : null}
               </View>
-            )}
+            ) : null}
 
             {error ? (
               <Animated.View entering={FadeIn.duration(300)} style={styles.errorContainer}>
@@ -564,25 +552,5 @@ const styles = StyleSheet.create({
   backButtonText: {
     fontSize: 14,
     fontWeight: "600",
-  },
-  coordenadorBanner: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 12,
-    backgroundColor: "#EEF2FF",
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#C7D2FE",
-    padding: 14,
-    marginBottom: Spacing.md,
-  },
-  coordenadorBannerTitle: {
-    fontSize: 14,
-    fontWeight: "700",
-    marginBottom: 2,
-  },
-  coordenadorBannerSub: {
-    fontSize: 12,
-    lineHeight: 16,
   },
 });
