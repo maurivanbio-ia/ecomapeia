@@ -134,11 +134,19 @@ export function useGPSTracking(): UseGPSTrackingResult {
     }
   }, []);
 
-  const stopTracking = useCallback(() => {
+  const safeRemoveSubscription = useCallback(() => {
     if (subscriptionRef.current) {
-      subscriptionRef.current.remove();
+      try {
+        subscriptionRef.current.remove();
+      } catch (e) {
+        // expo-location removeSubscription may not be available on web
+      }
       subscriptionRef.current = null;
     }
+  }, []);
+
+  const stopTracking = useCallback(() => {
+    safeRemoveSubscription();
 
     if (timerRef.current) {
       clearInterval(timerRef.current);
@@ -147,7 +155,7 @@ export function useGPSTracking(): UseGPSTrackingResult {
 
     setIsTracking(false);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-  }, []);
+  }, [safeRemoveSubscription]);
 
   const clearTrack = useCallback(() => {
     setTrackPoints([]);
@@ -160,7 +168,11 @@ export function useGPSTracking(): UseGPSTrackingResult {
   useEffect(() => {
     return () => {
       if (subscriptionRef.current) {
-        subscriptionRef.current.remove();
+        try {
+          subscriptionRef.current.remove();
+        } catch (e) {
+          // expo-location removeSubscription may not be available on web
+        }
       }
       if (timerRef.current) {
         clearInterval(timerRef.current);
