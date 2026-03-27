@@ -74,6 +74,8 @@ export default function HomeScreen() {
     getPendingCount().then(setPendingCount);
   }, []);
 
+  const serverPendingCount = vistorias.filter((v) => v.status_upload !== "synced").length;
+
   const filteredVistorias = useMemo(() => {
     let filtered = vistorias;
     
@@ -98,6 +100,7 @@ export default function HomeScreen() {
   }, [vistorias, searchQuery, statusFilter]);
 
   const syncedCount = vistorias.filter((v) => v.status_upload === "synced").length;
+  const totalPendingCount = serverPendingCount + pendingCount;
   const totalCount = vistorias.length + pendingCount;
 
   const onRefresh = React.useCallback(() => {
@@ -113,9 +116,9 @@ export default function HomeScreen() {
   };
 
   const handleSyncPending = async () => {
-    if (pendingCount === 0) {
+    if (totalPendingCount === 0) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-      Alert.alert(t.syncNow, t.noInspections);
+      Alert.alert(t.syncNow, "Todas as vistorias já estão sincronizadas.");
       return;
     }
 
@@ -123,18 +126,33 @@ export default function HomeScreen() {
     setSyncing(true);
 
     try {
-      const result = await syncPendingVistorias(async (data) => {
-        await apiRequest("POST", "/api/vistorias", data);
-      });
-      
+      let totalSynced = 0;
+      let totalErrors = 0;
+
+      // 1. Sync offline (AsyncStorage) items
+      if (pendingCount > 0) {
+        const offlineResult = await syncPendingVistorias(async (data) => {
+          await apiRequest("POST", "/api/vistorias", data);
+        });
+        totalSynced += offlineResult.synced;
+        totalErrors += offlineResult.errors;
+      }
+
+      // 2. Sync server-side vistorias with pending status
+      if (serverPendingCount > 0 && user?.id) {
+        const syncRes = await apiRequest("POST", "/api/vistorias/sync", { usuario_id: user.id });
+        const syncData = await syncRes.json();
+        totalSynced += syncData.synced || 0;
+      }
+
       await refetch();
       const newPending = await getPendingCount();
       setPendingCount(newPending);
-      
+
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       Alert.alert(
         t.success,
-        `${result.synced} vistoria(s) sincronizada(s).${result.errors > 0 ? ` ${result.errors} erro(s).` : ""}`
+        `${totalSynced} vistoria(s) sincronizada(s) com sucesso.${totalErrors > 0 ? ` ${totalErrors} erro(s).` : ""}`
       );
     } catch (error) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);

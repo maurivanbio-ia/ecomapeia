@@ -191,7 +191,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { coordenadas, coordenadas_utm, usosSolo, usos_solo, fotos, ...vistoriaData } = req.body;
       
-      const vistoria = await storage.createVistoria(vistoriaData);
+      const vistoria = await storage.createVistoria({ ...vistoriaData, status_upload: "synced" });
 
       const coordsArray = coordenadas_utm || coordenadas;
       if (coordsArray && Array.isArray(coordsArray)) {
@@ -230,6 +230,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(201).json(vistoria);
     } catch (error) {
       console.error("Create vistoria error:", error);
+      return res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
+  app.post("/api/vistorias/sync", async (req: Request, res: Response) => {
+    try {
+      const { usuario_id } = req.body;
+      if (!usuario_id) {
+        return res.status(400).json({ message: "usuario_id é obrigatório" });
+      }
+      const vistorias = await storage.getVistorias(usuario_id);
+      const pending = vistorias.filter((v) => v.status_upload !== "synced");
+      let synced = 0;
+      for (const v of pending) {
+        await storage.updateVistoria(v.id, { status_upload: "synced" });
+        synced++;
+      }
+      return res.json({ synced, total: vistorias.length });
+    } catch (error) {
+      console.error("Sync error:", error);
       return res.status(500).json({ message: "Erro interno do servidor" });
     }
   });
