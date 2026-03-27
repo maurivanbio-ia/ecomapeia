@@ -114,7 +114,7 @@ export default function RegisterScreen({ navigation }: RegisterScreenProps) {
       email: email.trim().toLowerCase(),
       senha,
       tipo_usuario: tipoUsuario,
-      complexo_id: complexoId,
+      complexo_id: complexoId ?? undefined,
     });
   };
 
