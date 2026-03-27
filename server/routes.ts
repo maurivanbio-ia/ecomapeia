@@ -213,6 +213,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         tipo: u.tipo_uso,
         valor: u.area_m2 ? String(u.area_m2) : "",
         unidade: "m²",
+        coordenada: u.coordenada || null,
       }));
 
       const fotos = fotosDB.map(f => ({
@@ -257,6 +258,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             vistoria_id: vistoria.id,
             tipo_uso: uso.tipo_uso || uso.tipo || "",
             area_m2: uso.area_m2 ?? (parseFloat(uso.valor) || null),
+            coordenada: uso.coordenada || null,
           });
         }
       }
@@ -319,6 +321,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             vistoria_id: id,
             tipo_uso: uso.tipo_uso || uso.tipo || "",
             area_m2: uso.area_m2 ?? (parseFloat(uso.valor) || null),
+            coordenada: uso.coordenada || null,
           });
         }
       }

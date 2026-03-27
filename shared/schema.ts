@@ -276,6 +276,7 @@ export const usosSolo = pgTable("usos_solo", {
   vistoria_id: varchar("vistoria_id").notNull().references(() => vistorias.id),
   tipo_uso: text("tipo_uso").notNull(),
   area_m2: real("area_m2"),
+  coordenada: jsonb("coordenada"),
 });
 
 export const insertUsoSoloSchema = createInsertSchema(usosSolo).pick({

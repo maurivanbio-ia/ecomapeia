@@ -51,6 +51,7 @@ const TIPO_INTERVENCAO_OPTIONS = [
 
 interface UsoSoloInstancia {
   area: string;
+  coordenada?: { utm_e: string; utm_n: string; lat: number; lng: number };
 }
 
 interface UsoSolo {
@@ -270,6 +271,11 @@ export default function NovaVistoriaScreen() {
   const [signatureUri, setSignatureUri] = useState<string | null>(null);
   const [signatureTecnicoUri, setSignatureTecnicoUri] = useState<string | null>(null);
   const [capturingGPS, setCapturingGPS] = useState(false);
+  const [capturingInstGPS, setCapturingInstGPS] = useState<string | null>(null);
+  const [photoPickerModal, setPhotoPickerModal] = useState<{
+    instanceLabel?: string;
+    usoTipo?: string;
+  } | null>(null);
   const [carInfo, setCarInfo] = useState<{
     carCode: string;
     areaHa?: number;
@@ -525,6 +531,7 @@ export default function NovaVistoriaScreen() {
         const count = Math.min(Math.max(parseInt(valor) || 0, 0), 20);
         const newInstancias = Array.from({ length: count }, (_, j) => ({
           area: uso.instancias[j]?.area || "",
+          coordenada: uso.instancias[j]?.coordenada,
         }));
         return { ...uso, valor, instancias: newInstancias };
       })
@@ -563,9 +570,10 @@ export default function NovaVistoriaScreen() {
               tipo: `${uso.tipo} ${idx + 1}`,
               valor: inst.area,
               unidade: uso.unidade,
+              coordenada: inst.coordenada || null,
             }));
           }
-          return [{ tipo: uso.tipo, valor: uso.valor, unidade: uso.unidade }];
+          return [{ tipo: uso.tipo, valor: uso.valor, unidade: uso.unidade, coordenada: null }];
         });
 
       const method = isEditMode ? "PUT" : "POST";
@@ -1009,18 +1017,71 @@ export default function NovaVistoriaScreen() {
     }
   };
 
-  const pickImageForUsoInstance = async (instanceLabel: string) => {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert("Permissão Necessária", "Precisamos de acesso à câmera para tirar fotos.");
-      return;
+  const captureInstanciaCoordinate = async (usoIndex: number, instIndex: number) => {
+    const key = `${usoIndex}-${instIndex}`;
+    setCapturingInstGPS(key);
+    try {
+      const hasPermission = await requestLocationPermission();
+      if (!hasPermission) {
+        Alert.alert("Permissão Necessária", "Precisamos de acesso à localização para capturar coordenadas.");
+        return;
+      }
+      const utm = await captureCurrentUTM();
+      if (!utm) {
+        Alert.alert("Erro", "Não foi possível capturar as coordenadas. Verifique o GPS.");
+        return;
+      }
+      setUsosSolo((prev) =>
+        prev.map((uso, i) => {
+          if (i !== usoIndex) return uso;
+          const newInstancias = uso.instancias.map((inst, j) =>
+            j === instIndex
+              ? {
+                  ...inst,
+                  coordenada: {
+                    utm_e: utm.easting.toFixed(0),
+                    utm_n: utm.northing.toFixed(0),
+                    lat: utm.latitude || 0,
+                    lng: utm.longitude || 0,
+                  },
+                }
+              : inst
+          );
+          return { ...uso, instancias: newInstancias };
+        })
+      );
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } finally {
+      setCapturingInstGPS(null);
     }
+  };
+
+  const pickImageForUsoInstance = async (instanceLabel: string, fromGallery = false) => {
     const location = await getCurrentLocation();
-    const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ["images"],
-      quality: 0.8,
-      allowsEditing: false,
-    });
+    let result;
+    if (fromGallery) {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Permissão Necessária", "Precisamos de acesso à galeria para selecionar fotos.");
+        return;
+      }
+      result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images"],
+        quality: 0.8,
+        allowsEditing: false,
+      });
+    } else {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Permissão Necessária", "Precisamos de acesso à câmera para tirar fotos.");
+        return;
+      }
+      result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ["images"],
+        quality: 0.8,
+        allowsEditing: false,
+      });
+    }
     if (!result.canceled && result.assets[0]) {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       const photoId = Date.now().toString();
@@ -1036,18 +1097,32 @@ export default function NovaVistoriaScreen() {
     }
   };
 
-  const pickImageForUso = async (usoTipo: string) => {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert("Permissão Necessária", "Precisamos de acesso à câmera para tirar fotos.");
-      return;
-    }
+  const pickImageForUso = async (usoTipo: string, fromGallery = false) => {
     const location = await getCurrentLocation();
-    const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ["images"],
-      quality: 0.8,
-      allowsEditing: false,
-    });
+    let result;
+    if (fromGallery) {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Permissão Necessária", "Precisamos de acesso à galeria para selecionar fotos.");
+        return;
+      }
+      result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images"],
+        quality: 0.8,
+        allowsEditing: false,
+      });
+    } else {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Permissão Necessária", "Precisamos de acesso à câmera para tirar fotos.");
+        return;
+      }
+      result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ["images"],
+        quality: 0.8,
+        allowsEditing: false,
+      });
+    }
     if (!result.canceled && result.assets[0]) {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       const photoId = Date.now().toString();
@@ -1236,6 +1311,53 @@ export default function NovaVistoriaScreen() {
         onProcessed={handleWatermarkProcessed}
         onError={handleWatermarkError}
       />
+
+      <Modal
+        visible={photoPickerModal !== null}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setPhotoPickerModal(null)}
+      >
+        <Pressable
+          style={styles.photoPickerOverlay}
+          onPress={() => setPhotoPickerModal(null)}
+        >
+          <View style={[styles.photoPickerCard, { backgroundColor: theme.backgroundCard }]}>
+            <ThemedText style={styles.photoPickerTitle}>Adicionar Foto</ThemedText>
+            <Pressable
+              style={[styles.photoPickerOption, { borderColor: theme.border }]}
+              onPress={() => {
+                const modal = photoPickerModal;
+                setPhotoPickerModal(null);
+                if (modal?.instanceLabel) pickImageForUsoInstance(modal.instanceLabel, false);
+                else if (modal?.usoTipo) pickImageForUso(modal.usoTipo, false);
+              }}
+            >
+              <Feather name="camera" size={22} color={Colors.light.primary} />
+              <ThemedText style={styles.photoPickerOptionText}>Tirar foto</ThemedText>
+            </Pressable>
+            <Pressable
+              style={[styles.photoPickerOption, { borderColor: theme.border }]}
+              onPress={() => {
+                const modal = photoPickerModal;
+                setPhotoPickerModal(null);
+                if (modal?.instanceLabel) pickImageForUsoInstance(modal.instanceLabel, true);
+                else if (modal?.usoTipo) pickImageForUso(modal.usoTipo, true);
+              }}
+            >
+              <Feather name="image" size={22} color={Colors.light.primary} />
+              <ThemedText style={styles.photoPickerOptionText}>Buscar na galeria</ThemedText>
+            </Pressable>
+            <Pressable
+              style={[styles.photoPickerCancel, { borderColor: theme.border }]}
+              onPress={() => setPhotoPickerModal(null)}
+            >
+              <ThemedText style={[styles.photoPickerCancelText, { color: theme.tabIconDefault }]}>Cancelar</ThemedText>
+            </Pressable>
+          </View>
+        </Pressable>
+      </Modal>
+
       <KeyboardAwareScrollViewCompat
         style={styles.scrollView}
         contentContainerStyle={[
@@ -1395,7 +1517,7 @@ export default function NovaVistoriaScreen() {
                     </View>
                     {uso.checked && !uso.unidade ? (
                       <Pressable
-                        onPress={() => pickImageForUso(uso.tipo)}
+                        onPress={() => setPhotoPickerModal({ usoTipo: uso.tipo })}
                         disabled={processingPhoto}
                         style={[styles.usoSoloCameraBtn, { backgroundColor: Colors.light.primary + "18", borderColor: Colors.light.primary }]}
                       >
@@ -1430,58 +1552,95 @@ export default function NovaVistoriaScreen() {
                       {uso.instancias.map((inst, instIdx) => {
                         const instLabel = `${uso.tipo} ${instIdx + 1}`;
                         const instPhoto = photos.find((p) => p.legenda === instLabel);
+                        const gpsKey = `${index}-${instIdx}`;
+                        const isCapturing = capturingInstGPS === gpsKey;
+                        const hasCoord = !!inst.coordenada;
                         return (
-                          <View key={instIdx} style={styles.usoSoloInstRow}>
-                            <ThemedText style={[styles.usoSoloInstLabel, { color: Colors.light.primary }]}>
-                              {uso.tipo} {instIdx + 1}
-                            </ThemedText>
-                            {uso.unidade !== "und." ? (
-                              <TextInput
-                                style={[
-                                  styles.usoSoloInstInput,
-                                  {
-                                    backgroundColor: theme.backgroundDefault,
-                                    borderColor: theme.border,
-                                    color: theme.text,
-                                  },
-                                ]}
-                                placeholder={`Tamanho (${uso.unidade})`}
-                                placeholderTextColor={theme.tabIconDefault}
-                                value={inst.area}
-                                onChangeText={(v) => updateInstanciaArea(index, instIdx, v)}
-                                keyboardType="numeric"
-                              />
-                            ) : null}
-                            {instPhoto ? (
-                              <View style={styles.usoSoloInstPhotoWrap}>
+                          <View key={instIdx} style={styles.usoSoloInstBlock}>
+                            <View style={styles.usoSoloInstRow}>
+                              <ThemedText style={[styles.usoSoloInstLabel, { color: Colors.light.primary }]}>
+                                {uso.tipo} {instIdx + 1}
+                              </ThemedText>
+                              {uso.unidade !== "und." ? (
+                                <TextInput
+                                  style={[
+                                    styles.usoSoloInstInput,
+                                    {
+                                      backgroundColor: theme.backgroundDefault,
+                                      borderColor: theme.border,
+                                      color: theme.text,
+                                    },
+                                  ]}
+                                  placeholder={`Tamanho (${uso.unidade})`}
+                                  placeholderTextColor={theme.tabIconDefault}
+                                  value={inst.area}
+                                  onChangeText={(v) => updateInstanciaArea(index, instIdx, v)}
+                                  keyboardType="numeric"
+                                />
+                              ) : null}
+                              <View style={styles.usoSoloInstActions}>
+                                {instPhoto ? (
+                                  <View style={styles.usoSoloInstPhotoWrap}>
+                                    <Pressable
+                                      onPress={() => setPhotoPickerModal({ instanceLabel: instLabel })}
+                                      disabled={processingPhoto}
+                                    >
+                                      <Image source={{ uri: instPhoto.uri }} style={styles.usoSoloInstThumb} />
+                                    </Pressable>
+                                    <Pressable
+                                      onPress={() => removePhoto(instPhoto.id)}
+                                      style={styles.usoSoloInstDeleteBtn}
+                                    >
+                                      <Feather name="x" size={9} color="#fff" />
+                                    </Pressable>
+                                  </View>
+                                ) : (
+                                  <Pressable
+                                    onPress={() => setPhotoPickerModal({ instanceLabel: instLabel })}
+                                    disabled={processingPhoto}
+                                    style={[
+                                      styles.usoSoloCameraBtn,
+                                      {
+                                        backgroundColor: Colors.light.primary + "15",
+                                        borderColor: Colors.light.primary,
+                                      },
+                                    ]}
+                                  >
+                                    <Feather name="camera" size={15} color={Colors.light.primary} />
+                                  </Pressable>
+                                )}
                                 <Pressable
-                                  onPress={() => pickImageForUsoInstance(instLabel)}
-                                  disabled={processingPhoto}
+                                  onPress={() => captureInstanciaCoordinate(index, instIdx)}
+                                  disabled={isCapturing}
+                                  style={[
+                                    styles.usoSoloCameraBtn,
+                                    {
+                                      backgroundColor: hasCoord ? Colors.light.success + "20" : theme.backgroundDefault,
+                                      borderColor: hasCoord ? Colors.light.success : theme.border,
+                                      marginLeft: 4,
+                                    },
+                                  ]}
                                 >
-                                  <Image source={{ uri: instPhoto.uri }} style={styles.usoSoloInstThumb} />
-                                </Pressable>
-                                <Pressable
-                                  onPress={() => removePhoto(instPhoto.id)}
-                                  style={styles.usoSoloInstDeleteBtn}
-                                >
-                                  <Feather name="x" size={9} color="#fff" />
+                                  {isCapturing ? (
+                                    <ActivityIndicator size={13} color={Colors.light.primary} />
+                                  ) : (
+                                    <Feather
+                                      name="map-pin"
+                                      size={14}
+                                      color={hasCoord ? Colors.light.success : theme.tabIconDefault}
+                                    />
+                                  )}
                                 </Pressable>
                               </View>
-                            ) : (
-                              <Pressable
-                                onPress={() => pickImageForUsoInstance(instLabel)}
-                                disabled={processingPhoto}
-                                style={[
-                                  styles.usoSoloCameraBtn,
-                                  {
-                                    backgroundColor: Colors.light.primary + "15",
-                                    borderColor: Colors.light.primary,
-                                  },
-                                ]}
-                              >
-                                <Feather name="camera" size={15} color={Colors.light.primary} />
-                              </Pressable>
-                            )}
+                            </View>
+                            {hasCoord && inst.coordenada ? (
+                              <View style={[styles.usoSoloInstCoordBadge, { backgroundColor: Colors.light.success + "15", borderColor: Colors.light.success + "40" }]}>
+                                <Feather name="map-pin" size={10} color={Colors.light.success} />
+                                <ThemedText style={[styles.usoSoloInstCoordText, { color: Colors.light.success }]}>
+                                  {"E: " + inst.coordenada.utm_e + "  N: " + inst.coordenada.utm_n}
+                                </ThemedText>
+                              </View>
+                            ) : null}
                           </View>
                         );
                       })}
@@ -2727,11 +2886,14 @@ const styles = StyleSheet.create({
     paddingLeft: Spacing.sm,
     gap: Spacing.xs,
   },
+  usoSoloInstBlock: {
+    flexDirection: "column",
+    marginBottom: 8,
+  },
   usoSoloInstRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: Spacing.xs,
-    marginBottom: 4,
   },
   usoSoloInstLabel: {
     fontSize: 13,
@@ -2770,6 +2932,71 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     zIndex: 1,
+  },
+  usoSoloInstActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    flexShrink: 0,
+  },
+  usoSoloInstCoordBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    borderWidth: 1,
+    borderRadius: BorderRadius.sm,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    marginTop: 4,
+    alignSelf: "flex-start",
+    marginLeft: 90,
+  },
+  usoSoloInstCoordText: {
+    fontSize: 10,
+    fontWeight: "600",
+  },
+  photoPickerOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 24,
+  },
+  photoPickerCard: {
+    width: "100%",
+    maxWidth: 340,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.lg,
+    gap: Spacing.sm,
+  },
+  photoPickerTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    textAlign: "center",
+    marginBottom: Spacing.xs,
+  },
+  photoPickerOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.md,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.md,
+    borderWidth: 1,
+    borderRadius: BorderRadius.md,
+  },
+  photoPickerOptionText: {
+    fontSize: 15,
+    fontWeight: "500",
+  },
+  photoPickerCancel: {
+    paddingVertical: Spacing.sm,
+    alignItems: "center",
+    marginTop: Spacing.xs,
+    borderTopWidth: 1,
+  },
+  photoPickerCancelText: {
+    fontSize: 14,
+    fontWeight: "500",
   },
   usoSoloCheck: {
     width: 24,

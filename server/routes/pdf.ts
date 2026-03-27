@@ -8,6 +8,7 @@ interface UsoSolo {
   tipo: string;
   valor: string;
   unidade: string;
+  coordenada?: { utm_e: string; utm_n: string; lat: number; lng: number } | null;
 }
 
 interface EmbargoCheck {
@@ -128,11 +129,14 @@ function generatePDFHTML(vistoria: VistoriaData): string {
             <td style="width: 60%;">${uso.tipo}</td>
             <td style="text-align: center;">${uso.valor || "-"}</td>
             <td style="text-align: center;">${uso.unidade}</td>
+            <td style="text-align: center; font-size:9pt; color:#555;">
+              ${uso.coordenada ? `E:${uso.coordenada.utm_e} N:${uso.coordenada.utm_n}` : "-"}
+            </td>
           </tr>
         `
         )
         .join("")
-    : `<tr><td colspan="3" style="text-align: center;">Nenhum uso identificado</td></tr>`;
+    : `<tr><td colspan="4" style="text-align: center;">Nenhum uso identificado</td></tr>`;
 
   const coordenadasHTML = vistoria.coordenadas_utm?.length
     ? vistoria.coordenadas_utm
@@ -155,43 +159,52 @@ function generatePDFHTML(vistoria: VistoriaData): string {
     "Área sem edificações", "Área com vegetação nativa", "Outros",
   ];
 
-  const fotosHTML = (() => {
-    if (!vistoria.fotos?.length) {
-      return `<p style="text-align: center; color: #666;">Nenhum registro fotográfico</p>`;
-    }
-    type FotoItem = { uri: string; legenda?: string };
-    const usoGroups: Record<string, FotoItem[]> = {};
-    const generalFotos: FotoItem[] = [];
+  type FotoItem = { uri: string; legenda?: string };
+  const usoFotoGroups: Record<string, FotoItem[]> = {};
+  const generalFotos: FotoItem[] = [];
+  if (vistoria.fotos?.length) {
     for (const foto of vistoria.fotos) {
       const matchedTipo = USO_TIPOS.find(
         (t) => foto.legenda && foto.legenda.startsWith(t + " ") && /\d+$/.test(foto.legenda)
       );
       if (matchedTipo) {
-        if (!usoGroups[matchedTipo]) usoGroups[matchedTipo] = [];
-        usoGroups[matchedTipo].push(foto);
+        if (!usoFotoGroups[matchedTipo]) usoFotoGroups[matchedTipo] = [];
+        usoFotoGroups[matchedTipo].push(foto);
       } else {
         generalFotos.push(foto);
       }
     }
-    const renderFoto = (foto: FotoItem, idx: number) => `
-      <div class="foto-item">
-        <img src="${foto.uri}" alt="Foto ${idx + 1}" />
-        <p class="foto-legenda">${foto.legenda || `Registro Fotográfico ${idx + 1}`}</p>
-      </div>`;
+  }
+
+  const renderFoto = (foto: FotoItem, idx: number) => `
+    <div class="foto-item">
+      <img src="${foto.uri}" alt="Foto ${idx + 1}" />
+      <p class="foto-legenda">${foto.legenda || `Registro Fotográfico ${idx + 1}`}</p>
+    </div>`;
+
+  const usosFotosHTML = (() => {
+    const tiposComFoto = USO_TIPOS.filter((t) => usoFotoGroups[t]?.length);
+    if (tiposComFoto.length === 0) return "";
+    let html = `<div style="margin-top:16px;">`;
+    let counter = 0;
+    for (const tipo of tiposComFoto) {
+      const group = usoFotoGroups[tipo];
+      html += `<div style="margin:10px 0 6px;font-weight:700;font-size:10pt;color:#1a5276;border-bottom:1px solid #aed6f1;padding-bottom:3px;">${tipo} — ${group.length} foto${group.length > 1 ? "s" : ""}</div>`;
+      html += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">`;
+      html += group.map((f) => renderFoto(f, ++counter)).join("");
+      html += `</div>`;
+    }
+    html += `</div>`;
+    return html;
+  })();
+
+  const fotosHTML = (() => {
+    if (generalFotos.length === 0) {
+      return `<p style="text-align: center; color: #666;">Nenhuma foto geral registrada</p>`;
+    }
     let html = "";
     let counter = 0;
-    for (const tipo of USO_TIPOS) {
-      const group = usoGroups[tipo];
-      if (!group || group.length === 0) continue;
-      html += `<div style="grid-column:1/-1;margin:12px 0 6px;font-weight:700;font-size:11pt;color:#1a5276;border-bottom:1px solid #aed6f1;padding-bottom:4px;">${tipo} (${group.length} foto${group.length > 1 ? "s" : ""})</div>`;
-      html += group.map((f) => renderFoto(f, ++counter)).join("");
-    }
-    if (generalFotos.length > 0) {
-      if (Object.keys(usoGroups).length > 0) {
-        html += `<div style="grid-column:1/-1;margin:12px 0 6px;font-weight:700;font-size:11pt;color:#555;border-bottom:1px solid #ccc;padding-bottom:4px;">Outras Fotos (${generalFotos.length})</div>`;
-      }
-      html += generalFotos.map((f) => renderFoto(f, ++counter)).join("");
-    }
+    html += generalFotos.map((f) => renderFoto(f, ++counter)).join("");
     return html;
   })();
 
@@ -465,8 +478,9 @@ function generatePDFHTML(vistoria: VistoriaData): string {
         <thead>
           <tr>
             <th>Tipo de Uso</th>
-            <th style="width: 20%;">Quantidade</th>
-            <th style="width: 15%;">Unidade</th>
+            <th style="width: 18%;">Quantidade</th>
+            <th style="width: 12%;">Unidade</th>
+            <th style="width: 22%;">Coordenada UTM</th>
           </tr>
         </thead>
         <tbody>
@@ -474,6 +488,7 @@ function generatePDFHTML(vistoria: VistoriaData): string {
         </tbody>
       </table>
       ${vistoria.observacoes_usos ? `<p style="margin-top: 10px;"><strong>Observação:</strong> ${vistoria.observacoes_usos}</p>` : ""}
+      ${usosFotosHTML}
     </div>
   </div>
 
