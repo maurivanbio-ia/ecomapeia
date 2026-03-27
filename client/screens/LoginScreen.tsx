@@ -26,7 +26,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 import { useAuth } from "@/hooks/useAuth";
 
-import logoImage from "../../assets/images/ecomapeia-logo.png";
+import logoImage from "../../assets/images/ecomapeia-logo-new.png";
 import bgImage from "../../assets/images/hidroeletrica-bg.png";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);

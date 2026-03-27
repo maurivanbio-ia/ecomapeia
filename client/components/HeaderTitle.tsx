@@ -2,7 +2,7 @@ import React from "react";
 import { View, StyleSheet } from "react-native";
 import { Image } from "expo-image";
 
-import logoImage from "../../assets/images/ecomapeia-logo.png";
+import logoImage from "../../assets/images/ecomapeia-logo-new.png";
 
 interface HeaderTitleProps {
   title?: string;
@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   logo: {
-    width: 433,
-    height: 92,
+    width: 160,
+    height: 40,
   },
 });

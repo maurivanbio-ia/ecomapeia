@@ -17,12 +17,15 @@ import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import Animated, { FadeIn, FadeInUp } from "react-native-reanimated";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ThemedText } from "@/components/ThemedText";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 import { getApiUrl } from "@/lib/query-client";
 
-import logoImage from "../../assets/images/ecomapeia-logo.png";
+import logoImage from "../../assets/images/ecomapeia-logo-new.png";
 import bgImage from "../../assets/images/hidroeletrica-bg.png";
+
+const TUTORIAL_COMPLETED_KEY = "@mapeia_tutorial_completed";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -79,8 +82,9 @@ export default function RegisterScreen({ navigation }: RegisterScreenProps) {
       if (!res.ok) throw new Error(json.message || "Erro ao criar conta");
       return json;
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      await AsyncStorage.removeItem(TUTORIAL_COMPLETED_KEY);
       navigation.navigate("Login", { registered: true });
     },
     onError: (err: any) => {
