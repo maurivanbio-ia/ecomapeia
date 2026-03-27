@@ -103,7 +103,7 @@ export default function RegisterScreen({ navigation }: RegisterScreenProps) {
       setError("A senha deve ter pelo menos 6 caracteres");
       return;
     }
-    if (!complexoId) {
+    if (!complexoId && tipoUsuario !== "Coordenador") {
       setError("Selecione o complexo ao qual você está designado");
       return;
     }
@@ -261,6 +261,7 @@ export default function RegisterScreen({ navigation }: RegisterScreenProps) {
                       onPress={() => {
                         setTipoUsuario(tipo);
                         setShowTipoDropdown(false);
+                        if (tipo === "Coordenador") setComplexoId(null);
                         Haptics.selectionAsync();
                       }}
                     >
@@ -280,73 +281,87 @@ export default function RegisterScreen({ navigation }: RegisterScreenProps) {
               ) : null}
             </View>
 
-            <View style={styles.inputGroup}>
-              <ThemedText style={styles.inputLabel} lightColor="#374151" darkColor="#374151">
-                Complexo hidrelétrico *
-              </ThemedText>
-              <Pressable
-                style={[styles.inputContainer, !complexoId && styles.inputContainerRequired]}
-                onPress={() => {
-                  Haptics.selectionAsync();
-                  setShowComplexoDropdown(!showComplexoDropdown);
-                  setShowTipoDropdown(false);
-                }}
-              >
-                <Feather name="zap" size={18} color={complexoId ? "#1A7A52" : "#9CA3AF"} style={styles.inputIcon} />
-                <ThemedText
-                  style={styles.dropdownText}
-                  lightColor={complexoId ? "#1F2937" : "#9CA3AF"}
-                  darkColor={complexoId ? "#1F2937" : "#9CA3AF"}
-                >
-                  {loadingComplexos
-                    ? "Carregando..."
-                    : selectedComplexo
-                    ? selectedComplexo.nome
-                    : "Selecione o complexo"}
-                </ThemedText>
-                <Feather name="chevron-down" size={18} color="#9CA3AF" />
-              </Pressable>
-              {showComplexoDropdown ? (
-                <View style={styles.dropdown}>
-                  {complexos.map((complexo) => (
-                    <Pressable
-                      key={complexo.id}
-                      style={[
-                        styles.dropdownItem,
-                        complexoId === complexo.id && styles.dropdownItemActive,
-                      ]}
-                      onPress={() => {
-                        setComplexoId(complexo.id);
-                        setShowComplexoDropdown(false);
-                        Haptics.selectionAsync();
-                      }}
-                    >
-                      <View style={{ flex: 1 }}>
-                        <ThemedText
-                          style={[styles.dropdownItemText, { fontWeight: "600" }]}
-                          lightColor={complexoId === complexo.id ? "#1A7A52" : "#374151"}
-                          darkColor={complexoId === complexo.id ? "#1A7A52" : "#374151"}
-                        >
-                          {complexo.nome}
-                        </ThemedText>
-                        {complexo.descricao ? (
-                          <ThemedText
-                            style={styles.dropdownItemSubtext}
-                            lightColor="#9CA3AF"
-                            darkColor="#9CA3AF"
-                          >
-                            {complexo.descricao}
-                          </ThemedText>
-                        ) : null}
-                      </View>
-                      {complexoId === complexo.id ? (
-                        <Feather name="check" size={16} color="#1A7A52" />
-                      ) : null}
-                    </Pressable>
-                  ))}
+            {tipoUsuario === "Coordenador" ? (
+              <View style={styles.coordenadorBanner}>
+                <Feather name="layers" size={18} color="#6366F1" />
+                <View style={{ flex: 1 }}>
+                  <ThemedText style={styles.coordenadorBannerTitle} lightColor="#4338CA" darkColor="#4338CA">
+                    Acesso a todos os complexos
+                  </ThemedText>
+                  <ThemedText style={styles.coordenadorBannerSub} lightColor="#6366F1" darkColor="#6366F1">
+                    Coordenadores visualizam informações de todos os complexos hidrelétricos
+                  </ThemedText>
                 </View>
-              ) : null}
-            </View>
+              </View>
+            ) : (
+              <View style={styles.inputGroup}>
+                <ThemedText style={styles.inputLabel} lightColor="#374151" darkColor="#374151">
+                  Complexo hidrelétrico *
+                </ThemedText>
+                <Pressable
+                  style={[styles.inputContainer, !complexoId && styles.inputContainerRequired]}
+                  onPress={() => {
+                    Haptics.selectionAsync();
+                    setShowComplexoDropdown(!showComplexoDropdown);
+                    setShowTipoDropdown(false);
+                  }}
+                >
+                  <Feather name="zap" size={18} color={complexoId ? "#1A7A52" : "#9CA3AF"} style={styles.inputIcon} />
+                  <ThemedText
+                    style={styles.dropdownText}
+                    lightColor={complexoId ? "#1F2937" : "#9CA3AF"}
+                    darkColor={complexoId ? "#1F2937" : "#9CA3AF"}
+                  >
+                    {loadingComplexos
+                      ? "Carregando..."
+                      : selectedComplexo
+                      ? selectedComplexo.nome
+                      : "Selecione o complexo"}
+                  </ThemedText>
+                  <Feather name="chevron-down" size={18} color="#9CA3AF" />
+                </Pressable>
+                {showComplexoDropdown ? (
+                  <View style={styles.dropdown}>
+                    {complexos.map((complexo) => (
+                      <Pressable
+                        key={complexo.id}
+                        style={[
+                          styles.dropdownItem,
+                          complexoId === complexo.id && styles.dropdownItemActive,
+                        ]}
+                        onPress={() => {
+                          setComplexoId(complexo.id);
+                          setShowComplexoDropdown(false);
+                          Haptics.selectionAsync();
+                        }}
+                      >
+                        <View style={{ flex: 1 }}>
+                          <ThemedText
+                            style={[styles.dropdownItemText, { fontWeight: "600" }]}
+                            lightColor={complexoId === complexo.id ? "#1A7A52" : "#374151"}
+                            darkColor={complexoId === complexo.id ? "#1A7A52" : "#374151"}
+                          >
+                            {complexo.nome}
+                          </ThemedText>
+                          {complexo.descricao ? (
+                            <ThemedText
+                              style={styles.dropdownItemSubtext}
+                              lightColor="#9CA3AF"
+                              darkColor="#9CA3AF"
+                            >
+                              {complexo.descricao}
+                            </ThemedText>
+                          ) : null}
+                        </View>
+                        {complexoId === complexo.id ? (
+                          <Feather name="check" size={16} color="#1A7A52" />
+                        ) : null}
+                      </Pressable>
+                    ))}
+                  </View>
+                ) : null}
+              </View>
+            )}
 
             {error ? (
               <Animated.View entering={FadeIn.duration(300)} style={styles.errorContainer}>
@@ -549,5 +564,25 @@ const styles = StyleSheet.create({
   backButtonText: {
     fontSize: 14,
     fontWeight: "600",
+  },
+  coordenadorBanner: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 12,
+    backgroundColor: "#EEF2FF",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#C7D2FE",
+    padding: 14,
+    marginBottom: Spacing.md,
+  },
+  coordenadorBannerTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    marginBottom: 2,
+  },
+  coordenadorBannerSub: {
+    fontSize: 12,
+    lineHeight: 16,
   },
 });
