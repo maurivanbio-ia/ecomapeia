@@ -133,6 +133,7 @@ export const usuarios = pgTable("usuarios", {
   complexo_id: integer("complexo_id").references(() => complexos.id),
   is_admin: boolean("is_admin").default(false),
   projeto_atual_id: integer("projeto_atual_id").references(() => projetos.id),
+  avatar_url: text("avatar_url"),
   created_at: timestamp("created_at").defaultNow(),
 });
 

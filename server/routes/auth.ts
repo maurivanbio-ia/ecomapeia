@@ -130,4 +130,30 @@ router.post("/reset-password", async (req: Request, res: Response) => {
   }
 });
 
+// PUT /api/auth/update-avatar
+// Atualiza a foto de perfil do usuário logado
+router.put("/update-avatar", async (req: Request, res: Response) => {
+  try {
+    const { userId, avatarBase64 } = req.body;
+    if (!userId) return res.status(400).json({ message: "userId é obrigatório." });
+
+    const avatarUrl = avatarBase64 || null;
+
+    const [updated] = await db
+      .update(usuarios)
+      .set({ avatar_url: avatarUrl })
+      .where(eq(usuarios.id, userId))
+      .returning();
+
+    if (!updated) return res.status(404).json({ message: "Usuário não encontrado." });
+
+    const { senha_hash, ...safeUser } = updated;
+    return res.json({ user: safeUser });
+  } catch (err) {
+    console.error("[Auth] update-avatar error:", err);
+    return res.status(500).json({ message: "Erro ao atualizar foto de perfil." });
+  }
+});
+
 export default router;
+

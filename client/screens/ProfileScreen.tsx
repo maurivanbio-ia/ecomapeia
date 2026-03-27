@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, Pressable, Alert, Platform, Modal, Linking, ScrollView, Switch } from "react-native";
+import { View, StyleSheet, Pressable, Alert, Platform, Modal, Linking, ScrollView, Switch, Image, ActivityIndicator } from "react-native";
+import * as ImagePicker from "expo-image-picker";
+import * as ImageManipulator from "expo-image-manipulator";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
@@ -53,9 +55,70 @@ export default function ProfileScreen() {
   const tabBarHeight = useBottomTabBarHeight();
   const { theme, isDark } = useTheme();
   const { themeMode, setThemeMode } = useThemeContext();
-  const { user, logout } = useAuth();
+  const { user, logout, updateUser } = useAuth();
   const { language, setLanguage, t } = useLanguage();
   const navigation = useNavigation<ProfileNavigationProp>();
+
+  const [avatarUploading, setAvatarUploading] = useState(false);
+
+  const handlePickAvatar = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Permissão necessária", "Permita o acesso à galeria para escolher uma foto de perfil.");
+        return;
+      }
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images"],
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+      if (result.canceled || !result.assets[0]) return;
+      setAvatarUploading(true);
+      const compressed = await ImageManipulator.manipulateAsync(
+        result.assets[0].uri,
+        [{ resize: { width: 300, height: 300 } }],
+        { compress: 0.75, format: ImageManipulator.SaveFormat.JPEG, base64: true }
+      );
+      const base64 = `data:image/jpeg;base64,${compressed.base64}`;
+      const res = await fetch(new URL("/api/auth/update-avatar", getApiUrl()).toString(), {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user?.id, avatarBase64: base64 }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+      await updateUser({ avatar_url: base64 });
+    } catch (err: any) {
+      Alert.alert("Erro", err.message || "Não foi possível atualizar a foto de perfil.");
+    } finally {
+      setAvatarUploading(false);
+    }
+  };
+
+  const handleRemoveAvatar = () => {
+    Alert.alert("Remover foto", "Deseja remover sua foto de perfil?", [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Remover", style: "destructive", onPress: async () => {
+          setAvatarUploading(true);
+          try {
+            await fetch(new URL("/api/auth/update-avatar", getApiUrl()).toString(), {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ userId: user?.id, avatarBase64: null }),
+            });
+            await updateUser({ avatar_url: undefined });
+          } catch (e) {
+            Alert.alert("Erro", "Não foi possível remover a foto.");
+          } finally {
+            setAvatarUploading(false);
+          }
+        }
+      },
+    ]);
+  };
 
   const [languageModalVisible, setLanguageModalVisible] = useState(false);
   const [aboutModalVisible, setAboutModalVisible] = useState(false);
@@ -258,16 +321,34 @@ export default function ProfileScreen() {
           entering={FadeInDown.duration(500).delay(100)}
           style={styles.profileHeader}
         >
-          <View
-            style={[
-              styles.avatarContainer,
-              { backgroundColor: Colors.light.primary },
-            ]}
+          <Pressable
+            onPress={handlePickAvatar}
+            onLongPress={user?.avatar_url ? handleRemoveAvatar : undefined}
+            style={styles.avatarWrapper}
           >
-            <ThemedText style={styles.avatarText} lightColor="#FFFFFF" darkColor="#FFFFFF">
-              {user?.nome?.charAt(0).toUpperCase() || "U"}
-            </ThemedText>
-          </View>
+            <View
+              style={[
+                styles.avatarContainer,
+                { backgroundColor: Colors.light.primary },
+              ]}
+            >
+              {user?.avatar_url ? (
+                <Image source={{ uri: user.avatar_url }} style={styles.avatarImage} />
+              ) : (
+                <ThemedText style={styles.avatarText} lightColor="#FFFFFF" darkColor="#FFFFFF">
+                  {user?.nome?.charAt(0).toUpperCase() || "U"}
+                </ThemedText>
+              )}
+              {avatarUploading && (
+                <View style={styles.avatarOverlayLoading}>
+                  <ActivityIndicator color="#fff" size="small" />
+                </View>
+              )}
+            </View>
+            <View style={[styles.avatarEditBadge, { backgroundColor: Colors.light.accent }]}>
+              <Feather name="camera" size={13} color="#fff" />
+            </View>
+          </Pressable>
           <ThemedText style={styles.userName}>{user?.nome || "Usuário"}</ThemedText>
           <ThemedText
             style={styles.userEmail}
@@ -981,13 +1062,41 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: Spacing["3xl"],
   },
+  avatarWrapper: {
+    marginBottom: Spacing.lg,
+    alignItems: "center",
+  },
   avatarContainer: {
     width: 88,
     height: 88,
     borderRadius: 44,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: Spacing.lg,
+    overflow: "hidden",
+  },
+  avatarImage: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+  },
+  avatarOverlayLoading: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.45)",
+    borderRadius: 44,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  avatarEditBadge: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+    borderColor: "#fff",
   },
   avatarText: {
     fontSize: 36,
