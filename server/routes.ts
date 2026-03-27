@@ -10,6 +10,7 @@ import kmzRoutes from "./routes/kmz";
 import reportsRoutes from "./routes/reports";
 import tenantRoutes from "./routes/tenant";
 import complexosRoutes from "./routes/complexos";
+import authRoutes from "./routes/auth";
 import aiRoutes from "./ai-routes";
 import mapbiomasRoutes from "./mapbiomas-routes";
 import environmentalRoutes from "./environmental-routes";
@@ -60,6 +61,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Register Summary Reports routes (by complexo/UHE)
   app.use("/api/reports", reportsRoutes);
   
+  // Password reset routes (forgot password / reset)
+  app.use("/api/auth", authRoutes);
+
   // Auth routes
   app.post("/api/auth/login", async (req: Request, res: Response) => {
     try {

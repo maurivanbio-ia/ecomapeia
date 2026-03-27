@@ -431,3 +431,15 @@ export const condicoes_climaticas = pgTable("condicoes_climaticas", {
 });
 
 export type CondicaoClimatica = typeof condicoes_climaticas.$inferSelect;
+
+// Password Resets table - 6-digit codes for password recovery
+export const passwordResets = pgTable("password_resets", {
+  id: serial("id").primaryKey(),
+  email: text("email").notNull(),
+  code: text("code").notNull(),
+  expires_at: timestamp("expires_at").notNull(),
+  used: boolean("used").default(false).notNull(),
+  created_at: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+});
+
+export type PasswordReset = typeof passwordResets.$inferSelect;

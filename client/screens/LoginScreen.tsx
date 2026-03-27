@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import ForgotPasswordModal from "@/components/ForgotPasswordModal";
 import {
   View,
   StyleSheet,
@@ -42,6 +43,7 @@ export default function LoginScreen({ navigation, route }: any) {
   const [showPassword, setShowPassword] = useState(false);
   const [emailFocused, setEmailFocused] = useState(false);
   const [senhaFocused, setSenhaFocused] = useState(false);
+  const [forgotVisible, setForgotVisible] = useState(false);
 
   const buttonScale = useSharedValue(1);
 
@@ -74,6 +76,7 @@ export default function LoginScreen({ navigation, route }: any) {
 
   return (
     <ImageBackground source={bgImage} style={styles.gradient} resizeMode="cover">
+      <ForgotPasswordModal visible={forgotVisible} onClose={() => setForgotVisible(false)} />
       <View style={styles.overlay} />
       <KeyboardAvoidingView
         style={styles.container}
@@ -219,7 +222,7 @@ export default function LoginScreen({ navigation, route }: any) {
               </View>
             </AnimatedPressable>
 
-            <Pressable style={styles.forgotButton}>
+            <Pressable style={styles.forgotButton} onPress={() => setForgotVisible(true)}>
               <ThemedText
                 style={styles.forgotText}
                 lightColor="rgba(255,255,255,0.75)"
