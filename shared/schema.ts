@@ -194,6 +194,7 @@ export const vistorias = pgTable("vistorias", {
   car_info: jsonb("car_info"),
   embargo_check: jsonb("embargo_check"),
   compliance_analysis: jsonb("compliance_analysis"),
+  uc_info: jsonb("uc_info"),
   // Weather and time fields
   hora_vistoria: text("hora_vistoria"),
   weather_data: jsonb("weather_data"),
@@ -239,6 +240,7 @@ export const insertVistoriaSchema = createInsertSchema(vistorias).pick({
   car_info: true,
   embargo_check: true,
   compliance_analysis: true,
+  uc_info: true,
   hora_vistoria: true,
   weather_data: true,
   track_points: true,

@@ -232,6 +232,7 @@ export default function DetalhesVistoriaScreen() {
         croqui_imagem: preparedCroqui,
         assinatura_uri: preparedSig,
         assinatura_tecnico_uri: preparedSigTec,
+        ucInfo: (vistoria as any).ucInfo || (vistoria as any).uc_info,
         carInfo: vistoria.carInfo || (vistoria as any).car_info,
         embargoCheck: vistoria.embargoCheck || (vistoria as any).embargo_check,
         complianceAnalysis: vistoria.complianceAnalysis || (vistoria as any).compliance_analysis,
@@ -291,6 +292,11 @@ export default function DetalhesVistoriaScreen() {
         assinatura_uri: preparedSig,
         assinatura_tecnico_uri: preparedSigTec,
         usos_solo: vistoria.usosSolo,
+        ucInfo: (vistoria as any).ucInfo || (vistoria as any).uc_info,
+        carInfo: vistoria.carInfo || (vistoria as any).car_info,
+        embargoCheck: vistoria.embargoCheck || (vistoria as any).embargo_check,
+        complianceAnalysis: vistoria.complianceAnalysis || (vistoria as any).compliance_analysis,
+        weather_data: vistoria.weatherData || vistoria.weather_data,
       };
       
       const apiUrl = getApiUrl();

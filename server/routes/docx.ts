@@ -57,6 +57,18 @@ interface CARInfo {
   situacao?: string;
 }
 
+interface UCInfo {
+  name?: string;
+  category?: string;
+  categoryName?: string;
+  distanceKm?: number;
+  isInside?: boolean;
+  state?: string;
+  biome?: string;
+  restrictionType?: string;
+  areaKm2?: number;
+}
+
 interface VistoriaData {
   id: string;
   numero_notificacao?: string;
@@ -86,6 +98,7 @@ interface VistoriaData {
   embargoCheck?: EmbargoCheck;
   complianceAnalysis?: ComplianceAnalysis;
   carInfo?: CARInfo;
+  ucInfo?: UCInfo;
 }
 
 function formatDate(dateStr: string): string {
@@ -595,6 +608,45 @@ async function generateWordDocument(vistoria: VistoriaData): Promise<Buffer> {
       rows: coordRows,
     })
   );
+
+  // UC Section
+  if (vistoria.ucInfo) {
+    const ucColor = vistoria.ucInfo.isInside ? 'C62828' : '1565C0';
+    const ucLabel = vistoria.ucInfo.isInside ? 'DENTRO DE UC' : 'UC MAIS PRÓXIMA';
+    const ucRows: TableRow[] = [
+      new TableRow({
+        children: [
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "UC Identificada:", bold: true, size: 20 })] })], width: { size: 30, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: vistoria.ucInfo.name || "-", bold: true, size: 20 })] })], width: { size: 35, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Situação:", bold: true, size: 20 })] })], width: { size: 15, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: vistoria.ucInfo.isInside ? "DENTRO DA UC" : "FORA DA UC", size: 20, color: ucColor })] })], width: { size: 20, type: WidthType.PERCENTAGE } }),
+        ],
+      }),
+      new TableRow({
+        children: [
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Categoria:", bold: true, size: 20 })] })] }),
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: vistoria.ucInfo.categoryName || vistoria.ucInfo.category || "-", size: 20 })] })] }),
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Distância:", bold: true, size: 20 })] })] }),
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: vistoria.ucInfo.distanceKm != null ? `${vistoria.ucInfo.distanceKm.toFixed(2)} km` : "-", size: 20 })] })] }),
+        ],
+      }),
+    ];
+    if (vistoria.ucInfo.biome) {
+      ucRows.push(new TableRow({
+        children: [
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Bioma:", bold: true, size: 20 })] })] }),
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: vistoria.ucInfo.biome, size: 20 })] })] }),
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Estado:", bold: true, size: 20 })] })] }),
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: vistoria.ucInfo.state || "-", size: 20 })] })] }),
+        ],
+      }));
+    }
+    sections.push(
+      createColoredSectionHeader(`ANÁLISE DE UNIDADES DE CONSERVAÇÃO - ${ucLabel}`, ucColor),
+      new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: ucRows }),
+      new Paragraph({ text: "" })
+    );
+  }
 
   // CAR Section
   if (vistoria.carInfo) {

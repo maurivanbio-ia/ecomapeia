@@ -44,6 +44,18 @@ interface CARInfo {
   situacao?: string;
 }
 
+interface UCInfo {
+  name?: string;
+  category?: string;
+  categoryName?: string;
+  distanceKm?: number;
+  isInside?: boolean;
+  state?: string;
+  biome?: string;
+  restrictionType?: string;
+  areaKm2?: number;
+}
+
 interface WeatherData {
   temperatura?: number;
   umidade?: number;
@@ -83,6 +95,7 @@ interface VistoriaData {
   embargoCheck?: EmbargoCheck;
   complianceAnalysis?: ComplianceAnalysis;
   carInfo?: CARInfo;
+  ucInfo?: UCInfo;
   weather_data?: WeatherData;
   projeto_nome?: string;
 }
@@ -500,6 +513,48 @@ function generatePDFHTML(vistoria: VistoriaData): string {
       </table>
     </div>
   </div>
+
+  ${vistoria.ucInfo ? `
+  <div class="section">
+    <div class="section-header" style="background-color: ${vistoria.ucInfo.isInside ? '#c62828' : '#1565c0'};">
+      ANÁLISE DE UNIDADES DE CONSERVAÇÃO - ${vistoria.ucInfo.isInside ? 'DENTRO DE UC' : 'UC MAIS PRÓXIMA'}
+    </div>
+    <div class="section-content">
+      <table>
+        <tr>
+          <td style="width: 30%;"><strong>UC Identificada:</strong></td>
+          <td><strong>${vistoria.ucInfo.name || "-"}</strong></td>
+          <td style="width: 20%;"><strong>Situação:</strong></td>
+          <td style="color: ${vistoria.ucInfo.isInside ? '#c62828' : '#2e7d32'}; font-weight: bold;">
+            ${vistoria.ucInfo.isInside ? 'DENTRO DA UC' : 'FORA DA UC'}
+          </td>
+        </tr>
+        <tr>
+          <td><strong>Categoria:</strong></td>
+          <td>${vistoria.ucInfo.categoryName || vistoria.ucInfo.category || "-"}</td>
+          <td><strong>Distância:</strong></td>
+          <td>${vistoria.ucInfo.distanceKm != null ? `${vistoria.ucInfo.distanceKm.toFixed(2)} km` : "-"}</td>
+        </tr>
+        ${vistoria.ucInfo.biome ? `
+        <tr>
+          <td><strong>Bioma:</strong></td>
+          <td>${vistoria.ucInfo.biome}</td>
+          <td><strong>Estado:</strong></td>
+          <td>${vistoria.ucInfo.state || "-"}</td>
+        </tr>
+        ` : ""}
+        ${vistoria.ucInfo.areaKm2 ? `
+        <tr>
+          <td><strong>Área UC:</strong></td>
+          <td>${vistoria.ucInfo.areaKm2.toFixed(2)} km²</td>
+          <td><strong>Tipo de Restrição:</strong></td>
+          <td>${vistoria.ucInfo.restrictionType || "-"}</td>
+        </tr>
+        ` : ""}
+      </table>
+    </div>
+  </div>
+  ` : ""}
 
   ${vistoria.carInfo ? `
   <div class="section">

@@ -426,6 +426,62 @@ export default function NovaVistoriaScreen() {
         setFormData((prev) => ({ ...prev, observacoes: editData.observacoes }));
       }
 
+      const ucInfoDb = editData.ucInfo || editData.uc_info;
+      if (ucInfoDb) {
+        setUcInfo({
+          name: ucInfoDb.name || "",
+          category: ucInfoDb.category || "",
+          categoryName: ucInfoDb.categoryName || "",
+          distanceKm: ucInfoDb.distanceKm || 0,
+          isInside: ucInfoDb.isInside || false,
+          state: ucInfoDb.state,
+          biome: ucInfoDb.biome,
+          restrictionType: ucInfoDb.restrictionType,
+          areaKm2: ucInfoDb.areaKm2,
+        });
+      }
+
+      const carInfoDb = editData.carInfo || editData.car_info;
+      if (carInfoDb) {
+        setCarInfo({
+          carCode: carInfoDb.carCode || carInfoDb.codigo || "",
+          areaHa: carInfoDb.areaHa ?? carInfoDb.area_total,
+          city: carInfoDb.city || carInfoDb.municipio,
+          state: carInfoDb.state || carInfoDb.uf,
+          status: carInfoDb.status || carInfoDb.situacao,
+        });
+      }
+
+      const embargoDb = editData.embargoCheck || editData.embargo_check;
+      if (embargoDb) {
+        setEmbargoCheck({
+          level: embargoDb.level || "LOW",
+          hasEmbargoRisk: embargoDb.hasEmbargoRisk || false,
+          isInsideProtectedArea: embargoDb.isInsideProtectedArea || false,
+          protectedAreaName: embargoDb.protectedAreaName,
+          protectionLevel: embargoDb.protectionLevel,
+          reasons: embargoDb.reasons || [],
+          recommendations: embargoDb.recommendations || [],
+        });
+      }
+
+      const complianceDb = editData.complianceAnalysis || editData.compliance_analysis;
+      if (complianceDb) {
+        setComplianceAnalysis({
+          conformidadeGeral: complianceDb.conformidadeGeral || "CONFORME",
+          pontuacao: complianceDb.pontuacao || 0,
+          riscos: complianceDb.riscos || [],
+          naoConformidades: complianceDb.naoConformidades || [],
+          pontosFavoraveis: complianceDb.pontosFavoraveis || [],
+          recomendacoes: complianceDb.recomendacoes || [],
+          resumoExecutivo: complianceDb.resumoExecutivo || "",
+        });
+      }
+
+      if (ucInfoDb || carInfoDb || embargoDb || complianceDb) {
+        setGpsAnalysisStarted(true);
+      }
+
       navigation.setOptions({
         title: "Editar Vistoria",
       });
@@ -588,6 +644,17 @@ export default function NovaVistoriaScreen() {
         croqui_imagem: mapImageUri,
         assinatura_uri: signatureUri,
         assinatura_tecnico_uri: signatureTecnicoUri,
+        uc_info: ucInfo ? {
+          name: ucInfo.name,
+          category: ucInfo.category,
+          categoryName: ucInfo.categoryName,
+          distanceKm: ucInfo.distanceKm,
+          isInside: ucInfo.isInside,
+          state: ucInfo.state,
+          biome: ucInfo.biome,
+          restrictionType: ucInfo.restrictionType,
+          areaKm2: ucInfo.areaKm2,
+        } : null,
         car_info: carInfo ? {
           codigo: carInfo.carCode,
           municipio: carInfo.city,
