@@ -84,7 +84,7 @@ async function uriToBase64DataUri(uri: string): Promise<string> {
   if (Platform.OS === "web") return uri;
   try {
     const base64 = await FileSystem.readAsStringAsync(uri, {
-      encoding: FileSystem.EncodingType.Base64,
+      encoding: "base64" as any,
     });
     const ext = uri.split(".").pop()?.toLowerCase() || "jpeg";
     const mime = ext === "png" ? "image/png" : ext === "gif" ? "image/gif" : "image/jpeg";

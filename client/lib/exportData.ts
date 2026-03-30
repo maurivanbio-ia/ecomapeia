@@ -32,7 +32,7 @@ export async function exportToJSON(data: any, filename: string): Promise<ExportR
     const filePath = `${FileSystem.documentDirectory}${filename}.json`;
     
     await FileSystem.writeAsStringAsync(filePath, jsonString, {
-      encoding: FileSystem.EncodingType.UTF8,
+      encoding: "utf8" as any,
     });
 
     const canShare = await Sharing.isAvailableAsync();
@@ -93,7 +93,7 @@ export async function exportToCSV(data: any[], filename: string, headers: string
     const filePath = `${FileSystem.documentDirectory}${filename}.csv`;
     
     await FileSystem.writeAsStringAsync(filePath, csvContent, {
-      encoding: FileSystem.EncodingType.UTF8,
+      encoding: "utf8" as any,
     });
 
     const canShare = await Sharing.isAvailableAsync();

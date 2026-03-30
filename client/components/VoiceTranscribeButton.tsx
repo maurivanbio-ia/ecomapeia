@@ -112,7 +112,7 @@ export default function VoiceTranscribeButton({
       }
 
       const base64 = await FileSystem.readAsStringAsync(uri, {
-        encoding: FileSystem.EncodingType.Base64,
+        encoding: "base64" as any,
       });
 
       const ext = uri.split(".").pop()?.toLowerCase() || "m4a";

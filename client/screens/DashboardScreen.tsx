@@ -109,7 +109,7 @@ export default function DashboardScreen() {
         const fileUri = FileSystem.documentDirectory + filename;
         
         await FileSystem.writeAsStringAsync(fileUri, csvText, {
-          encoding: FileSystem.EncodingType.UTF8,
+          encoding: "utf8" as any,
         });
 
         if (await Sharing.isAvailableAsync()) {

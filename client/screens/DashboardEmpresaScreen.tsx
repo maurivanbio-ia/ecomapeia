@@ -93,7 +93,7 @@ export default function DashboardEmpresaScreen() {
 
         const fileUri = (FileSystem.cacheDirectory || "") + `relatorio_${tenantData.empresa.nome.replace(/\s/g, "_")}_${new Date().toISOString().split("T")[0]}.xlsx`;
         await FileSystem.writeAsStringAsync(fileUri, base64, {
-          encoding: FileSystem.EncodingType.Base64,
+          encoding: "base64" as any,
         });
 
         if (await Sharing.isAvailableAsync()) {
