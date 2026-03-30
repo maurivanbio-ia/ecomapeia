@@ -482,6 +482,18 @@ export default function NovaVistoriaScreen() {
         setGpsAnalysisStarted(true);
       }
 
+      const weatherDb = editData.weatherData || editData.weather_data;
+      if (weatherDb) {
+        setWeatherData({
+          temperatura: weatherDb.temperatura ?? 0,
+          umidade: weatherDb.umidade ?? 0,
+          condicoes: weatherDb.condicoes || "",
+          velocidadeVento: weatherDb.velocidadeVento ?? weatherDb.velocidade_vento ?? 0,
+          direcaoVento: weatherDb.direcaoVento || weatherDb.direcao_vento || "",
+          nebulosidade: weatherDb.nebulosidade ?? 0,
+        });
+      }
+
       navigation.setOptions({
         title: "Editar Vistoria",
       });

@@ -69,6 +69,15 @@ interface UCInfo {
   areaKm2?: number;
 }
 
+interface WeatherData {
+  temperatura?: number;
+  umidade?: number;
+  condicoes?: string;
+  velocidade_vento?: number;
+  direcao_vento?: string;
+  nebulosidade?: number;
+}
+
 interface VistoriaData {
   id: string;
   numero_notificacao?: string;
@@ -99,6 +108,7 @@ interface VistoriaData {
   complianceAnalysis?: ComplianceAnalysis;
   carInfo?: CARInfo;
   ucInfo?: UCInfo;
+  weather_data?: WeatherData;
 }
 
 function formatDate(dateStr: string): string {
@@ -329,6 +339,40 @@ async function generateWordDocument(vistoria: VistoriaData): Promise<Buffer> {
       ],
     })
   );
+
+  // Weather Section
+  if (vistoria.weather_data) {
+    const wd = vistoria.weather_data;
+    sections.push(
+      createSectionHeader("CONDIÇÕES CLIMÁTICAS NO MOMENTO DA VISTORIA"),
+      new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        rows: [
+          new TableRow({
+            children: [
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Temperatura:", bold: true, size: 20 })] })], width: { size: 20, type: WidthType.PERCENTAGE } }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: wd.temperatura != null ? `${wd.temperatura.toFixed(1)}°C` : "-", size: 20 })] })], width: { size: 13, type: WidthType.PERCENTAGE } }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Umidade Relativa:", bold: true, size: 20 })] })], width: { size: 17, type: WidthType.PERCENTAGE } }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: wd.umidade != null ? `${wd.umidade}%` : "-", size: 20 })] })], width: { size: 13, type: WidthType.PERCENTAGE } }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Nebulosidade:", bold: true, size: 20 })] })], width: { size: 17, type: WidthType.PERCENTAGE } }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: wd.nebulosidade != null ? `${wd.nebulosidade}%` : "-", size: 20 })] })], width: { size: 20, type: WidthType.PERCENTAGE } }),
+            ],
+          }),
+          new TableRow({
+            children: [
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Vento:", bold: true, size: 20 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: wd.velocidade_vento != null ? `${wd.velocidade_vento.toFixed(1)} km/h` : "-", size: 20 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Direção:", bold: true, size: 20 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: wd.direcao_vento || "-", size: 20 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Condição:", bold: true, size: 20 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: wd.condicoes || "-", size: 20 })] })] }),
+            ],
+          }),
+        ],
+      }),
+      new Paragraph({ text: "" })
+    );
+  }
 
   sections.push(
     createSectionHeader("02 – IDENTIFICAÇÃO PROPRIETÁRIO"),
