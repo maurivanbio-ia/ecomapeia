@@ -112,7 +112,10 @@ export default function HomeScreen() {
 
   const handleNewVistoria = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    navigation.navigate("VistoriasTab");
+    navigation.navigate("VistoriasTab", {
+      screen: "VistoriasList",
+      params: { openNew: true },
+    });
   };
 
   const handleSyncPending = async () => {

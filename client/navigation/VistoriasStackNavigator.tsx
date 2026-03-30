@@ -14,7 +14,7 @@ import MapaVistoriasScreen from "@/screens/MapaVistoriasScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 
 export type VistoriasStackParamList = {
-  VistoriasList: undefined;
+  VistoriasList: { openNew?: boolean } | undefined;
   NovaVistoria: { editVistoriaId?: string } | undefined;
   DetalhesVistoria: { vistoriaId: string };
   MapaGeral: undefined;

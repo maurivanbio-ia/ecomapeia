@@ -20,7 +20,7 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute, useFocusEffect, RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -52,8 +52,18 @@ export default function VistoriasScreen() {
   const { theme } = useTheme();
   const { user } = useAuth();
   const navigation = useNavigation<NavigationProp>();
+  const route = useRoute<RouteProp<VistoriasStackParamList, "VistoriasList">>();
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
+
+  useFocusEffect(
+    React.useCallback(() => {
+      if ((route.params as any)?.openNew) {
+        navigation.setParams({ openNew: false } as any);
+        navigation.push("NovaVistoria", {});
+      }
+    }, [(route.params as any)?.openNew])
+  );
 
   // Fetch user's current project selection
   const { data: tenantData } = useQuery<{

@@ -71,6 +71,12 @@ export default function MainTabNavigator() {
             <Feather name="clipboard" size={size} color={color} />
           ),
         }}
+        listeners={({ navigation }) => ({
+          tabPress: (e) => {
+            e.preventDefault();
+            navigation.navigate("VistoriasTab", { screen: "VistoriasList" });
+          },
+        })}
       />
       <Tab.Screen
         name="IATab"
