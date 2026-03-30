@@ -136,7 +136,7 @@ export default function VistoriasScreen() {
 
   const handleNewVistoria = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    navigation.navigate("NovaVistoria");
+    navigation.push("NovaVistoria", {});
   };
 
   const renderEmptyState = () => (
