@@ -307,6 +307,7 @@ export default function NovaVistoriaScreen() {
     recommendations: string[];
   } | null>(null);
   const [loadingEmbargo, setLoadingEmbargo] = useState(false);
+  const [gpsAnalysisStarted, setGpsAnalysisStarted] = useState(false);
   
   const [complianceAnalysis, setComplianceAnalysis] = useState<{
     conformidadeGeral: string;
@@ -889,6 +890,7 @@ export default function NovaVistoriaScreen() {
           const lng = utm.longitude;
           
           if (lat && lng) {
+            setGpsAnalysisStarted(true);
             if (flags.mapbiomas) fetchCARByCoordinates(lat, lng);
             if (flags.uc) fetchUCByCoordinates(lat, lng);
             if (flags.embargo) checkEmbargoByCoordinates(lat, lng, carInfo?.carCode);
@@ -969,6 +971,7 @@ export default function NovaVistoriaScreen() {
       
       if (latLng.latitude && latLng.longitude) {
         setManualChecksTriggered(true);
+        setGpsAnalysisStarted(true);
         
         // Trigger all environmental checks
         if (flags.mapbiomas) fetchCARByCoordinates(latLng.latitude, latLng.longitude);
@@ -1889,7 +1892,7 @@ export default function NovaVistoriaScreen() {
 
           {savedTracks.length > 0 ? (
             <View style={[styles.savedTracksContainer, { backgroundColor: theme.backgroundSecondary }]}>
-              <ThemedText style={[styles.sectionSubtitle, { color: theme.text, marginBottom: Spacing.sm }]}>
+              <ThemedText style={[styles.sectionTitle, { color: theme.text, marginBottom: Spacing.sm }]}>
                 Trajetos Salvos ({savedTracks.length})
               </ThemedText>
               {savedTracks.map((track, index) => (
@@ -1929,7 +1932,7 @@ export default function NovaVistoriaScreen() {
             </View>
           ) : null}
 
-          {(flags.mapbiomas || flags.uc || flags.embargo) && (carInfo || ucInfo || embargoCheck || loadingCAR || loadingUC) ? (
+          {gpsAnalysisStarted && (flags.mapbiomas || flags.uc || flags.embargo) ? (
             <View style={[styles.sectionHeader, { marginTop: Spacing.md, marginBottom: Spacing.xs }]}>
               <Feather name="activity" size={14} color={Colors.light.primary} />
               <ThemedText style={[styles.sectionHeaderText, { color: Colors.light.primary }]}>
@@ -1938,7 +1941,7 @@ export default function NovaVistoriaScreen() {
             </View>
           ) : null}
 
-          {flags.mapbiomas ? (carInfo ? (
+          {gpsAnalysisStarted && flags.mapbiomas ? (carInfo ? (
             <View style={[styles.carInfoCard, { backgroundColor: Colors.light.accent + "15", borderColor: Colors.light.accent }]}>
               <View style={styles.carInfoHeader}>
                 <Feather name="map-pin" size={18} color={Colors.light.accent} />
@@ -1965,9 +1968,21 @@ export default function NovaVistoriaScreen() {
                 Buscando código CAR no MapBiomas...
               </ThemedText>
             </View>
-          ) : null) : null}
+          ) : (
+            <View style={[styles.carInfoCard, { backgroundColor: theme.backgroundSecondary, borderColor: theme.tabIconDefault + "40" }]}>
+              <View style={styles.carInfoHeader}>
+                <Feather name="map-pin" size={18} color={theme.tabIconDefault} />
+                <ThemedText style={[styles.carInfoTitle, { color: theme.tabIconDefault }]}>
+                  Nenhum CAR encontrado
+                </ThemedText>
+              </View>
+              <ThemedText style={[styles.carDetails, { color: theme.tabIconDefault }]}>
+                Propriedade sem registro no MapBiomas nesta coordenada.
+              </ThemedText>
+            </View>
+          )) : null}
 
-          {flags.uc ? (ucInfo ? (
+          {gpsAnalysisStarted && flags.uc ? (ucInfo ? (
             <View style={[styles.carInfoCard, { 
               backgroundColor: ucInfo.isInside ? Colors.light.warning + "20" : Colors.light.success + "15", 
               borderColor: ucInfo.isInside ? Colors.light.warning : Colors.light.success 
@@ -2003,9 +2018,21 @@ export default function NovaVistoriaScreen() {
                 Buscando Unidade de Conservação mais próxima...
               </ThemedText>
             </View>
-          ) : null) : null}
+          ) : (
+            <View style={[styles.carInfoCard, { backgroundColor: theme.backgroundSecondary, borderColor: theme.tabIconDefault + "40" }]}>
+              <View style={styles.carInfoHeader}>
+                <Feather name="shield" size={18} color={theme.tabIconDefault} />
+                <ThemedText style={[styles.carInfoTitle, { color: theme.tabIconDefault }]}>
+                  Nenhuma UC encontrada
+                </ThemedText>
+              </View>
+              <ThemedText style={[styles.carDetails, { color: theme.tabIconDefault }]}>
+                Coordenada fora do alcance das UCs cadastradas.
+              </ThemedText>
+            </View>
+          )) : null}
 
-          {flags.embargo ? (embargoCheck ? (
+          {gpsAnalysisStarted && flags.embargo ? (embargoCheck ? (
             <View style={[styles.carInfoCard, { 
               backgroundColor: embargoCheck.level === "HIGH" ? "#e5393520" : 
                               embargoCheck.level === "MEDIUM" ? Colors.light.warning + "20" : 
@@ -2057,7 +2084,19 @@ export default function NovaVistoriaScreen() {
                 Verificando sobreposição com áreas protegidas...
               </ThemedText>
             </View>
-          ) : null) : null}
+          ) : (
+            <View style={[styles.carInfoCard, { backgroundColor: theme.backgroundSecondary, borderColor: theme.tabIconDefault + "40" }]}>
+              <View style={styles.carInfoHeader}>
+                <Feather name="alert-triangle" size={18} color={theme.tabIconDefault} />
+                <ThemedText style={[styles.carInfoTitle, { color: theme.tabIconDefault }]}>
+                  Verificação de Embargo
+                </ThemedText>
+              </View>
+              <ThemedText style={[styles.carDetails, { color: theme.tabIconDefault }]}>
+                Não foi possível verificar sobreposição com áreas protegidas.
+              </ThemedText>
+            </View>
+          )) : null}
 
           {flags.weather ? (weatherData ? (
             <View style={[styles.carInfoCard, { backgroundColor: "#e3f2fd", borderColor: "#2196f3" }]}>
@@ -2396,7 +2435,7 @@ export default function NovaVistoriaScreen() {
               Legenda do Trajeto
             </ThemedText>
             <TextInput
-              style={[styles.input, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
+              style={[styles.input, { backgroundColor: theme.backgroundDefault, color: theme.text, borderColor: theme.border }]}
               value={trackLegendInput}
               onChangeText={setTrackLegendInput}
               placeholder={`Ex: Área de APP, Desmatamento, Limite norte...`}
