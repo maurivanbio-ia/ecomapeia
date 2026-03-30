@@ -1017,34 +1017,20 @@ export default function NovaVistoriaScreen() {
       if (utm) {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         updateField("zona_utm", `${utm.zone}${utm.zoneLetter}`);
-        
-        const isFirstCapture = utmPoints.length === 1 && utmPoints[0].e === "" && utmPoints[0].n === "";
-        
-        if (isFirstCapture) {
+
+        const lat = utm.latitude;
+        const lng = utm.longitude;
+
+        const isFirstSlotEmpty = utmPoints.length === 1 && utmPoints[0].e === "" && utmPoints[0].n === "";
+
+        if (isFirstSlotEmpty) {
           const captureTime = new Date();
           updateField("hora_vistoria", captureTime.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }));
-          
           setUtmPoints([{
             id: "1",
             e: utm.easting.toFixed(2),
             n: utm.northing.toFixed(2),
           }]);
-
-          const lat = utm.latitude;
-          const lng = utm.longitude;
-          
-          if (lat && lng) {
-            setGpsAnalysisStarted(true);
-            if (flags.mapbiomas) fetchCARByCoordinates(lat, lng);
-            if (flags.uc) fetchUCByCoordinates(lat, lng);
-            if (flags.embargo) checkEmbargoByCoordinates(lat, lng, carInfo?.carCode);
-            if (flags.weather) fetchWeatherByCoordinates(lat, lng);
-            if (flags.ti) fetchTerraIndigenaByCoordinates(lat, lng);
-            Alert.alert(
-              "Primeira Coordenada Capturada",
-              `E: ${utm.easting.toFixed(2)}\nN: ${utm.northing.toFixed(2)}\n\nAnalisando dados ambientais e clima...`
-            );
-          }
         } else {
           setUtmPoints((prev) => [
             ...prev,
@@ -1054,8 +1040,23 @@ export default function NovaVistoriaScreen() {
               n: utm.northing.toFixed(2),
             },
           ]);
+        }
+
+        if (lat && lng && !gpsAnalysisStarted) {
+          setGpsAnalysisStarted(true);
+          if (flags.mapbiomas) fetchCARByCoordinates(lat, lng);
+          if (flags.uc) fetchUCByCoordinates(lat, lng);
+          if (flags.embargo) checkEmbargoByCoordinates(lat, lng, carInfo?.carCode);
+          if (flags.weather) fetchWeatherByCoordinates(lat, lng);
+          if (flags.ti) fetchTerraIndigenaByCoordinates(lat, lng);
           Alert.alert(
-            `Coordenada ${utmPoints.length + 1} Capturada`,
+            "Coordenada Capturada",
+            `E: ${utm.easting.toFixed(2)}\nN: ${utm.northing.toFixed(2)}\n\nAnalisando dados ambientais e clima...`
+          );
+        } else {
+          const nextNum = isFirstSlotEmpty ? 1 : utmPoints.length + 1;
+          Alert.alert(
+            `Coordenada ${nextNum} Capturada`,
             `E: ${utm.easting.toFixed(2)}\nN: ${utm.northing.toFixed(2)}`
           );
         }
@@ -1087,7 +1088,7 @@ export default function NovaVistoriaScreen() {
   // Check and trigger environmental verification when manual coordinates are entered
   const checkManualCoordinates = () => {
     // Only check if not already triggered and we have at least one point
-    if (manualChecksTriggered || utmPoints.length === 0) return;
+    if (manualChecksTriggered || gpsAnalysisStarted || utmPoints.length === 0) return;
 
     const firstPoint = utmPoints[0];
     const e = parseFloat(firstPoint.e);

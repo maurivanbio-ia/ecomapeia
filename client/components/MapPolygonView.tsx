@@ -1,5 +1,5 @@
-import React, { useRef } from "react";
-import { View, StyleSheet, Pressable, Image, Platform } from "react-native";
+import React, { useRef, useState } from "react";
+import { View, StyleSheet, Pressable, Image, Platform, ActivityIndicator } from "react-native";
 import { captureRef } from "react-native-view-shot";
 import MapView, { Polygon, Polyline, Marker, PROVIDER_DEFAULT } from "react-native-maps";
 import { ThemedText } from "@/components/ThemedText";
@@ -44,10 +44,12 @@ export default function MapPolygonView({
   const { theme } = useTheme();
   const mapRef = useRef<MapView>(null);
   const mapContainerRef = useRef<View>(null);
+  const [capturingImage, setCapturingImage] = useState(false);
 
   const captureMapImage = async () => {
+    if (capturingImage) return;
     const hasContent =
-      polygonCoordinates.length >= 3 ||
+      polygonCoordinates.length >= 1 ||
       trackPoints.length > 1 ||
       savedTracks.length > 0;
 
@@ -55,7 +57,23 @@ export default function MapPolygonView({
       return;
     }
 
+    setCapturingImage(true);
     try {
+      const allCoords = [
+        ...polygonCoordinates,
+        ...trackPoints,
+        ...savedTracks.flatMap((t) => t.points),
+      ];
+
+      if (mapRef.current && allCoords.length > 0) {
+        mapRef.current.fitToCoordinates(allCoords, {
+          edgePadding: { top: 40, right: 40, bottom: 40, left: 40 },
+          animated: false,
+        });
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 900));
+
       if (mapContainerRef.current) {
         const uri = await captureRef(mapContainerRef, {
           format: "png",
@@ -65,6 +83,8 @@ export default function MapPolygonView({
       }
     } catch (error) {
       console.error("Error capturing map:", error);
+    } finally {
+      setCapturingImage(false);
     }
   };
 
@@ -94,12 +114,14 @@ export default function MapPolygonView({
           zoomEnabled={true}
           mapType="satellite"
         >
-          <Polygon
-            coordinates={polygonCoordinates}
-            strokeColor={Colors.light.accent}
-            fillColor="rgba(141, 198, 63, 0.3)"
-            strokeWidth={3}
-          />
+          {polygonCoordinates.length >= 3 ? (
+            <Polygon
+              coordinates={polygonCoordinates}
+              strokeColor={Colors.light.accent}
+              fillColor="rgba(141, 198, 63, 0.3)"
+              strokeWidth={3}
+            />
+          ) : null}
           {savedTracks.map((track) => (
             <React.Fragment key={track.id}>
               <Polyline
@@ -158,10 +180,17 @@ export default function MapPolygonView({
 
       <Pressable
         onPress={captureMapImage}
-        style={[styles.captureMapBtn, { backgroundColor: Colors.light.primary }]}
+        disabled={capturingImage}
+        style={[styles.captureMapBtn, { backgroundColor: capturingImage ? Colors.light.primary + "80" : Colors.light.primary }]}
       >
-        <Feather name="camera" size={18} color="#FFFFFF" />
-        <ThemedText style={styles.captureMapText}>Gerar Imagem do Mapa</ThemedText>
+        {capturingImage ? (
+          <ActivityIndicator size="small" color="#FFFFFF" />
+        ) : (
+          <Feather name="camera" size={18} color="#FFFFFF" />
+        )}
+        <ThemedText style={styles.captureMapText}>
+          {capturingImage ? "Capturando..." : "Gerar Imagem do Mapa"}
+        </ThemedText>
       </Pressable>
 
       {mapImageUri ? (
@@ -183,7 +212,7 @@ const styles = StyleSheet.create({
   mapContainer: {
     borderRadius: BorderRadius.lg,
     overflow: "hidden",
-    height: 250,
+    height: 280,
   },
   map: {
     width: "100%",
