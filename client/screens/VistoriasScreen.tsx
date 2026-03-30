@@ -276,17 +276,44 @@ export default function VistoriasScreen() {
 
       {projetoAtual ? (
         <Animated.View entering={FadeIn.duration(300)} style={styles.projetoFilterBar}>
-          <View style={[styles.projetoFilterCard, { backgroundColor: Colors.light.primary + "15", borderColor: Colors.light.primary + "40" }]}>
+          <Pressable
+            style={[styles.projetoFilterCard, { backgroundColor: Colors.light.primary + "15", borderColor: Colors.light.primary + "40" }]}
+            onPress={() => {
+              Haptics.selectionAsync();
+              navigation.getParent()?.navigate("ProfileTab" as never);
+            }}
+          >
             <Feather name="zap" size={14} color={Colors.light.primary} />
             <ThemedText style={[styles.projetoFilterText, { color: Colors.light.primary }]} numberOfLines={1}>
               {projetoAtual.nome}
             </ThemedText>
+            {projetoAtual.complexo_nome ? (
+              <ThemedText style={[styles.projetoFilterText, { color: theme.tabIconDefault, fontSize: 11 }]} numberOfLines={1}>
+                {projetoAtual.complexo_nome}
+              </ThemedText>
+            ) : null}
             <View style={[styles.projetoFilterBadge, { backgroundColor: Colors.light.primary }]}>
               <ThemedText style={styles.projetoFilterBadgeText}>{vistorias.length}</ThemedText>
             </View>
-          </View>
+          </Pressable>
         </Animated.View>
-      ) : null}
+      ) : (
+        <Animated.View entering={FadeIn.duration(300)} style={styles.projetoFilterBar}>
+          <Pressable
+            style={[styles.projetoFilterCard, { backgroundColor: Colors.light.warning + "15", borderColor: Colors.light.warning + "60", borderWidth: 1.5 }]}
+            onPress={() => {
+              Haptics.selectionAsync();
+              navigation.getParent()?.navigate("ProfileTab" as never);
+            }}
+          >
+            <Feather name="alert-circle" size={14} color={Colors.light.warning} />
+            <ThemedText style={[styles.projetoFilterText, { color: Colors.light.warning, flex: 1 }]} numberOfLines={1}>
+              Nenhuma UHE selecionada — Toque para selecionar
+            </ThemedText>
+            <Feather name="chevron-right" size={14} color={Colors.light.warning} />
+          </Pressable>
+        </Animated.View>
+      )}
 
       <View
         style={[

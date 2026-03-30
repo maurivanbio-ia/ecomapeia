@@ -175,8 +175,11 @@ export default function NovaVistoriaScreen() {
   const editVistoriaId = (route.params as any)?.editVistoriaId as string | undefined;
   const isEditMode = !!editVistoriaId;
 
-  // Fetch user's currently selected project to associate with new vistorias
-  const { data: tenantData } = useQuery<{ projetoAtual: { id: number; nome: string } | null }>({
+  // Fetch user's currently selected project and all available projects
+  const { data: tenantData } = useQuery<{
+    projetoAtual: { id: number; nome: string; complexo_nome?: string | null } | null;
+    projetosDisponiveis: Array<{ id: number; nome: string; complexo_id: number | null; complexo_nome: string | null; codigo?: string | null }>;
+  }>({
     queryKey: ["/api/tenant/usuarios", user?.id, "tenant"],
     queryFn: async () => {
       const response = await fetch(new URL(`/api/tenant/usuarios/${user?.id}/tenant`, getApiUrl()).toString());
@@ -186,7 +189,13 @@ export default function NovaVistoriaScreen() {
     enabled: !!user?.id,
     staleTime: 0,
   });
-  const projetoAtualId = tenantData?.projetoAtual?.id ?? null;
+
+  const [selectedProjetoId, setSelectedProjetoId] = useState<number | null>(null);
+  const [showUHESelector, setShowUHESelector] = useState(false);
+
+  // Use explicitly selected project, otherwise fall back to user's current project
+  const projetoAtualId = selectedProjetoId ?? tenantData?.projetoAtual?.id ?? null;
+  const projetoSelecionado = tenantData?.projetosDisponiveis?.find(p => p.id === projetoAtualId) ?? tenantData?.projetoAtual ?? null;
   const { flags } = useFeatureFlags();
 
   const {
@@ -356,6 +365,10 @@ export default function NovaVistoriaScreen() {
   React.useEffect(() => {
     if (isEditMode && editData && !editLoaded) {
       setEditLoaded(true);
+      // Pre-select the UHE/project from the edited vistoria
+      if (editData.projeto_id) {
+        setSelectedProjetoId(editData.projeto_id);
+      }
       setFormData({
         numero_notificacao: editData.numero_notificacao || "",
         setor: editData.setor || "",
@@ -1462,6 +1475,73 @@ export default function NovaVistoriaScreen() {
         onError={handleWatermarkError}
       />
 
+      {/* UHE / Complexo Selector Modal */}
+      <Modal
+        visible={showUHESelector}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowUHESelector(false)}
+      >
+        <Pressable style={styles.photoPickerOverlay} onPress={() => setShowUHESelector(false)}>
+          <View style={[styles.photoPickerSheet, { maxHeight: "80%", paddingBottom: insets.bottom + 12 }]}>
+            <View style={styles.photoPickerHandle} />
+            <ThemedText style={[styles.sectionTitle, { marginBottom: 12, marginTop: 4 }]}>
+              <Feather name="zap" size={18} /> Selecionar UHE / PCH
+            </ThemedText>
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {(() => {
+                const projetos = tenantData?.projetosDisponiveis ?? [];
+                const groupsMap: Record<string, typeof projetos> = {};
+                for (const p of projetos) {
+                  const key = p.complexo_nome ?? "Outros";
+                  if (!groupsMap[key]) groupsMap[key] = [];
+                  groupsMap[key].push(p);
+                }
+                return Object.entries(groupsMap).map(([complexoNome, items]) => (
+                  <View key={complexoNome} style={{ marginBottom: 12 }}>
+                    <ThemedText style={{ fontSize: 11, fontWeight: "700", color: Colors.light.primary, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 6, marginLeft: 4 }}>
+                      {complexoNome}
+                    </ThemedText>
+                    {items.map(p => {
+                      const isSelected = projetoAtualId === p.id;
+                      return (
+                        <Pressable
+                          key={p.id}
+                          style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                            marginBottom: 6,
+                            paddingVertical: 10,
+                            paddingHorizontal: 14,
+                            borderRadius: 10,
+                            backgroundColor: isSelected ? Colors.light.primary : theme.backgroundDefault,
+                            borderWidth: 1,
+                            borderColor: isSelected ? Colors.light.primary : theme.border,
+                            gap: 10,
+                          }}
+                          onPress={() => {
+                            Haptics.selectionAsync();
+                            setSelectedProjetoId(p.id);
+                            setShowUHESelector(false);
+                          }}
+                        >
+                          <Feather name="zap" size={16} color={isSelected ? "#fff" : Colors.light.primary} />
+                          <View style={{ flex: 1 }}>
+                            <ThemedText style={{ fontSize: 14, fontWeight: "600", color: isSelected ? "#fff" : theme.text }} numberOfLines={1}>{p.nome}</ThemedText>
+                            {p.codigo ? <ThemedText style={{ fontSize: 11, color: isSelected ? "#ffffffb0" : theme.tabIconDefault }}>{p.codigo}</ThemedText> : null}
+                          </View>
+                          {isSelected ? <Feather name="check-circle" size={18} color="#fff" /> : null}
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                ));
+              })()}
+            </ScrollView>
+          </View>
+        </Pressable>
+      </Modal>
+
       <Modal
         visible={photoPickerModal !== null}
         transparent
@@ -1535,6 +1615,44 @@ export default function NovaVistoriaScreen() {
           },
         ]}
       >
+        {/* UHE / Complexo Selector Card */}
+        <Pressable
+          style={[styles.uheSelectorCard, {
+            backgroundColor: projetoSelecionado ? Colors.light.primary + "12" : theme.backgroundDefault,
+            borderColor: projetoSelecionado ? Colors.light.primary + "60" : theme.border,
+          }]}
+          onPress={() => {
+            Haptics.selectionAsync();
+            setShowUHESelector(true);
+          }}
+        >
+          <View style={[styles.uheSelectorIcon, { backgroundColor: projetoSelecionado ? Colors.light.primary : theme.tabIconDefault + "40" }]}>
+            <Feather name="zap" size={20} color={projetoSelecionado ? "#fff" : theme.tabIconDefault} />
+          </View>
+          <View style={{ flex: 1 }}>
+            {projetoSelecionado ? (
+              <>
+                <ThemedText style={[styles.uheSelectorTitle, { color: Colors.light.primary }]} numberOfLines={1}>
+                  {(projetoSelecionado as any).nome}
+                </ThemedText>
+                <ThemedText style={[styles.uheSelectorSub, { color: theme.tabIconDefault }]} numberOfLines={1}>
+                  {(projetoSelecionado as any).complexo_nome ?? "UHE / PCH selecionada"}
+                </ThemedText>
+              </>
+            ) : (
+              <>
+                <ThemedText style={[styles.uheSelectorTitle, { color: Colors.light.error ?? "#e53935" }]}>
+                  Selecione a UHE / Complexo
+                </ThemedText>
+                <ThemedText style={[styles.uheSelectorSub, { color: theme.tabIconDefault }]}>
+                  Obrigatório para associar a vistoria
+                </ThemedText>
+              </>
+            )}
+          </View>
+          <Feather name="chevron-right" size={18} color={projetoSelecionado ? Colors.light.primary : theme.tabIconDefault} />
+        </Pressable>
+
         <View
           style={[
             styles.section,
@@ -2688,6 +2806,30 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: Spacing.lg,
+  },
+  uheSelectorCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1.5,
+    padding: Spacing.md,
+    marginBottom: Spacing.lg,
+    gap: Spacing.md,
+  },
+  uheSelectorIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  uheSelectorTitle: {
+    fontSize: 15,
+    fontWeight: "700",
+  },
+  uheSelectorSub: {
+    fontSize: 12,
+    marginTop: 2,
   },
   section: {
     borderRadius: BorderRadius.lg,
