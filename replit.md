@@ -65,6 +65,15 @@ The application integrates Replit AI, leveraging OpenAI's gpt-5.2 model for vari
 
 -   **MapBiomas Alerta API V2:** Integration for deforestation monitoring, providing access to alerts, rural properties (CAR), legal reserves (RL), and permanent protected areas (APPs).
 
+### Terra Indígena Proximity (Mar 2026)
+
+-   **Data source:** Shapefile FUNAI/IBGE (655 TIs, SIRGAS 2000), converted to `server/data/tis_brasil.json` with centroids
+-   **New endpoint:** `POST /api/conservation/check-terra-indigena` — returns nearest TI name, ethnicity, municipality, UF, fase, and distance in km
+-   **Risk levels:** HIGH (≤5 km), MEDIUM (≤25 km), LOW (>25 km) — color-coded card: red/yellow/green
+-   **Integration flow:** GPS capture or manual UTM entry → automatic TI check (flag `ti: true`)
+-   **Persistence:** `ti_info` JSONB column in `vistorias` table; restored in edit mode; included in PDF/DOCX reports
+-   **Feature flag:** `ti` in `FeatureFlagsContext` (default `true`)
+
 ### Environmental Compliance Features
 
 -   **Embargo Detection:** `/api/conservation/check-embargo` - Point-in-polygon verification against 968 loaded conservation units, returns risk level (HIGH/MEDIUM/LOW) and specific reasons for embargo

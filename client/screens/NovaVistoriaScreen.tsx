@@ -235,6 +235,18 @@ export default function NovaVistoriaScreen() {
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [loadingWeather, setLoadingWeather] = useState(false);
 
+  const [tiInfo, setTiInfo] = useState<{
+    nome: string;
+    etnia: string;
+    municipio: string;
+    uf: string;
+    fase: string;
+    area_ha: number;
+    distanceKm: number;
+    riskLevel: "HIGH" | "MEDIUM" | "LOW";
+  } | null>(null);
+  const [loadingTI, setLoadingTI] = useState(false);
+
   const [usosSolo, setUsosSolo] = useState<UsoSolo[]>([
     { tipo: "Acesso", valor: "", unidade: "m²", checked: false, instancias: [] },
     { tipo: "Edificação", valor: "", unidade: "m²", checked: false, instancias: [] },
@@ -478,7 +490,21 @@ export default function NovaVistoriaScreen() {
         });
       }
 
-      if (ucInfoDb || carInfoDb || embargoDb || complianceDb) {
+      const tiInfoDb = editData.tiInfo || editData.ti_info;
+      if (tiInfoDb) {
+        setTiInfo({
+          nome: tiInfoDb.nome || "",
+          etnia: tiInfoDb.etnia || "",
+          municipio: tiInfoDb.municipio || "",
+          uf: tiInfoDb.uf || "",
+          fase: tiInfoDb.fase || "",
+          area_ha: tiInfoDb.area_ha ?? 0,
+          distanceKm: tiInfoDb.distanceKm ?? 0,
+          riskLevel: tiInfoDb.riskLevel || "LOW",
+        });
+      }
+
+      if (ucInfoDb || carInfoDb || embargoDb || complianceDb || tiInfoDb) {
         setGpsAnalysisStarted(true);
       }
 
@@ -696,6 +722,16 @@ export default function NovaVistoriaScreen() {
           velocidade_vento: weatherData.velocidadeVento,
           direcao_vento: weatherData.direcaoVento,
           nebulosidade: weatherData.nebulosidade,
+        } : null,
+        ti_info: tiInfo ? {
+          nome: tiInfo.nome,
+          etnia: tiInfo.etnia,
+          municipio: tiInfo.municipio,
+          uf: tiInfo.uf,
+          fase: tiInfo.fase,
+          area_ha: tiInfo.area_ha,
+          distanceKm: tiInfo.distanceKm,
+          riskLevel: tiInfo.riskLevel,
         } : null,
         track_points: (() => {
           const allTracks = savedTracks.map(track => ({
@@ -939,6 +975,28 @@ export default function NovaVistoriaScreen() {
     }
   };
 
+  const fetchTerraIndigenaByCoordinates = async (lat: number, lng: number) => {
+    setLoadingTI(true);
+    try {
+      const response = await fetch(
+        new URL("/api/conservation/check-terra-indigena", getApiUrl()).toString(),
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ lat, lon: lng }),
+        }
+      );
+      const data = await response.json();
+      if (data.success && data.found && data.tiInfo) {
+        setTiInfo(data.tiInfo);
+      }
+    } catch (error) {
+      console.error("Error fetching TI:", error);
+    } finally {
+      setLoadingTI(false);
+    }
+  };
+
   const captureGPSPoint = async () => {
     setCapturingGPS(true);
     try {
@@ -974,6 +1032,7 @@ export default function NovaVistoriaScreen() {
             if (flags.uc) fetchUCByCoordinates(lat, lng);
             if (flags.embargo) checkEmbargoByCoordinates(lat, lng, carInfo?.carCode);
             if (flags.weather) fetchWeatherByCoordinates(lat, lng);
+            if (flags.ti) fetchTerraIndigenaByCoordinates(lat, lng);
             Alert.alert(
               "Primeira Coordenada Capturada",
               `E: ${utm.easting.toFixed(2)}\nN: ${utm.northing.toFixed(2)}\n\nAnalisando dados ambientais e clima...`
@@ -1057,6 +1116,7 @@ export default function NovaVistoriaScreen() {
         if (flags.uc) fetchUCByCoordinates(latLng.latitude, latLng.longitude);
         if (flags.embargo) checkEmbargoByCoordinates(latLng.latitude, latLng.longitude, carInfo?.carCode);
         if (flags.weather) fetchWeatherByCoordinates(latLng.latitude, latLng.longitude);
+        if (flags.ti) fetchTerraIndigenaByCoordinates(latLng.latitude, latLng.longitude);
         
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         Alert.alert(
@@ -2011,7 +2071,7 @@ export default function NovaVistoriaScreen() {
             </View>
           ) : null}
 
-          {gpsAnalysisStarted && (flags.mapbiomas || flags.uc || flags.embargo) ? (
+          {gpsAnalysisStarted && (flags.mapbiomas || flags.uc || flags.embargo || flags.ti) ? (
             <View style={[styles.sectionHeader, { marginTop: Spacing.md, marginBottom: Spacing.xs }]}>
               <Feather name="activity" size={14} color={Colors.light.primary} />
               <ThemedText style={[styles.sectionHeaderText, { color: Colors.light.primary }]}>
@@ -2173,6 +2233,77 @@ export default function NovaVistoriaScreen() {
               </View>
               <ThemedText style={[styles.carDetails, { color: theme.tabIconDefault }]}>
                 Não foi possível verificar sobreposição com áreas protegidas.
+              </ThemedText>
+            </View>
+          )) : null}
+
+          {gpsAnalysisStarted && flags.ti ? (tiInfo ? (
+            <View style={[styles.carInfoCard, {
+              backgroundColor: tiInfo.riskLevel === "HIGH" ? "#e5393520" :
+                              tiInfo.riskLevel === "MEDIUM" ? "#ff980020" :
+                              Colors.light.success + "15",
+              borderColor: tiInfo.riskLevel === "HIGH" ? "#e53935" :
+                          tiInfo.riskLevel === "MEDIUM" ? "#ff9800" :
+                          Colors.light.success,
+            }]}>
+              <View style={styles.carInfoHeader}>
+                <Feather
+                  name={tiInfo.riskLevel === "HIGH" ? "alert-octagon" : tiInfo.riskLevel === "MEDIUM" ? "alert-triangle" : "users"}
+                  size={18}
+                  color={tiInfo.riskLevel === "HIGH" ? "#e53935" : tiInfo.riskLevel === "MEDIUM" ? "#ff9800" : Colors.light.success}
+                />
+                <ThemedText style={[styles.carInfoTitle, {
+                  color: tiInfo.riskLevel === "HIGH" ? "#e53935" :
+                        tiInfo.riskLevel === "MEDIUM" ? "#ff9800" :
+                        Colors.light.success,
+                }]}>
+                  Terra Indígena Mais Próxima
+                </ThemedText>
+              </View>
+              <ThemedText style={styles.carCode}>{tiInfo.nome}</ThemedText>
+              {tiInfo.etnia ? (
+                <ThemedText style={[styles.carDetails, { color: theme.tabIconDefault }]}>
+                  Etnia: {tiInfo.etnia}
+                </ThemedText>
+              ) : null}
+              {tiInfo.municipio || tiInfo.uf ? (
+                <ThemedText style={[styles.carDetails, { color: theme.tabIconDefault }]}>
+                  {tiInfo.municipio}{tiInfo.municipio && tiInfo.uf ? " - " : ""}{tiInfo.uf}
+                </ThemedText>
+              ) : null}
+              <ThemedText style={[styles.carDetails, {
+                color: tiInfo.riskLevel === "HIGH" ? "#e53935" :
+                      tiInfo.riskLevel === "MEDIUM" ? "#ff9800" :
+                      Colors.light.success,
+                fontWeight: "600",
+              }]}>
+                Distância: {tiInfo.distanceKm.toFixed(1)} km
+                {tiInfo.riskLevel === "HIGH" ? " (PROXIMA)" :
+                 tiInfo.riskLevel === "MEDIUM" ? " (ATENÇÃO)" : " (SEGURA)"}
+              </ThemedText>
+              {tiInfo.fase ? (
+                <ThemedText style={[styles.carDetails, { color: theme.tabIconDefault }]}>
+                  Situação: {tiInfo.fase}
+                </ThemedText>
+              ) : null}
+            </View>
+          ) : loadingTI ? (
+            <View style={[styles.carInfoCard, { backgroundColor: theme.backgroundSecondary }]}>
+              <ActivityIndicator size="small" color="#9c27b0" />
+              <ThemedText style={{ marginLeft: Spacing.sm, color: theme.tabIconDefault }}>
+                Buscando Terra Indígena mais próxima...
+              </ThemedText>
+            </View>
+          ) : (
+            <View style={[styles.carInfoCard, { backgroundColor: theme.backgroundSecondary, borderColor: theme.tabIconDefault + "40" }]}>
+              <View style={styles.carInfoHeader}>
+                <Feather name="users" size={18} color={theme.tabIconDefault} />
+                <ThemedText style={[styles.carInfoTitle, { color: theme.tabIconDefault }]}>
+                  Terra Indígena
+                </ThemedText>
+              </View>
+              <ThemedText style={[styles.carDetails, { color: theme.tabIconDefault }]}>
+                Nenhuma Terra Indígena encontrada próxima à coordenada.
               </ThemedText>
             </View>
           )) : null}

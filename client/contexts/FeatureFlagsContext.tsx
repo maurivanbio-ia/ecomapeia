@@ -8,6 +8,7 @@ export interface FeatureFlags {
   mapbiomas: boolean;
   fireHotspots: boolean;
   compliance: boolean;
+  ti: boolean;
 }
 
 const STORAGE_KEY = "@mapeia_feature_flags";
@@ -19,6 +20,7 @@ const DEFAULT_FLAGS: FeatureFlags = {
   mapbiomas: true,
   fireHotspots: true,
   compliance: true,
+  ti: true,
 };
 
 interface FeatureFlagsContextValue {

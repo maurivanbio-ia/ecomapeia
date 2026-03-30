@@ -204,6 +204,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         embargoCheck: vistoria.embargo_check,
         complianceAnalysis: vistoria.compliance_analysis,
         ucInfo: vistoria.uc_info,
+        tiInfo: vistoria.ti_info,
         horaVistoria: vistoria.hora_vistoria,
         weatherData: vistoria.weather_data,
         projeto_nome: projetoNome,

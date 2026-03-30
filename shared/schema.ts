@@ -200,6 +200,8 @@ export const vistorias = pgTable("vistorias", {
   weather_data: jsonb("weather_data"),
   // GPS tracking field
   track_points: jsonb("track_points"),
+  // Terra Indígena proximity
+  ti_info: jsonb("ti_info"),
 });
 
 export const insertVistoriaSchema = createInsertSchema(vistorias).pick({
@@ -244,6 +246,7 @@ export const insertVistoriaSchema = createInsertSchema(vistorias).pick({
   hora_vistoria: true,
   weather_data: true,
   track_points: true,
+  ti_info: true,
 });
 
 export type InsertVistoria = z.infer<typeof insertVistoriaSchema>;

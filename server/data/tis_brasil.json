@@ -1,0 +1,6552 @@
+[
+  {
+    "nome": "Acapuri de Cima",
+    "etnia": "Kokama",
+    "municipio": "Fonte Boa",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -2.6070777837035,
+    "centroidLon": -66.832215160103
+  },
+  {
+    "nome": "Acimã",
+    "etnia": "Apurinã",
+    "municipio": "Lábrea",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -7.84514055989581,
+    "centroidLon": -66.17322130766641
+  },
+  {
+    "nome": "Água Preta/Inari",
+    "etnia": "Apurinã",
+    "municipio": "Pauini",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -7.477680482038491,
+    "centroidLon": -67.14954595116166
+  },
+  {
+    "nome": "Águas Belas",
+    "etnia": "Pataxó",
+    "municipio": "Prado",
+    "uf": "BA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -16.920178882710694,
+    "centroidLon": -39.276255765972394
+  },
+  {
+    "nome": "Aconã",
+    "etnia": "Tingui-Botó",
+    "municipio": "Traipu",
+    "uf": "AL",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -10.05359891755042,
+    "centroidLon": -36.927569384880925
+  },
+  {
+    "nome": "Aldeia Kondá",
+    "etnia": "Kaingang",
+    "municipio": "Chapecó",
+    "uf": "SC",
+    "fase": "Encaminhada RI",
+    "area_ha": 0,
+    "centroidLat": -27.219586094999997,
+    "centroidLon": -52.563737777777504
+  },
+  {
+    "nome": "Aldeia Limão Verde",
+    "etnia": "Guarani Kaiowá",
+    "municipio": "Amambai",
+    "uf": "MS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -23.174799395,
+    "centroidLon": -55.201677812916
+  },
+  {
+    "nome": "Aldeia Velha",
+    "etnia": "Pataxó",
+    "municipio": "Porto Seguro",
+    "uf": "BA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -16.462764054220788,
+    "centroidLon": -39.101436549821884
+  },
+  {
+    "nome": "Alto Rio Guamá",
+    "etnia": "Timbira,Tembé",
+    "municipio": "Santa Luzia do Pará,Paragominas,Nova Esperança do Piriá,Garrafão do Norte",
+    "uf": "PA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -2.32432423063785,
+    "centroidLon": -46.7160425650735
+  },
+  {
+    "nome": "Alto Rio Negro",
+    "etnia": "Arapáso,Karapanã,Barasána,Baré,Wanana",
+    "municipio": "Japurá,São Gabriel da Cachoeira",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": 0.5748052403814999,
+    "centroidLon": -68.54162468
+  },
+  {
+    "nome": "Alto Rio Purus",
+    "etnia": "Kaxinawá,Kulina Páno",
+    "municipio": "Santa Rosa do Purus,Manoel Urbano",
+    "uf": "AC",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -9.308984764734967,
+    "centroidLon": -70.08213553018794
+  },
+  {
+    "nome": "Alto Sepatini",
+    "etnia": "Apurinã",
+    "municipio": "Lábrea",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -8.015868435458076,
+    "centroidLon": -66.34415346119744
+  },
+  {
+    "nome": "Alto Tarauacá",
+    "etnia": "Isolados",
+    "municipio": "Jordão,Feijó",
+    "uf": "AC",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -9.603897145,
+    "centroidLon": -71.904856282129
+  },
+  {
+    "nome": "Alto Turiaçu",
+    "etnia": "Ka´apor",
+    "municipio": "Centro Novo do Maranhão,Maranhãozinho,Centro do Guilherme,Zé Doca,Santa Luzia do Paruá,Araguanã",
+    "uf": "MA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -2.862448685842976,
+    "centroidLon": -46.25830176720517
+  },
+  {
+    "nome": "Amambai",
+    "etnia": "Guarani Kaiowá",
+    "municipio": "Amambai",
+    "uf": "MS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -23.07305597259635,
+    "centroidLon": -55.1909412304325
+  },
+  {
+    "nome": "Amanayé",
+    "etnia": "Amanayé",
+    "municipio": "Goianésia do Pará",
+    "uf": "PA",
+    "fase": "Encaminhada RI",
+    "area_ha": 0,
+    "centroidLat": -3.90825336311545,
+    "centroidLon": -48.682471652336
+  },
+  {
+    "nome": "Anambé",
+    "etnia": "Anambé",
+    "municipio": "Moju",
+    "uf": "PA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -2.8650070671603896,
+    "centroidLon": -49.31211424732042
+  },
+  {
+    "nome": "Ananás",
+    "etnia": "Makuxí",
+    "municipio": "Amajari",
+    "uf": "RR",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": 3.90417970376245,
+    "centroidLon": -61.424801137997
+  },
+  {
+    "nome": "Andirá-Marau",
+    "etnia": "Sateré-Mawé",
+    "municipio": "Parintins,Maués,Barreirinha,Aveiro,Itaituba",
+    "uf": "AM,PA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.743036498452325,
+    "centroidLon": -56.921089941762105
+  },
+  {
+    "nome": "Aningal",
+    "etnia": "Makuxí",
+    "municipio": "Amajari",
+    "uf": "RR",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": 3.45499972,
+    "centroidLon": -61.401377085
+  },
+  {
+    "nome": "Anta",
+    "etnia": "Wapixana",
+    "municipio": "Alto Alegre",
+    "uf": "RR",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": 3.36439821,
+    "centroidLon": -61.147380755
+  },
+  {
+    "nome": "Apiaka/Kayabi",
+    "etnia": "Apiaká,Kaiabi",
+    "municipio": "Juara",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -10.93728347,
+    "centroidLon": -57.40907303
+  },
+  {
+    "nome": "Apinayé",
+    "etnia": "Apinayé",
+    "municipio": "Maurilândia do Tocantins,Itaguatins,Cachoeirinha,São Bento do Tocantins,Tocantinópolis",
+    "uf": "TO",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -6.15870173,
+    "centroidLon": -47.6515401679015
+  },
+  {
+    "nome": "Apipica",
+    "etnia": "Múra",
+    "municipio": "Careiro da Várzea",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.364576765,
+    "centroidLon": -59.3452693
+  },
+  {
+    "nome": "Apucarana",
+    "etnia": "Kaingang",
+    "municipio": "Londrina",
+    "uf": "PR",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -23.7984894319395,
+    "centroidLon": -50.923430247423994
+  },
+  {
+    "nome": "Apurinã do Igarapé São João",
+    "etnia": "Apurinã",
+    "municipio": "Tapauá",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -5.5650810449999994,
+    "centroidLon": -63.13620668
+  },
+  {
+    "nome": "Apurinã Igarapé Tauamirim",
+    "etnia": "Apurinã",
+    "municipio": "Tapauá",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -5.676070420593307,
+    "centroidLon": -62.99698896156502
+  },
+  {
+    "nome": "Apurinã Km 124 BR-317",
+    "etnia": "Apurinã",
+    "municipio": "Boca do Acre,Lábrea",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -9.312849700000001,
+    "centroidLon": -67.213910965
+  },
+  {
+    "nome": "Apyterewa",
+    "etnia": "Parakanã",
+    "municipio": "São Félix do Xingu",
+    "uf": "PA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -5.630881544999999,
+    "centroidLon": -52.035322120000004
+  },
+  {
+    "nome": "Araçá",
+    "etnia": "Wapixana",
+    "municipio": "Amajari",
+    "uf": "RR",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": 3.628014585,
+    "centroidLon": -61.110434999999995
+  },
+  {
+    "nome": "Arara",
+    "etnia": "Arara do Pará",
+    "municipio": "Medicilândia,Brasil Novo,Altamira,Uruará",
+    "uf": "PA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.759967009655262,
+    "centroidLon": -53.07788574228918
+  },
+  {
+    "nome": "Arara do Rio Branco",
+    "etnia": "Arara do Acre",
+    "municipio": "Aripuanã,Colniza",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -9.772597094739249,
+    "centroidLon": -59.5906768456112
+  },
+  {
+    "nome": "Arara do Igarapé Humaitá",
+    "etnia": "Arara do Acre",
+    "municipio": "Tarauacá,Porto Walter",
+    "uf": "AC",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -8.431397203656116,
+    "centroidLon": -72.39275016558872
+  },
+  {
+    "nome": "Araribá",
+    "etnia": "Terena,Guarani Kaiowá",
+    "municipio": "Avaí",
+    "uf": "SP",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -22.273157106391,
+    "centroidLon": -49.3531123955225
+  },
+  {
+    "nome": "Arariboia",
+    "etnia": "Guajá",
+    "municipio": "Arame,Buriticupu,Amarante do Maranhão,Bom Jesus das Selvas,Santa Luzia,Grajaú",
+    "uf": "MA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -5.085822115,
+    "centroidLon": -46.40581207
+  },
+  {
+    "nome": "Arary",
+    "etnia": "Múra",
+    "municipio": "Novo Aripuanã,Borba",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -4.75514102369295,
+    "centroidLon": -60.024579920708
+  },
+  {
+    "nome": "Araweté Igarapé Ipixuna",
+    "etnia": "Araweté",
+    "municipio": "Altamira,São Félix do Xingu,Senador José Porfírio",
+    "uf": "PA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -4.82245506,
+    "centroidLon": -52.460825785
+  },
+  {
+    "nome": "Areões",
+    "etnia": "Xavante",
+    "municipio": "Água Boa",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -14.388581145,
+    "centroidLon": -52.014338715
+  },
+  {
+    "nome": "Aripuanã",
+    "etnia": "Cinta Larga",
+    "municipio": "Aripuanã,Juína",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -10.565284225,
+    "centroidLon": -59.96512266
+  },
+  {
+    "nome": "Ariramba",
+    "etnia": "Múra",
+    "municipio": "Manicoré",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -6.12628733,
+    "centroidLon": -62.256736045
+  },
+  {
+    "nome": "Arroio-Korá",
+    "etnia": "Guarani Kaiowá",
+    "municipio": "Paranhos",
+    "uf": "MS",
+    "fase": "Homologada",
+    "area_ha": 0,
+    "centroidLat": -23.7133853306535,
+    "centroidLon": -55.2803607589075
+  },
+  {
+    "nome": "Atikum",
+    "etnia": "Atikum",
+    "municipio": "Salgueiro,Mirandiba,Carnaubeira da Penha,Belém do São Francisco",
+    "uf": "PE",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -8.289252018376954,
+    "centroidLon": -38.8299049537739
+  },
+  {
+    "nome": "Avá-Canoeiro",
+    "etnia": "Ava-Canoeiro",
+    "municipio": "Minaçu,Colinas do Sul",
+    "uf": "GO",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -13.837139870000001,
+    "centroidLon": -48.238116000000005
+  },
+  {
+    "nome": "Avá-Guarani do Ocoí",
+    "etnia": "Guarani Kaiowá",
+    "municipio": "São Miguel do Iguaçu",
+    "uf": "PR",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -25.243196276389,
+    "centroidLon": -54.3150235833335
+  },
+  {
+    "nome": "Awa",
+    "etnia": "Guajá",
+    "municipio": "Governador Newton Bello,Centro Novo do Maranhão,Zé Doca,São João do Carú",
+    "uf": "MA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.339635293777116,
+    "centroidLon": -46.44550072279536
+  },
+  {
+    "nome": "Bacurizinho",
+    "etnia": "Guajá",
+    "municipio": "Grajaú",
+    "uf": "MA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -5.892472201072501,
+    "centroidLon": -45.7845917365195
+  },
+  {
+    "nome": "Bacurizinho",
+    "etnia": "Guajá",
+    "municipio": "Grajaú",
+    "uf": "MA",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -5.92914181931935,
+    "centroidLon": -45.803870642739
+  },
+  {
+    "nome": "Badjonkore",
+    "etnia": "Kayapó",
+    "municipio": "Cumaru do Norte,São Félix do Xingu",
+    "uf": "PA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -8.8972085993894,
+    "centroidLon": -52.020668615000005
+  },
+  {
+    "nome": "Baía dos Guató",
+    "etnia": "Guató",
+    "municipio": "Barão de Melgaço,Poconé",
+    "uf": "MT",
+    "fase": "Homologada",
+    "area_ha": 0,
+    "centroidLat": -16.97943776557475,
+    "centroidLon": -56.5457051140195
+  },
+  {
+    "nome": "Bakairi",
+    "etnia": "Bakairí",
+    "municipio": "Planalto da Serra,Paranatinga",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -14.2978826668145,
+    "centroidLon": -54.6251999400415
+  },
+  {
+    "nome": "Balaio",
+    "etnia": "Tukano,Tariana,Desána",
+    "municipio": "São Gabriel da Cachoeira",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": 0.40326955129276604,
+    "centroidLon": -66.58414398775346
+  },
+  {
+    "nome": "Banawá",
+    "etnia": "Banawa",
+    "municipio": "Tapauá,Canutama,Lábrea",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -6.808370316464334,
+    "centroidLon": -64.89847638003624
+  },
+  {
+    "nome": "Barão de Antonina",
+    "etnia": "Kaingang",
+    "municipio": "São Jerônimo da Serra",
+    "uf": "PR",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -23.6642816110735,
+    "centroidLon": -50.8753858123365
+  },
+  {
+    "nome": "Barata Livramento",
+    "etnia": "Makuxí,Wapixana",
+    "municipio": "Alto Alegre",
+    "uf": "RR",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": 3.31791019,
+    "centroidLon": -61.067252896374
+  },
+  {
+    "nome": "Barra",
+    "etnia": "Kiriri,Atikum",
+    "municipio": "Muquém de São Francisco",
+    "uf": "BA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -12.170879258753999,
+    "centroidLon": -43.251483551956994
+  },
+  {
+    "nome": "Barra Velha",
+    "etnia": "Pataxó",
+    "municipio": "Porto Seguro",
+    "uf": "BA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -16.8580752950065,
+    "centroidLon": -39.265444695
+  },
+  {
+    "nome": "Barra Velha do Monte Pascoal",
+    "etnia": "Pataxó",
+    "municipio": "Porto Seguro",
+    "uf": "BA",
+    "fase": "Delimitada",
+    "area_ha": 0,
+    "centroidLat": -16.845730995,
+    "centroidLon": -39.320365960000004
+  },
+  {
+    "nome": "Barreira da Missão",
+    "etnia": "Kambéba,Kokama",
+    "municipio": "Tefé",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.4164688500000002,
+    "centroidLon": -64.63493244
+  },
+  {
+    "nome": "Batovi",
+    "etnia": "Wauja",
+    "municipio": "Gaúcha do Norte",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -12.944681428123715,
+    "centroidLon": -53.93463762902715
+  },
+  {
+    "nome": "Baú",
+    "etnia": "Kayapó",
+    "municipio": "Altamira",
+    "uf": "PA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -7.302888030214149,
+    "centroidLon": -54.46141280303192
+  },
+  {
+    "nome": "Betania",
+    "etnia": "Tikúna",
+    "municipio": "Tonantins,Santo Antônio do Içá,Amaturá",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.09721631831535,
+    "centroidLon": -68.066109475166
+  },
+  {
+    "nome": "Boa Vista Sertão do Promirim",
+    "etnia": "Guaraní",
+    "municipio": "Ubatuba",
+    "uf": "SP",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -23.353392739934833,
+    "centroidLon": -44.985214438584364
+  },
+  {
+    "nome": "Boa Vista Sertão do Promirim",
+    "etnia": "Guaraní",
+    "municipio": "Ubatuba",
+    "uf": "SP",
+    "fase": "Delimitada",
+    "area_ha": 0,
+    "centroidLat": -23.350341461880816,
+    "centroidLon": -44.9979318422148
+  },
+  {
+    "nome": "Boca do Acre",
+    "etnia": "Apurinã",
+    "municipio": "Boca do Acre,Lábrea",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -9.065898995000001,
+    "centroidLon": -67.11257534500001
+  },
+  {
+    "nome": "Bom Intento",
+    "etnia": "Tikúna",
+    "municipio": "Benjamin Constant",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -4.34669831,
+    "centroidLon": -70.00428266
+  },
+  {
+    "nome": "Bom Jesus",
+    "etnia": "Makuxí",
+    "municipio": "Bonfim",
+    "uf": "RR",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": 3.451082957721,
+    "centroidLon": -59.8439832283605
+  },
+  {
+    "nome": "Boqueirão",
+    "etnia": "Makuxí,Wapixana",
+    "municipio": "Alto Alegre",
+    "uf": "RR",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": 3.2530443637696997,
+    "centroidLon": -61.297121805
+  },
+  {
+    "nome": "Brejo do Burgo",
+    "etnia": "Pankararé",
+    "municipio": "Glória,Paulo Afonso,Rodelas",
+    "uf": "BA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -9.342209921883239,
+    "centroidLon": -38.54655456857722
+  },
+  {
+    "nome": "Buriti",
+    "etnia": "Terena",
+    "municipio": "Sidrolândia,Dois Irmãos do Buriti",
+    "uf": "MS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -20.85978687,
+    "centroidLon": -55.18557357500001
+  },
+  {
+    "nome": "Buriti",
+    "etnia": "Terena",
+    "municipio": "Sidrolândia,Dois Irmãos do Buriti",
+    "uf": "MS",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -20.896528574999998,
+    "centroidLon": -55.1650632649865
+  },
+  {
+    "nome": "Buritizinho",
+    "etnia": "Guarani Kaiowá",
+    "municipio": "Sidrolândia",
+    "uf": "MS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -20.93965352670918,
+    "centroidLon": -54.975186714313054
+  },
+  {
+    "nome": "Caarapó",
+    "etnia": "Guarani Kaiowá",
+    "municipio": "Caarapó",
+    "uf": "MS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -22.597550802778,
+    "centroidLon": -54.963612297222
+  },
+  {
+    "nome": "Cabeceira do Rio Acre",
+    "etnia": "Yaminawa",
+    "municipio": "Sena Madureira,Assis Brasil",
+    "uf": "AC",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -10.890375435,
+    "centroidLon": -69.97103487
+  },
+  {
+    "nome": "Cacau do Tarauaca",
+    "etnia": "Kulina Páno",
+    "municipio": "Envira",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -7.42763628595344,
+    "centroidLon": -69.90487751333293
+  },
+  {
+    "nome": "Cachoeira dos Inácios",
+    "etnia": "Guarani Mbya",
+    "municipio": "Imaruí",
+    "uf": "SC",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -28.182257797767,
+    "centroidLon": -48.799585408754
+  },
+  {
+    "nome": "Cachoeira Seca",
+    "etnia": "Arara do Pará",
+    "municipio": "Altamira,Uruará,Placas",
+    "uf": "PA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -4.341276753860994,
+    "centroidLon": -54.043185695
+  },
+  {
+    "nome": "Cachoeirinha",
+    "etnia": "Terena",
+    "municipio": "Miranda",
+    "uf": "MS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -20.185198335000003,
+    "centroidLon": -56.27039024
+  },
+  {
+    "nome": "Cachoeirinha",
+    "etnia": "Terena",
+    "municipio": "Miranda",
+    "uf": "MS",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -20.097623069097,
+    "centroidLon": -56.214647255
+  },
+  {
+    "nome": "Cacique Doble",
+    "etnia": "Guaraní,Kaingang",
+    "municipio": "Cacique Doble,São José do Ouro",
+    "uf": "RS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -27.834395,
+    "centroidLon": -51.63651199
+  },
+  {
+    "nome": "Caiçara/Ilha de São Pedro",
+    "etnia": "Xocó",
+    "municipio": "Porto da Folha",
+    "uf": "SE",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -9.81647538,
+    "centroidLon": -37.385524020000005
+  },
+  {
+    "nome": "Tupiniquim",
+    "etnia": "Tupiniquim",
+    "municipio": "Aracruz",
+    "uf": "ES",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -19.88356498373947,
+    "centroidLon": -40.17709374643009
+  },
+  {
+    "nome": "Caititu",
+    "etnia": "Apurinã",
+    "municipio": "Lábrea",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -7.82191595266925,
+    "centroidLon": -64.77871694712749
+  },
+  {
+    "nome": "Cajueiro",
+    "etnia": "Makuxí",
+    "municipio": "Amajari",
+    "uf": "RR",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": 3.7619212356692344,
+    "centroidLon": -61.305485920250476
+  },
+  {
+    "nome": "Cajuhiri Atravessado",
+    "etnia": "Kambéba,Miránha,Tikúna",
+    "municipio": "Coari",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.99170494450705,
+    "centroidLon": -63.3693271174395
+  },
+  {
+    "nome": "Camadeni",
+    "etnia": "Jamamadí",
+    "municipio": "Pauini",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -7.209806302097633,
+    "centroidLon": -67.0849487695524
+  },
+  {
+    "nome": "Camicua",
+    "etnia": "Apurinã",
+    "municipio": "Boca do Acre",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -8.61687705,
+    "centroidLon": -67.55802363000001
+  },
+  {
+    "nome": "Campinas/Katukina",
+    "etnia": "Katukina",
+    "municipio": "Cruzeiro do Sul",
+    "uf": "AC",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -7.8037938478271,
+    "centroidLon": -72.172140533694
+  },
+  {
+    "nome": "Cana Brava/Guajajara",
+    "etnia": "Tenetehara",
+    "municipio": "Jenipapo dos Vieiras,Barra do Corda,Barão de Grajaú",
+    "uf": "MA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -5.636156805,
+    "centroidLon": -45.550243554999994
+  },
+  {
+    "nome": "Canauanim",
+    "etnia": "Makuxí,Wapixana",
+    "municipio": "Cantá",
+    "uf": "RR",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": 2.77134765972005,
+    "centroidLon": -60.496189305
+  },
+  {
+    "nome": "Cantagalo",
+    "etnia": "Guarani Mbya",
+    "municipio": "Porto Alegre,Viamão",
+    "uf": "RS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -30.188728235348208,
+    "centroidLon": -51.02372851279597
+  },
+  {
+    "nome": "Capivara",
+    "etnia": "Múra",
+    "municipio": "Autazes",
+    "uf": "AM",
+    "fase": "Delimitada",
+    "area_ha": 0,
+    "centroidLat": -3.6572006049014503,
+    "centroidLon": -59.436260485708004
+  },
+  {
+    "nome": "Capivari",
+    "etnia": "Guarani Mbya",
+    "municipio": "Palmares do Sul",
+    "uf": "RS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -30.358910677906294,
+    "centroidLon": -50.35532684064404
+  },
+  {
+    "nome": "Capoto/Jarina",
+    "etnia": "Kayapó",
+    "municipio": "São José do Xingu,Santa Cruz do Xingu,Peixoto de Azevedo",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -10.227124759999999,
+    "centroidLon": -53.12213156
+  },
+  {
+    "nome": "Caramuru/Paraguassu",
+    "etnia": "Pataxo Há-Há-Há",
+    "municipio": "Pau Brasil,Itaju do Colônia,Camacan",
+    "uf": "BA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -15.3645537594105,
+    "centroidLon": -39.6848838616665
+  },
+  {
+    "nome": "Carretão I",
+    "etnia": "Tapuia",
+    "municipio": "Rubiataba,Nova América",
+    "uf": "GO",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -15.107720457219,
+    "centroidLon": -50.039452763487
+  },
+  {
+    "nome": "Carretão II",
+    "etnia": "Tapuia",
+    "municipio": "Nova América",
+    "uf": "GO",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -15.0555233986195,
+    "centroidLon": -50.018332380000004
+  },
+  {
+    "nome": "Carreteiro",
+    "etnia": "Kaingang",
+    "municipio": "Água Santa",
+    "uf": "RS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -28.194491215,
+    "centroidLon": -52.0143853
+  },
+  {
+    "nome": "Caru",
+    "etnia": "Tenetehara",
+    "municipio": "Bom Jardim",
+    "uf": "MA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.7365357550000002,
+    "centroidLon": -46.345786355
+  },
+  {
+    "nome": "Catipari/Mamoria",
+    "etnia": "Apurinã",
+    "municipio": "Pauini",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -7.510292005,
+    "centroidLon": -66.74688571
+  },
+  {
+    "nome": "Cerrito",
+    "etnia": "Guarani Nhandeva",
+    "municipio": "Eldorado",
+    "uf": "MS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -23.5904606227965,
+    "centroidLon": -54.2872645557965
+  },
+  {
+    "nome": "Chão Preto",
+    "etnia": "Xavante",
+    "municipio": "Campinápolis",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -14.598119763300843,
+    "centroidLon": -53.23511589750365
+  },
+  {
+    "nome": "Coata-Laranjal",
+    "etnia": "Mundurukú",
+    "municipio": "Borba",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -4.604454943859054,
+    "centroidLon": -59.128916462555594
+  },
+  {
+    "nome": "Comboios",
+    "etnia": "Guaraní,Tupiniquim",
+    "municipio": "Aracruz",
+    "uf": "ES",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -19.7629441681175,
+    "centroidLon": -40.0088439956575
+  },
+  {
+    "nome": "Coroa Vermelha",
+    "etnia": "Pataxó",
+    "municipio": "Santa Cruz Cabrália,Porto Seguro",
+    "uf": "BA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -16.34966769,
+    "centroidLon": -39.038369056614
+  },
+  {
+    "nome": "Córrego João Pereira",
+    "etnia": "Tremembé",
+    "municipio": "Itarema,Acaraú",
+    "uf": "CE",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.10508572912825,
+    "centroidLon": -39.969415751677
+  },
+  {
+    "nome": "Cuia",
+    "etnia": "Múra",
+    "municipio": "Autazes",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.5129249083844627,
+    "centroidLon": -59.208214063295316
+  },
+  {
+    "nome": "Cuiu-Cuiu",
+    "etnia": "Miránha",
+    "municipio": "Maraã",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -2.397574877362217,
+    "centroidLon": -65.00651003531738
+  },
+  {
+    "nome": "Cunhã-Sapucaia",
+    "etnia": "Múra",
+    "municipio": "Borba,Autazes",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -4.530760681185797,
+    "centroidLon": -60.42805345840944
+  },
+  {
+    "nome": "Deni",
+    "etnia": "Dení",
+    "municipio": "Tapauá,Lábrea,Itamarati,Pauini",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -6.676531718193587,
+    "centroidLon": -67.51434392034574
+  },
+  {
+    "nome": "Diahui",
+    "etnia": "Diahói",
+    "municipio": "Humaitá",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -7.9731686387780485,
+    "centroidLon": -62.27219344316114
+  },
+  {
+    "nome": "Dourados",
+    "etnia": "Guarani Nhandeva,Terena",
+    "municipio": "Dourados",
+    "uf": "MS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -22.173876101389,
+    "centroidLon": -54.833863581944
+  },
+  {
+    "nome": "Enawenê-Nawê",
+    "etnia": "Enawenê-Nawê",
+    "municipio": "Comodoro,Sapezal,Juína",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -12.185258863707,
+    "centroidLon": -59.1938057759805
+  },
+  {
+    "nome": "Entre Serras",
+    "etnia": "Pankararú",
+    "municipio": "Petrolândia,Tacaratu,Jatobá",
+    "uf": "PE",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -9.1092664034735,
+    "centroidLon": -38.192777635352996
+  },
+  {
+    "nome": "Erikpatsá",
+    "etnia": "Rikbaktsa",
+    "municipio": "Brasnorte",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -11.212824302874395,
+    "centroidLon": -58.253831652200205
+  },
+  {
+    "nome": "Escondido",
+    "etnia": "Rikbaktsa",
+    "municipio": "Cotriguaçu",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -9.43212916548065,
+    "centroidLon": -58.637454004971005
+  },
+  {
+    "nome": "Espírito Santo",
+    "etnia": "Kokama",
+    "municipio": "Jutaí",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -2.7413232450000002,
+    "centroidLon": -67.07877772500001
+  },
+  {
+    "nome": "Estação Parecis",
+    "etnia": "Paresí",
+    "municipio": "Diamantino",
+    "uf": "MT",
+    "fase": "Homologada",
+    "area_ha": 0,
+    "centroidLat": -14.133935026245041,
+    "centroidLon": -56.926679824270025
+  },
+  {
+    "nome": "Estivadinho",
+    "etnia": "Paresí",
+    "municipio": "Tangará da Serra",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -14.590797339719927,
+    "centroidLon": -58.64375621011706
+  },
+  {
+    "nome": "Estrela da Paz",
+    "etnia": "Tikúna",
+    "municipio": "Jutaí",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -2.8415848755686284,
+    "centroidLon": -66.8682808398803
+  },
+  {
+    "nome": "Évare I",
+    "etnia": "Tikúna",
+    "municipio": "Santo Antônio do Içá,São Paulo de Olivença,Tabatinga",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.7756229888914996,
+    "centroidLon": -69.523851245
+  },
+  {
+    "nome": "Évare II",
+    "etnia": "Tikúna",
+    "municipio": "São Paulo de Olivença",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.813741961618092,
+    "centroidLon": -69.27502915379824
+  },
+  {
+    "nome": "Faxinal",
+    "etnia": "Kaingang",
+    "municipio": "Cândido de Abreu",
+    "uf": "PR",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -24.6478423193525,
+    "centroidLon": -51.277426286244
+  },
+  {
+    "nome": "Fazenda Bahiana",
+    "etnia": "Pataxó",
+    "municipio": "Camamu",
+    "uf": "BA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -13.96565369481715,
+    "centroidLon": -39.20084382621232
+  },
+  {
+    "nome": "Fazenda Canto",
+    "etnia": "Xucuru - Kariri",
+    "municipio": "Palmeira dos Índios",
+    "uf": "AL",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -9.39405843287966,
+    "centroidLon": -36.58493570158575
+  },
+  {
+    "nome": "Tuxá de Inajá",
+    "etnia": "Tuxá",
+    "municipio": "Inajá",
+    "uf": "PE",
+    "fase": "Encaminhada RI",
+    "area_ha": 0,
+    "centroidLat": -8.773661900375117,
+    "centroidLon": -37.695711820970246
+  },
+  {
+    "nome": "Fazenda Guarani",
+    "etnia": "Pataxó,Krenák",
+    "municipio": "Senhora do Porto,Carmésia",
+    "uf": "MG",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -19.039021218589767,
+    "centroidLon": -43.120960805735365
+  },
+  {
+    "nome": "Figueiras",
+    "etnia": "Paresí",
+    "municipio": "Barra do Bugres,Tangará da Serra",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -14.776523045,
+    "centroidLon": -58.655506465
+  },
+  {
+    "nome": "Fortaleza do Castanho",
+    "etnia": "Múra",
+    "municipio": "Manaquiri",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.751985547771881,
+    "centroidLon": -60.53095459100905
+  },
+  {
+    "nome": "Fortaleza do Patauá",
+    "etnia": "Apurinã",
+    "municipio": "Manacapuru",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.145829587452539,
+    "centroidLon": -60.740286323111945
+  },
+  {
+    "nome": "Fulni-ô",
+    "etnia": "Fulni-ô",
+    "municipio": "Itaíba,Águas Belas",
+    "uf": "PE",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -9.1135648105257,
+    "centroidLon": -37.11085
+  },
+  {
+    "nome": "Funil",
+    "etnia": "Xerente",
+    "municipio": "Tocantínia",
+    "uf": "TO",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -9.63192266823,
+    "centroidLon": -48.3174596719
+  },
+  {
+    "nome": "Galibi",
+    "etnia": "Galibi do Oiapoque",
+    "municipio": "Oiapoque",
+    "uf": "AP",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": 3.9597305,
+    "centroidLon": -51.730953667648
+  },
+  {
+    "nome": "Gavião",
+    "etnia": "Múra",
+    "municipio": "Careiro da Várzea",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.4236779830801822,
+    "centroidLon": -59.48482007361426
+  },
+  {
+    "nome": "Geralda Toco Preto",
+    "etnia": "Timbira",
+    "municipio": "Arame,Itaipava do Grajaú",
+    "uf": "MA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -5.016810627540224,
+    "centroidLon": -45.70515877226504
+  },
+  {
+    "nome": "Governador",
+    "etnia": "Tenetehara,Gavião Pukobiê",
+    "municipio": "Amarante do Maranhão",
+    "uf": "MA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -5.4915210249167,
+    "centroidLon": -46.6487411347565
+  },
+  {
+    "nome": "Guaimbé",
+    "etnia": "Guarani Kaiowá",
+    "municipio": "Laguna Carapã",
+    "uf": "MS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -22.85491867,
+    "centroidLon": -55.203080465
+  },
+  {
+    "nome": "Guajahã",
+    "etnia": "Apurinã",
+    "municipio": "Pauini",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -7.722868034856305,
+    "centroidLon": -66.8563939923921
+  },
+  {
+    "nome": "Guarani Araponga",
+    "etnia": "Guaraní",
+    "municipio": "Paraty",
+    "uf": "RJ",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -23.310701343387336,
+    "centroidLon": -44.77509155336813
+  },
+  {
+    "nome": "Guarani Barra do Ouro",
+    "etnia": "Guaraní",
+    "municipio": "Caraá,Riozinho,Maquiné",
+    "uf": "RS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -29.668236460000003,
+    "centroidLon": -50.29589758
+  },
+  {
+    "nome": "Guarani da Barragem",
+    "etnia": "Guarani Kaiowá",
+    "municipio": "São Paulo",
+    "uf": "SP",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -23.868637778627,
+    "centroidLon": -46.650211183953004
+  },
+  {
+    "nome": "Guarani de Águas Brancas",
+    "etnia": "Guaraní",
+    "municipio": "Arambaré",
+    "uf": "RS",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -30.761169535194,
+    "centroidLon": -51.62179686492
+  },
+  {
+    "nome": "Guarani de Bracui",
+    "etnia": "Guaraní",
+    "municipio": "Angra dos Reis",
+    "uf": "RJ",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -22.8821537899165,
+    "centroidLon": -44.379292156384
+  },
+  {
+    "nome": "Guarani do Aguapeu",
+    "etnia": "Guaraní",
+    "municipio": "Mongaguá",
+    "uf": "SP",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -24.048737800037003,
+    "centroidLon": -46.6492591342805
+  },
+  {
+    "nome": "Guarani de Araçai",
+    "etnia": "Guaraní",
+    "municipio": "Cunha Porã,Saudades",
+    "uf": "SC",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -26.8687456456585,
+    "centroidLon": -53.108534676553006
+  },
+  {
+    "nome": "Guarani Votouro",
+    "etnia": "Guaraní",
+    "municipio": "Benjamin Constant do Sul",
+    "uf": "RS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -27.5018757945055,
+    "centroidLon": -52.682461811127
+  },
+  {
+    "nome": "Guarita",
+    "etnia": "Guaraní,Kaingang",
+    "municipio": "Tenente Portela,Redentora,Erval Seco",
+    "uf": "RS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -27.46831626,
+    "centroidLon": -53.646798245
+  },
+  {
+    "nome": "Guasuti",
+    "etnia": "Guarani Kaiowá",
+    "municipio": "Aral Moreira",
+    "uf": "MS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -23.0694091396495,
+    "centroidLon": -55.50201561
+  },
+  {
+    "nome": "Guató",
+    "etnia": "Guató",
+    "municipio": "Corumbá",
+    "uf": "MS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -17.62441969,
+    "centroidLon": -57.7310478539155
+  },
+  {
+    "nome": "Guyraroká",
+    "etnia": "Guarani Kaiowá",
+    "municipio": "Caarapó",
+    "uf": "MS",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -22.5304470583175,
+    "centroidLon": -54.625109206939996
+  },
+  {
+    "nome": "Hi Merimã",
+    "etnia": "Himarimã",
+    "municipio": "Tapauá,Lábrea",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -7.011767298535773,
+    "centroidLon": -65.64155091551251
+  },
+  {
+    "nome": "Ibirama",
+    "etnia": "Xokléng,Guaraní,Kaingang",
+    "municipio": "Doutor Pedrinho,Vitor Meireles,José Boiteux,Itaiópolis",
+    "uf": "SC",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -26.812830268300075,
+    "centroidLon": -49.70860482656437
+  },
+  {
+    "nome": "Ibirama-La Klãnô",
+    "etnia": "Xokléng,Guaraní,Kaingang",
+    "municipio": "Rio Negrinho,Doutor Pedrinho,Vitor Meireles,José Boiteux,Itaiópolis",
+    "uf": "SC",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -26.785249921231497,
+    "centroidLon": -49.7741759372935
+  },
+  {
+    "nome": "Tuxá de Ibotirama",
+    "etnia": "Tuxá",
+    "municipio": "Ibotirama",
+    "uf": "BA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -12.073617935981,
+    "centroidLon": -43.257287760048
+  },
+  {
+    "nome": "Icatu",
+    "etnia": "Terena,Kaingang",
+    "municipio": "Braúna",
+    "uf": "SP",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -21.565339722451,
+    "centroidLon": -50.315703033185
+  },
+  {
+    "nome": "Igarapé Capana",
+    "etnia": "Jamamadí",
+    "municipio": "Boca do Acre",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -8.86574677,
+    "centroidLon": -68.16156784
+  },
+  {
+    "nome": "Igarapé do Caucho",
+    "etnia": "Kaxinawá",
+    "municipio": "Tarauacá,Feijó",
+    "uf": "AC",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -8.2745704610351,
+    "centroidLon": -70.69359595301
+  },
+  {
+    "nome": "Igarapé Grande",
+    "etnia": "Kambéba",
+    "municipio": "Alvarães",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.22184680962431,
+    "centroidLon": -64.87675346044716
+  },
+  {
+    "nome": "Igarapé Lage",
+    "etnia": "Pakaa Nova",
+    "municipio": "Guajará-Mirim,Nova Mamoré",
+    "uf": "RO",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -10.527755964942312,
+    "centroidLon": -65.03452113244947
+  },
+  {
+    "nome": "Igarapé Lourdes",
+    "etnia": "Gavião de Rondônia",
+    "municipio": "Ji-Paraná",
+    "uf": "RO",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -10.50934586625,
+    "centroidLon": -61.6629713947
+  },
+  {
+    "nome": "Igarapé Ribeirão",
+    "etnia": "Pakaa Nova",
+    "municipio": "Nova Mamoré",
+    "uf": "RO",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -10.2736834871915,
+    "centroidLon": -65.1018650134475
+  },
+  {
+    "nome": "Ilha da Cotinga",
+    "etnia": "Guaraní",
+    "municipio": "Paranaguá",
+    "uf": "PR",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -25.5241181417545,
+    "centroidLon": -48.4462460729595
+  },
+  {
+    "nome": "Ilha do Camaleão",
+    "etnia": "Tikúna",
+    "municipio": "Anamã",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.6731098517402643,
+    "centroidLon": -61.49767061873362
+  },
+  {
+    "nome": "Imbiriba",
+    "etnia": "Pataxó",
+    "municipio": "Porto Seguro",
+    "uf": "BA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -16.652777345,
+    "centroidLon": -39.160466225
+  },
+  {
+    "nome": "Inauini/Teuini",
+    "etnia": "Jamamadí",
+    "municipio": "Boca do Acre,Pauini",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -7.9174876,
+    "centroidLon": -68.1791695
+  },
+  {
+    "nome": "Inawebohona",
+    "etnia": "Javaé,Karajá",
+    "municipio": "Lagoa da Confusão,Pium",
+    "uf": "TO",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -10.682456700631501,
+    "centroidLon": -50.160030891575005
+  },
+  {
+    "nome": "Inhacorá",
+    "etnia": "Kaingang",
+    "municipio": "São Valério do Sul",
+    "uf": "RS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -27.852065643583,
+    "centroidLon": -53.8894732724995
+  },
+  {
+    "nome": "Ipixuna",
+    "etnia": "Diahói",
+    "municipio": "Humaitá",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -6.800395876563755,
+    "centroidLon": -62.19692624560105
+  },
+  {
+    "nome": "Irantxe",
+    "etnia": "Irántxe",
+    "municipio": "Brasnorte",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -12.8456347,
+    "centroidLon": -57.960796305
+  },
+  {
+    "nome": "Manoki",
+    "etnia": "Irántxe",
+    "municipio": "Brasnorte",
+    "uf": "MT",
+    "fase": "Homologada",
+    "area_ha": 0,
+    "centroidLat": -12.662195405,
+    "centroidLon": -57.72844671
+  },
+  {
+    "nome": "Irapuá",
+    "etnia": "Guaraní",
+    "municipio": "Caçapava do Sul",
+    "uf": "RS",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -30.337584322136735,
+    "centroidLon": -53.198170904040666
+  },
+  {
+    "nome": "Itaitinga",
+    "etnia": "Múra",
+    "municipio": "Autazes",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.5641004449866784,
+    "centroidLon": -59.197196698820505
+  },
+  {
+    "nome": "Itaóca",
+    "etnia": "Guarani Mbya",
+    "municipio": "Mongaguá",
+    "uf": "SP",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -24.086273905,
+    "centroidLon": -46.701345704999994
+  },
+  {
+    "nome": "Ivai",
+    "etnia": "Kaingang",
+    "municipio": "Pitanga,Manoel Ribas",
+    "uf": "PR",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -24.588233555000002,
+    "centroidLon": -51.586754885
+  },
+  {
+    "nome": "Jabuti",
+    "etnia": "Makuxí,Wapixana",
+    "municipio": "Bonfim",
+    "uf": "RR",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": 3.20396646540655,
+    "centroidLon": -60.296053573695005
+  },
+  {
+    "nome": "Jacamim",
+    "etnia": "Jaricuna,Wapixana",
+    "municipio": "Bonfim,Caracaraí",
+    "uf": "RR",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": 1.99274934,
+    "centroidLon": -59.84815813
+  },
+  {
+    "nome": "Jacaré de São Domingos",
+    "etnia": "Potiguara",
+    "municipio": "Rio Tinto,Marcação",
+    "uf": "PB",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -6.730836945,
+    "centroidLon": -35.085515279999996
+  },
+  {
+    "nome": "Jaguapiré",
+    "etnia": "Guarani Kaiowá",
+    "municipio": "Tacuru",
+    "uf": "MS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -23.722376825,
+    "centroidLon": -54.95330837
+  },
+  {
+    "nome": "Jaguari",
+    "etnia": "Guarani Kaiowá",
+    "municipio": "Amambai",
+    "uf": "MS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -23.0554231641515,
+    "centroidLon": -54.9186209847325
+  },
+  {
+    "nome": "Jaminaua/Envira",
+    "etnia": "Kulina Madijá",
+    "municipio": "Feijó",
+    "uf": "AC",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -9.493885725219968,
+    "centroidLon": -71.0844183102655
+  },
+  {
+    "nome": "Jaminawa Arara do Rio Bagé",
+    "etnia": "Yaminawa,Arara do Acre",
+    "municipio": "Marechal Thaumaturgo,Jordão",
+    "uf": "AC",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -8.842663314173826,
+    "centroidLon": -72.19278808600515
+  },
+  {
+    "nome": "Jaminawa do Igarapé Preto",
+    "etnia": "Yaminawa",
+    "municipio": "Cruzeiro do Sul",
+    "uf": "AC",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -8.03424117,
+    "centroidLon": -72.91947327361001
+  },
+  {
+    "nome": "Japuira",
+    "etnia": "Rikbaktsa",
+    "municipio": "Juara",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -10.714121155,
+    "centroidLon": -58.232103085
+  },
+  {
+    "nome": "Jaquiri",
+    "etnia": "Kambéba",
+    "municipio": "Uarini",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.0826757750000002,
+    "centroidLon": -64.87330287500001
+  },
+  {
+    "nome": "Jaraguá",
+    "etnia": "Guaraní",
+    "municipio": "São Paulo,Osasco",
+    "uf": "SP",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -23.464291069028,
+    "centroidLon": -46.7540608793055
+  },
+  {
+    "nome": "Jaraguá",
+    "etnia": "Guaraní",
+    "municipio": "São Paulo,Osasco",
+    "uf": "SP",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -23.459785972222498,
+    "centroidLon": -46.770585972222506
+  },
+  {
+    "nome": "Jarara",
+    "etnia": "Guarani Kaiowá",
+    "municipio": "Juti",
+    "uf": "MS",
+    "fase": "Homologada",
+    "area_ha": 0,
+    "centroidLat": -22.9245522524915,
+    "centroidLon": -54.608295003913
+  },
+  {
+    "nome": "Jarawara/Jamamadi/Kanamati",
+    "etnia": "Yaminawa,Jamamadí,Kanamarí",
+    "municipio": "Tapauá,Lábrea",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -7.129536653349902,
+    "centroidLon": -65.38020767338048
+  },
+  {
+    "nome": "Jarudore",
+    "etnia": "Boróro",
+    "municipio": "Poxoréo",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -16.184831441111,
+    "centroidLon": -54.319311957222
+  },
+  {
+    "nome": "Jatuarana",
+    "etnia": "Apurinã",
+    "municipio": "Manacapuru",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.084239167908521,
+    "centroidLon": -60.913675306533264
+  },
+  {
+    "nome": "Jauary",
+    "etnia": "Múra",
+    "municipio": "Autazes",
+    "uf": "AM",
+    "fase": "Delimitada",
+    "area_ha": 0,
+    "centroidLat": -3.414100305594019,
+    "centroidLon": -59.045127511397936
+  },
+  {
+    "nome": "Geripancó",
+    "etnia": "Jeripancó",
+    "municipio": "Pariconha",
+    "uf": "AL",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -9.228992636810151,
+    "centroidLon": -38.029133727635
+  },
+  {
+    "nome": "Juininha",
+    "etnia": "Paresí",
+    "municipio": "Conquista D´Oeste",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -14.468812830000001,
+    "centroidLon": -59.172599655
+  },
+  {
+    "nome": "Juma",
+    "etnia": "Juma",
+    "municipio": "Canutama",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -7.3332101882839495,
+    "centroidLon": -63.9684266540485
+  },
+  {
+    "nome": "Jumina",
+    "etnia": "Karipuna,Galibi do Oiapoque",
+    "municipio": "Oiapoque",
+    "uf": "AP",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": 4.0593523288293,
+    "centroidLon": -51.592051042731
+  },
+  {
+    "nome": "Kadiwéu",
+    "etnia": "Terena,Kadiwéu",
+    "municipio": "Porto Murtinho,Corumbá",
+    "uf": "MS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -20.6174945001995,
+    "centroidLon": -57.34771931
+  },
+  {
+    "nome": "Kaingang de Iraí",
+    "etnia": "Kaingang",
+    "municipio": "Iraí",
+    "uf": "RS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -27.191798739319502,
+    "centroidLon": -53.241252281714
+  },
+  {
+    "nome": "Kambiwá",
+    "etnia": "Kambiwá",
+    "municipio": "Inajá,Ibimirim,Floresta",
+    "uf": "PE",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -8.66486297849615,
+    "centroidLon": -37.868318103341
+  },
+  {
+    "nome": "Kampa do Igarapé Primavera",
+    "etnia": "Ashaninka",
+    "municipio": "Tarauacá",
+    "uf": "AC",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -8.63572817451005,
+    "centroidLon": -71.734646722216
+  },
+  {
+    "nome": "Kampa do Rio Amônia",
+    "etnia": "Ashaninka",
+    "municipio": "Marechal Thaumaturgo",
+    "uf": "AC",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -9.26837262877285,
+    "centroidLon": -73.00754671499999
+  },
+  {
+    "nome": "Kampa e Isolados do Rio Envira",
+    "etnia": "Ashaninka",
+    "municipio": "Jordão,Feijó",
+    "uf": "AC",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -9.76141606,
+    "centroidLon": -71.779776145
+  },
+  {
+    "nome": "Kanamari do Rio Juruá",
+    "etnia": "Kanamarí",
+    "municipio": "Itamarati,Pauini,Eirunepé",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -6.899184005,
+    "centroidLon": -68.985643065
+  },
+  {
+    "nome": "Kanela",
+    "etnia": "Kanela",
+    "municipio": "Fernando Falcão,Barra do Corda",
+    "uf": "MA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -6.070298455,
+    "centroidLon": -45.106883205
+  },
+  {
+    "nome": "Kanela Memortumré",
+    "etnia": "Kanela",
+    "municipio": "Fernando Falcão,Barra do Corda",
+    "uf": "MA",
+    "fase": "Delimitada",
+    "area_ha": 0,
+    "centroidLat": -6.1049776950000005,
+    "centroidLon": -45.182150675
+  },
+  {
+    "nome": "Kantaruré",
+    "etnia": "Kantaruré",
+    "municipio": "Glória",
+    "uf": "BA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -9.16412286194285,
+    "centroidLon": -38.3906948550255
+  },
+  {
+    "nome": "Kapinawá",
+    "etnia": "Kapinawá",
+    "municipio": "Buíque",
+    "uf": "PE",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -8.620075702963959,
+    "centroidLon": -37.35615437548282
+  },
+  {
+    "nome": "Karajá de Aruanã I",
+    "etnia": "Karajá",
+    "municipio": "Aruanã",
+    "uf": "GO",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -14.9145651008585,
+    "centroidLon": -51.082358690112
+  },
+  {
+    "nome": "Karajá de Aruanã II",
+    "etnia": "Karajá",
+    "municipio": "Cocalinho",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -14.9091036250555,
+    "centroidLon": -51.1034547841615
+  },
+  {
+    "nome": "Karajá de Aruanã III",
+    "etnia": "Karajá",
+    "municipio": "Aruanã",
+    "uf": "GO",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -14.873321573738501,
+    "centroidLon": -51.0780826870215
+  },
+  {
+    "nome": "Karajá Santana do Araguaia",
+    "etnia": "Karajá",
+    "municipio": "Santa Maria das Barreiras",
+    "uf": "PA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -8.87934833333335,
+    "centroidLon": -49.7713106944445
+  },
+  {
+    "nome": "Karapotó",
+    "etnia": "Karapotó",
+    "municipio": "São Sebastião",
+    "uf": "AL",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -10.011162489251,
+    "centroidLon": -36.6244729295845
+  },
+  {
+    "nome": "Kararaô",
+    "etnia": "Kayapó",
+    "municipio": "Altamira",
+    "uf": "PA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -4.122772975,
+    "centroidLon": -52.9763806746975
+  },
+  {
+    "nome": "Karipuna",
+    "etnia": "Karipuna",
+    "municipio": "Porto Velho,Nova Mamoré",
+    "uf": "RO",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -9.9282322424339,
+    "centroidLon": -64.517323725637
+  },
+  {
+    "nome": "Kariri-Xocó",
+    "etnia": "Kariri - Xocó",
+    "municipio": "São Brás,Porto Real do Colégio",
+    "uf": "AL",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -10.153851207487634,
+    "centroidLon": -36.82871705887612
+  },
+  {
+    "nome": "Kariri-Xocó",
+    "etnia": "Kariri - Xocó",
+    "municipio": "São Brás,Porto Real do Colégio",
+    "uf": "AL",
+    "fase": "Homologada",
+    "area_ha": 0,
+    "centroidLat": -10.148160479878001,
+    "centroidLon": -36.836458569119
+  },
+  {
+    "nome": "Karitiana",
+    "etnia": "Karitiana",
+    "municipio": "Porto Velho",
+    "uf": "RO",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -9.33256289603463,
+    "centroidLon": -64.04703014073004
+  },
+  {
+    "nome": "Katukina/Kaxinawá",
+    "etnia": "Kaxinawá,Katukina",
+    "municipio": "Feijó",
+    "uf": "AC",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -8.069267504636002,
+    "centroidLon": -70.40443419431429
+  },
+  {
+    "nome": "Kaxarari",
+    "etnia": "Kaxarari",
+    "municipio": "Lábrea,Porto Velho",
+    "uf": "AM,RO",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -9.369113825,
+    "centroidLon": -66.31840087
+  },
+  {
+    "nome": "Kaxinawá Ashaninka do Rio Breu",
+    "etnia": "Kaxinawá,Ashaninka",
+    "municipio": "Marechal Thaumaturgo,Jordão",
+    "uf": "AC",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -9.558969979944301,
+    "centroidLon": -72.374477635
+  },
+  {
+    "nome": "Kaxinawá Colônia Vinte e Sete",
+    "etnia": "Kaxinawá",
+    "municipio": "Tarauacá",
+    "uf": "AC",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -8.101584128297048,
+    "centroidLon": -70.78374738365301
+  },
+  {
+    "nome": "Kaxinawá da Praia do Carapanã",
+    "etnia": "Kaxinawá",
+    "municipio": "Tarauacá",
+    "uf": "AC",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -8.42247628,
+    "centroidLon": -71.36653083499999
+  },
+  {
+    "nome": "Kaxinawá do Baixo Rio Jordão",
+    "etnia": "Kaxinawá",
+    "municipio": "Jordão",
+    "uf": "AC",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -9.29009653476973,
+    "centroidLon": -72.02085001380681
+  },
+  {
+    "nome": "Kaxinawá do Rio Humaitá",
+    "etnia": "Kaxinawá",
+    "municipio": "Feijó",
+    "uf": "AC",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -9.236001755,
+    "centroidLon": -71.51794559999999
+  },
+  {
+    "nome": "Kaxinawá do Rio Jordão",
+    "etnia": "Kaxinawá",
+    "municipio": "Jordão",
+    "uf": "AC",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -9.53623346105605,
+    "centroidLon": -72.13403477
+  },
+  {
+    "nome": "Kaxinawá Nova Olinda",
+    "etnia": "Kaxinawá",
+    "municipio": "Feijó",
+    "uf": "AC",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -9.13894455315,
+    "centroidLon": -70.7078584544
+  },
+  {
+    "nome": "Kaxinawá Seringal Independência",
+    "etnia": "Kaxinawá",
+    "municipio": "Jordão",
+    "uf": "AC",
+    "fase": "Encaminhada RI",
+    "area_ha": 0,
+    "centroidLat": -9.310844672128638,
+    "centroidLon": -71.92056094226933
+  },
+  {
+    "nome": "Kayabi",
+    "etnia": "Kaiabi",
+    "municipio": "Apiacás,Jacareacanga",
+    "uf": "MT,PA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -8.555498076222399,
+    "centroidLon": -57.310697680385005
+  },
+  {
+    "nome": "Kayapó",
+    "etnia": "Kayapó",
+    "municipio": "Bannach,Cumaru do Norte,São Félix do Xingu,Ourilândia do Norte",
+    "uf": "PA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -7.78604716,
+    "centroidLon": -51.98194721
+  },
+  {
+    "nome": "Kiriri",
+    "etnia": "Kiriri",
+    "municipio": "Ribeira do Pombal,Quijingue,Tucano,Banzaê",
+    "uf": "BA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -10.656860338276175,
+    "centroidLon": -38.631425946766115
+  },
+  {
+    "nome": "Koatinemo",
+    "etnia": "Asurini do Xingu",
+    "municipio": "Altamira,Senador José Porfírio",
+    "uf": "PA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -4.319729625,
+    "centroidLon": -52.284821825
+  },
+  {
+    "nome": "Kraolandia",
+    "etnia": "Krahô",
+    "municipio": "Goiatins,Itacajá",
+    "uf": "TO",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -8.3482635,
+    "centroidLon": -47.4511495
+  },
+  {
+    "nome": "Krenak",
+    "etnia": "Krenák",
+    "municipio": "Resplendor",
+    "uf": "MG",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -19.221818120000002,
+    "centroidLon": -41.30342944
+  },
+  {
+    "nome": "Krenak de Sete Salões",
+    "etnia": "Krenák",
+    "municipio": "Santa Rita do Itueto,Resplendor,Conselheiro Pena,Itueta",
+    "uf": "MG",
+    "fase": "Delimitada",
+    "area_ha": 0,
+    "centroidLat": -19.301534405725498,
+    "centroidLon": -41.356745699446506
+  },
+  {
+    "nome": "Krikati",
+    "etnia": "Krikati",
+    "municipio": "Montes Altos,Amarante do Maranhão,Lajeado Novo,Sítio Novo",
+    "uf": "MA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -5.86918911783365,
+    "centroidLon": -46.947235173059
+  },
+  {
+    "nome": "Krukutu",
+    "etnia": "Guaraní",
+    "municipio": "São Paulo",
+    "uf": "SP",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -23.863266702575,
+    "centroidLon": -46.6205378270345
+  },
+  {
+    "nome": "Tenondé Porã",
+    "etnia": "Guaraní",
+    "municipio": "Mongaguá e São Bernardo do Campo e São Paulo e São Vicente",
+    "uf": "SP",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -23.939657584133002,
+    "centroidLon": -46.616428371553
+  },
+  {
+    "nome": "Kulina do Medio Jurua",
+    "etnia": "Kulina Páno",
+    "municipio": "Envira,Ipixuna,Eirunepé,Tarauacá",
+    "uf": "AM,AC",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -7.30253980735645,
+    "centroidLon": -70.618908381572
+  },
+  {
+    "nome": "Kulina do Rio Envira",
+    "etnia": "Kaxinawá,Kulina Páno",
+    "municipio": "Feijó",
+    "uf": "AC",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -9.4554474914683,
+    "centroidLon": -71.38108375832999
+  },
+  {
+    "nome": "Kulina Igarapé do Pau",
+    "etnia": "Kulina Páno",
+    "municipio": "Feijó",
+    "uf": "AC",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -9.303069440000002,
+    "centroidLon": -71.01594717500001
+  },
+  {
+    "nome": "Kumaru do Lago Ualá",
+    "etnia": "Kulina Páno",
+    "municipio": "Juruá",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -2.954175725972107,
+    "centroidLon": -65.796924635882
+  },
+  {
+    "nome": "Kwazá do Rio São Pedro",
+    "etnia": "Kwazá,Aikanã",
+    "municipio": "Parecis",
+    "uf": "RO",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -12.36726307575239,
+    "centroidLon": -61.396875635895526
+  },
+  {
+    "nome": "Lago Aiapua",
+    "etnia": "Múra",
+    "municipio": "Anori,Beruri",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -4.378488446435853,
+    "centroidLon": -62.142399303463975
+  },
+  {
+    "nome": "Lago Capanã",
+    "etnia": "Múra",
+    "municipio": "Manicoré",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -6.03776285470035,
+    "centroidLon": -62.1373225791925
+  },
+  {
+    "nome": "Lago do Beruri",
+    "etnia": "Tikúna",
+    "municipio": "Beruri",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.801909111555034,
+    "centroidLon": -61.269724717817866
+  },
+  {
+    "nome": "Lago do Limão",
+    "etnia": "Múra",
+    "municipio": "Borba",
+    "uf": "AM",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -4.269907852981959,
+    "centroidLon": -59.922280445454135
+  },
+  {
+    "nome": "Lago Jauari",
+    "etnia": "Múra",
+    "municipio": "Manicoré",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -6.19506682603895,
+    "centroidLon": -61.960929164448004
+  },
+  {
+    "nome": "Lagoa Comprida",
+    "etnia": "Tenetehara",
+    "municipio": "Jenipapo dos Vieiras,Itaipava do Grajaú",
+    "uf": "MA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -5.331543352013449,
+    "centroidLon": -45.7397973190555
+  },
+  {
+    "nome": "Lagoa  Encantada",
+    "etnia": "Kanindé",
+    "municipio": "Aquiraz",
+    "uf": "CE",
+    "fase": "Homologada",
+    "area_ha": 0,
+    "centroidLat": -3.9824850111111,
+    "centroidLon": -38.27411572769
+  },
+  {
+    "nome": "Lagoa dos Brincos",
+    "etnia": "Negarotê",
+    "municipio": "Comodoro",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -13.262944373545736,
+    "centroidLon": -60.18365211181714
+  },
+  {
+    "nome": "Lalima",
+    "etnia": "Terena,Kinikinau",
+    "municipio": "Miranda",
+    "uf": "MS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -20.581132857816783,
+    "centroidLon": -56.280751927534524
+  },
+  {
+    "nome": "Laranjinha",
+    "etnia": "Guaraní,Kaingang",
+    "municipio": "Santa Amélia,Abatiá",
+    "uf": "PR",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -23.28331791952,
+    "centroidLon": -50.409149669759
+  },
+  {
+    "nome": "Lauro Sodré",
+    "etnia": "Tikúna",
+    "municipio": "Benjamin Constant",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -4.484586661308953,
+    "centroidLon": -69.89503677612055
+  },
+  {
+    "nome": "Ligeiro",
+    "etnia": "Kaingang",
+    "municipio": "Charrua",
+    "uf": "RS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -27.953720591707,
+    "centroidLon": -51.9515750000505
+  },
+  {
+    "nome": "Jatayvari",
+    "etnia": "Guarani Kaiowá",
+    "municipio": "Ponta Porã",
+    "uf": "MS",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -22.362241009999998,
+    "centroidLon": -55.307133955
+  },
+  {
+    "nome": "Limão Verde",
+    "etnia": "Terena",
+    "municipio": "Aquidauana",
+    "uf": "MS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -20.3367517704195,
+    "centroidLon": -55.688770085
+  },
+  {
+    "nome": "Macarrão",
+    "etnia": "Tikúna",
+    "municipio": "Jutaí",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -2.9233370550033726,
+    "centroidLon": -67.14026481430122
+  },
+  {
+    "nome": "Mãe Maria",
+    "etnia": "Gavião Parkatejê",
+    "municipio": "Bom Jesus do Tocantins",
+    "uf": "PA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -5.15431114,
+    "centroidLon": -48.915247656678005
+  },
+  {
+    "nome": "Malacacheta",
+    "etnia": "Wapixana",
+    "municipio": "Cantá",
+    "uf": "RR",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": 2.59014008986725,
+    "centroidLon": -60.4728781273785
+  },
+  {
+    "nome": "Mamoadate",
+    "etnia": "Machineri,Yaminawa",
+    "municipio": "Sena Madureira,Assis Brasil",
+    "uf": "AC",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -10.70311999,
+    "centroidLon": -70.21326149000001
+  },
+  {
+    "nome": "Mangueira",
+    "etnia": "Makuxí",
+    "municipio": "Alto Alegre",
+    "uf": "RR",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": 3.2717371912588,
+    "centroidLon": -61.4075886428275
+  },
+  {
+    "nome": "Mangueirinha",
+    "etnia": "Guaraní,Kaingang",
+    "municipio": "Mangueirinha,Coronel Vivida,Chopinzinho",
+    "uf": "PR",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -25.874193220000002,
+    "centroidLon": -52.31552164
+  },
+  {
+    "nome": "Manoa/Pium",
+    "etnia": "Makuxí,Wapixana",
+    "municipio": "Bonfim",
+    "uf": "RR",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": 2.9631741050000002,
+    "centroidLon": -60.08396207
+  },
+  {
+    "nome": "Mapari",
+    "etnia": "Kaixana",
+    "municipio": "Fonte Boa,Japurá,Tonantins",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -2.1144970741191997,
+    "centroidLon": -67.29762283794301
+  },
+  {
+    "nome": "Maraã Urubaxi",
+    "etnia": "Makú,Kanamarí",
+    "municipio": "Maraã,Santa Isabel do Rio Negro",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -1.6548184177625647,
+    "centroidLon": -65.49672715887951
+  },
+  {
+    "nome": "Maraitá",
+    "etnia": "Tikúna",
+    "municipio": "Amaturá",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.2104375381726,
+    "centroidLon": -68.3546467368935
+  },
+  {
+    "nome": "Maraiwatsede",
+    "etnia": "Xavante",
+    "municipio": "São Félix do Araguaia,Bom Jesus do Araguaia,Alto Boa Vista",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -11.742284225,
+    "centroidLon": -51.689455145
+  },
+  {
+    "nome": "Marajai",
+    "etnia": "Matsés",
+    "municipio": "Alvarães",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.1931609401658534,
+    "centroidLon": -64.82705026347148
+  },
+  {
+    "nome": "Maranduba",
+    "etnia": "Karajá",
+    "municipio": "Araguacema,Santa Maria das Barreiras",
+    "uf": "TO,PA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -8.86991104472885,
+    "centroidLon": -49.697880691247505
+  },
+  {
+    "nome": "Marechal Rondon",
+    "etnia": "Xavante",
+    "municipio": "Paranatinga",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -13.9519612804345,
+    "centroidLon": -53.970566650924
+  },
+  {
+    "nome": "Lago do Marinheiro",
+    "etnia": "Múra",
+    "municipio": "Careiro",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.5971680710094347,
+    "centroidLon": -59.99824603417977
+  },
+  {
+    "nome": "Marrecas",
+    "etnia": "Kaingang",
+    "municipio": "Turvo,Guarapuava",
+    "uf": "PR",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -25.0586800561215,
+    "centroidLon": -51.404646001135
+  },
+  {
+    "nome": "Massacara",
+    "etnia": "Kaimbé",
+    "municipio": "Euclides da Cunha",
+    "uf": "BA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -10.4358172723085,
+    "centroidLon": -38.7850205496455
+  },
+  {
+    "nome": "Massaco",
+    "etnia": "Isolados",
+    "municipio": "Alta Floresta D´Oeste,São Francisco do Guaporé",
+    "uf": "RO",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -12.570559790016745,
+    "centroidLon": -62.63482320018929
+  },
+  {
+    "nome": "Mata da Cafurna",
+    "etnia": "Xucuru - Kariri",
+    "municipio": "Palmeira dos Índios",
+    "uf": "AL",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -9.378174026383789,
+    "centroidLon": -36.633715226112116
+  },
+  {
+    "nome": "Mata Medonha",
+    "etnia": "Pataxó",
+    "municipio": "Santa Cruz Cabrália",
+    "uf": "BA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -16.151977495325127,
+    "centroidLon": -39.01156066475113
+  },
+  {
+    "nome": "Matintin",
+    "etnia": "Tikúna",
+    "municipio": "Tonantins,Santo Antônio do Içá",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -2.8872564007774004,
+    "centroidLon": -68.460995688351
+  },
+  {
+    "nome": "Mawetek",
+    "etnia": "Kanamarí",
+    "municipio": "Jutaí,Eirunepé",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -6.619029339612666,
+    "centroidLon": -70.29391721411412
+  },
+  {
+    "nome": "Maxacali",
+    "etnia": "Maxakali",
+    "municipio": "Santa Helena de Minas,Bertópolis",
+    "uf": "MG",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -16.875284134003998,
+    "centroidLon": -40.5809396805555
+  },
+  {
+    "nome": "Mbiguaçu",
+    "etnia": "Guarani Nhandeva,Guarani Mbya",
+    "municipio": "Biguaçu",
+    "uf": "SC",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -27.462634055,
+    "centroidLon": -48.646311335
+  },
+  {
+    "nome": "Médio Rio Negro I",
+    "etnia": "Tukano,Makú,Tariana,Baré,Baniwa",
+    "municipio": "Japurá,Santa Isabel do Rio Negro,São Gabriel da Cachoeira",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -0.6259145497413949,
+    "centroidLon": -67.29962257255801
+  },
+  {
+    "nome": "Médio Rio Negro II",
+    "etnia": "Tukano,Makú,Tariana,Desána,Baré,Baniwa",
+    "municipio": "Santa Isabel do Rio Negro,São Gabriel da Cachoeira",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -0.187116976487205,
+    "centroidLon": -66.137760706292
+  },
+  {
+    "nome": "Menkragnoti",
+    "etnia": "Kayapó",
+    "municipio": "Matupá,Peixoto de Azevedo,Altamira,São Félix do Xingu",
+    "uf": "PA,MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -8.505334715,
+    "centroidLon": -53.344601585
+  },
+  {
+    "nome": "Menkü",
+    "etnia": "Mynky",
+    "municipio": "Brasnorte",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -12.180117485,
+    "centroidLon": -58.420070005
+  },
+  {
+    "nome": "Meria",
+    "etnia": "Miránha",
+    "municipio": "Alvarães",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.2221030792780425,
+    "centroidLon": -64.85327330631753
+  },
+  {
+    "nome": "Merure",
+    "etnia": "Boróro",
+    "municipio": "Barra do Garças,General Carneiro",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -15.5648789884515,
+    "centroidLon": -53.0362594814535
+  },
+  {
+    "nome": "Miguel/Josefa",
+    "etnia": "Múra",
+    "municipio": "Autazes",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.8100127047921433,
+    "centroidLon": -59.15165652228271
+  },
+  {
+    "nome": "Miratu",
+    "etnia": "Miránha",
+    "municipio": "Uarini",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.0318157271632913,
+    "centroidLon": -65.2331340496032
+  },
+  {
+    "nome": "Monte Caseros",
+    "etnia": "Kaingang",
+    "municipio": "Muliterno,Ibiraiaras",
+    "uf": "RS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -28.359438557895,
+    "centroidLon": -51.707801856581995
+  },
+  {
+    "nome": "Morro Alto",
+    "etnia": "Guarani Mbya",
+    "municipio": "São Francisco do Sul",
+    "uf": "SC",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -26.302823341648,
+    "centroidLon": -48.6648908061905
+  },
+  {
+    "nome": "Morro Branco",
+    "etnia": "Tenetehara",
+    "municipio": "Grajaú",
+    "uf": "MA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -5.8222950748999995,
+    "centroidLon": -46.129493902600004
+  },
+  {
+    "nome": "Morro dos Cavalos",
+    "etnia": "Guaraní",
+    "municipio": "Palhoça",
+    "uf": "SC",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -27.79083171,
+    "centroidLon": -48.648815565
+  },
+  {
+    "nome": "Moskow",
+    "etnia": "Wapixana",
+    "municipio": "Bonfim",
+    "uf": "RR",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": 2.751066945,
+    "centroidLon": -60.167956939999996
+  },
+  {
+    "nome": "Munduruku",
+    "etnia": "Mundurukú",
+    "municipio": "Jacareacanga",
+    "uf": "PA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -7.400314338394708,
+    "centroidLon": -57.57048269122515
+  },
+  {
+    "nome": "Muriru",
+    "etnia": "Wapixana",
+    "municipio": "Bonfim,Cantá",
+    "uf": "RR",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": 2.5614084608741052,
+    "centroidLon": -60.208926896069755
+  },
+  {
+    "nome": "Murutinga/Tracaja",
+    "etnia": "Múra",
+    "municipio": "Autazes",
+    "uf": "AM",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -3.389081995217225,
+    "centroidLon": -59.19498657682087
+  },
+  {
+    "nome": "Nambikwara",
+    "etnia": "Nambikwára",
+    "municipio": "Comodoro",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -13.02283609,
+    "centroidLon": -59.43146194
+  },
+  {
+    "nome": "Ñande Ru Marangatu",
+    "etnia": "Guarani Kaiowá",
+    "municipio": "Antônio João",
+    "uf": "MS",
+    "fase": "Homologada",
+    "area_ha": 0,
+    "centroidLat": -22.2413637,
+    "centroidLon": -56.03819677
+  },
+  {
+    "nome": "Natal/Felicidade",
+    "etnia": "Múra",
+    "municipio": "Autazes",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.569723568178574,
+    "centroidLon": -59.21682498857152
+  },
+  {
+    "nome": "Nhamundá/Mapuera",
+    "etnia": "Hixkaryána,Wai Wai",
+    "municipio": "Nhamundá,Urucará,Oriximiná,Faro",
+    "uf": "AM,PA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -0.7516255206532615,
+    "centroidLon": -58.1752100853245
+  },
+  {
+    "nome": "Nioaque",
+    "etnia": "Terena",
+    "municipio": "Nioaque",
+    "uf": "MS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -21.1580929,
+    "centroidLon": -55.74035859
+  },
+  {
+    "nome": "Nonoai",
+    "etnia": "Guaraní,Kaingang",
+    "municipio": "Rio dos Índios,Planalto,Nonoai,Gramado dos Loureiros",
+    "uf": "RS",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -27.369840995557,
+    "centroidLon": -52.927163966968
+  },
+  {
+    "nome": "Nonoai/Rio da Várzea",
+    "etnia": "Kaingang",
+    "municipio": "Trindade do Sul,Planalto,Nonoai,Liberato Salzano,Gramado dos Loureiros",
+    "uf": "RS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -27.4224776851845,
+    "centroidLon": -53.044535932548
+  },
+  {
+    "nome": "Nossa Senhora de Fátima",
+    "etnia": "Terena",
+    "municipio": "Miranda",
+    "uf": "MS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -20.36718535961876,
+    "centroidLon": -56.135787815280906
+  },
+  {
+    "nome": "Nova Esperança do Rio Jandiatuba",
+    "etnia": "Tikúna",
+    "municipio": "São Paulo de Olivença,Amaturá",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.5768305742563484,
+    "centroidLon": -68.74364852495742
+  },
+  {
+    "nome": "Nova Jacundá",
+    "etnia": "Guarani Mbya",
+    "municipio": "Rondon do Pará",
+    "uf": "PA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -4.7344972506394,
+    "centroidLon": -48.9619101666665
+  },
+  {
+    "nome": "Nove de Janeiro",
+    "etnia": "Diahói",
+    "municipio": "Humaitá",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -7.4415478174821,
+    "centroidLon": -62.640107599416496
+  },
+  {
+    "nome": "Nukini",
+    "etnia": "Nukiní",
+    "municipio": "Mâncio Lima",
+    "uf": "AC",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -7.3659615904452505,
+    "centroidLon": -73.4737782617025
+  },
+  {
+    "nome": "Ofayé-Xavante",
+    "etnia": "Ofayé",
+    "municipio": "Brasilândia",
+    "uf": "MS",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -21.265585815,
+    "centroidLon": -52.165255845000004
+  },
+  {
+    "nome": "Ofayé-Xavante",
+    "etnia": "Ofayé",
+    "municipio": "Brasilândia",
+    "uf": "MS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -21.25131235,
+    "centroidLon": -52.132549495
+  },
+  {
+    "nome": "Ouro",
+    "etnia": "Makuxí",
+    "municipio": "Boa Vista",
+    "uf": "RR",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": 3.48159772924625,
+    "centroidLon": -60.67352913443
+  },
+  {
+    "nome": "Pacaas Novas",
+    "etnia": "Pakaa Nova",
+    "municipio": "Guajará-Mirim",
+    "uf": "RO",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -11.356248832354936,
+    "centroidLon": -65.09938840974314
+  },
+  {
+    "nome": "Pacheca",
+    "etnia": "Guaraní",
+    "municipio": "Camaquã",
+    "uf": "RS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -31.173008298009,
+    "centroidLon": -51.78860394
+  },
+  {
+    "nome": "Padre",
+    "etnia": "Múra",
+    "municipio": "Autazes",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.744483282435766,
+    "centroidLon": -59.184765820955676
+  },
+  {
+    "nome": "Palmas",
+    "etnia": "Kaingang",
+    "municipio": "Abelardo Luz,Palmas",
+    "uf": "PR,SC",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -26.531826536866,
+    "centroidLon": -52.074533610197
+  },
+  {
+    "nome": "Panambizinho",
+    "etnia": "Guarani Kaiowá",
+    "municipio": "Dourados",
+    "uf": "MS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -22.1273329805915,
+    "centroidLon": -54.6692318870825
+  },
+  {
+    "nome": "Panará",
+    "etnia": "Panará",
+    "municipio": "Guarantã do Norte,Matupá,Altamira",
+    "uf": "PA,MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -9.349395155,
+    "centroidLon": -54.169507710000005
+  },
+  {
+    "nome": "Pankararé",
+    "etnia": "Pankararé",
+    "municipio": "Glória,Paulo Afonso,Rodelas",
+    "uf": "BA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -9.457749748203867,
+    "centroidLon": -38.56547356804006
+  },
+  {
+    "nome": "Pankararu",
+    "etnia": "Pankararú",
+    "municipio": "Petrolândia,Tacaratu",
+    "uf": "PE",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -9.1458484360316,
+    "centroidLon": -38.2034394139635
+  },
+  {
+    "nome": "Paquiçamba",
+    "etnia": "Yudjá",
+    "municipio": "Vitória do Xingu",
+    "uf": "PA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.47893822398143,
+    "centroidLon": -51.801939196733116
+  },
+  {
+    "nome": "Paquiçamba",
+    "etnia": "Yudjá",
+    "municipio": "Vitória do Xingu,Anapu,Senador José Porfírio",
+    "uf": "PA",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -3.4462710425175374,
+    "centroidLon": -51.774579126880326
+  },
+  {
+    "nome": "Parabubure",
+    "etnia": "Xavante",
+    "municipio": "Nova Xavantina,Campinápolis,Água Boa",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -14.362668608288232,
+    "centroidLon": -53.15661072692619
+  },
+  {
+    "nome": "Paracuhuba",
+    "etnia": "Múra",
+    "municipio": "Autazes",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.5527893987358823,
+    "centroidLon": -59.07364329961803
+  },
+  {
+    "nome": "Parakanã",
+    "etnia": "Parakanã",
+    "municipio": "Novo Repartimento,Itupiranga",
+    "uf": "PA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -4.8039993835066,
+    "centroidLon": -50.1026329688525
+  },
+  {
+    "nome": "Paraná do Arauató",
+    "etnia": "Múra",
+    "municipio": "Itacoatiara",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.21397066547885,
+    "centroidLon": -58.6566262437435
+  },
+  {
+    "nome": "Parana do Boa Boa",
+    "etnia": "Makú",
+    "municipio": "Japurá,Santa Isabel do Rio Negro",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -1.6705279921521816,
+    "centroidLon": -67.13845302508184
+  },
+  {
+    "nome": "Parana do Paricá",
+    "etnia": "Kanamarí",
+    "municipio": "Maraã",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -1.8806501765658363,
+    "centroidLon": -65.83755120703361
+  },
+  {
+    "nome": "Parati-Mirim",
+    "etnia": "Guaraní",
+    "municipio": "Paraty",
+    "uf": "RJ",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -23.254221663719,
+    "centroidLon": -44.653143599744496
+  },
+  {
+    "nome": "Paresi",
+    "etnia": "Paresí",
+    "municipio": "Tangará da Serra",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -14.333100045,
+    "centroidLon": -58.595004915000004
+  },
+  {
+    "nome": "Parque do Araguaia",
+    "etnia": "Tapirapé,Javaé,Karajá,Ava-Canoeiro",
+    "municipio": "Formoso do Araguaia,Lagoa da Confusão,Pium",
+    "uf": "TO",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -11.658889160000001,
+    "centroidLon": -50.311042275
+  },
+  {
+    "nome": "Parque do Aripuanã",
+    "etnia": "Cinta Larga",
+    "municipio": "Juína,Vilhena",
+    "uf": "MT,RO",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -11.6598755624005,
+    "centroidLon": -59.8767662
+  },
+  {
+    "nome": "Parque do Tumucumaque",
+    "etnia": "Wayana,Apalaí",
+    "municipio": "Laranjal do Jari,Almeirim,Alenquer,Oriximiná,Óbidos",
+    "uf": "AP,PA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": 1.5849357249999998,
+    "centroidLon": -55.46107474
+  },
+  {
+    "nome": "Parque do Xingu",
+    "etnia": "Wauja, Trumái, Yawalapití, Mehináku, Aweti, Yudjá, Kisêdjê, Ikpeng, Matipú, Kuikuro, Nahukuá, Tapayuna, Kaiabi, Kamayrurá, Kalapalo",
+    "municipio": "Feliz Natal,Gaúcha do Norte,Querência,Canarana,São Félix do Araguaia,Nova Ubiratã,Marcelândia,Paranatinga,São Félix do Xingu",
+    "uf": "MT,PA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -11.801437474099998,
+    "centroidLon": -53.275174695000004
+  },
+  {
+    "nome": "Patauá",
+    "etnia": "Múra",
+    "municipio": "Autazes",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.4432945662977943,
+    "centroidLon": -59.299643663779676
+  },
+  {
+    "nome": "Paukalirajausu",
+    "etnia": "Nambikwára",
+    "municipio": "Conquista D´Oeste,Vila Bela da Santíssima Trindade,Nova Lacerda",
+    "uf": "MT",
+    "fase": "Delimitada",
+    "area_ha": 0,
+    "centroidLat": -14.765092342224001,
+    "centroidLon": -59.645038505336004
+  },
+  {
+    "nome": "Paumari do Cuniua",
+    "etnia": "Paumarí",
+    "municipio": "Tapauá",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -6.0547585247219615,
+    "centroidLon": -64.91401493157761
+  },
+  {
+    "nome": "Paumari do Lago Manissuã",
+    "etnia": "Paumarí",
+    "municipio": "Tapauá",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -5.802659398751302,
+    "centroidLon": -64.58622679641053
+  },
+  {
+    "nome": "Paumari do Lago Marahã",
+    "etnia": "Apurinã",
+    "municipio": "Lábrea",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -7.59282159010192,
+    "centroidLon": -65.24228617874968
+  },
+  {
+    "nome": "Paumari do Lago Paricá",
+    "etnia": "Paumarí",
+    "municipio": "Tapauá",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -5.930571517664191,
+    "centroidLon": -64.71481689212033
+  },
+  {
+    "nome": "Paumari do Rio Ituxi",
+    "etnia": "Paumarí",
+    "municipio": "Lábrea",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -7.367039135000001,
+    "centroidLon": -64.983817855
+  },
+  {
+    "nome": "Peneri/Tacaquiri",
+    "etnia": "Apurinã",
+    "municipio": "Pauini",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -8.141743204115443,
+    "centroidLon": -67.08909382398181
+  },
+  {
+    "nome": "Pequizal",
+    "etnia": "Nambikwára",
+    "municipio": "Nova Lacerda",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -14.2600964,
+    "centroidLon": -59.857954974021
+  },
+  {
+    "nome": "Perigara",
+    "etnia": "Boróro",
+    "municipio": "Barão de Melgaço",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -16.86729305024997,
+    "centroidLon": -56.17898700496954
+  },
+  {
+    "nome": "Peruíbe",
+    "etnia": "Guaraní",
+    "municipio": "Peruíbe",
+    "uf": "SP",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -24.1850478240236,
+    "centroidLon": -46.98506442357487
+  },
+  {
+    "nome": "Piaçaguera",
+    "etnia": "Guarani Nhandeva",
+    "municipio": "Peruíbe",
+    "uf": "SP",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -24.231648205,
+    "centroidLon": -46.938641825000005
+  },
+  {
+    "nome": "Pilad Rebuá",
+    "etnia": "Terena",
+    "municipio": "Miranda",
+    "uf": "MS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -20.25436005397026,
+    "centroidLon": -56.361902260884506
+  },
+  {
+    "nome": "Pimentel Barbosa",
+    "etnia": "Xavante",
+    "municipio": "Canarana,Ribeirão Cascalheira",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -13.454373858691,
+    "centroidLon": -51.614218502534996
+  },
+  {
+    "nome": "Pinatuba",
+    "etnia": "Múra",
+    "municipio": "Manicoré",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -5.662840158365839,
+    "centroidLon": -60.75106651105031
+  },
+  {
+    "nome": "Pinhal",
+    "etnia": "Kaingang",
+    "municipio": "Seara",
+    "uf": "SC",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -27.1470756695495,
+    "centroidLon": -52.4538156667965
+  },
+  {
+    "nome": "Toldo Pinhal",
+    "etnia": "Kaingang",
+    "municipio": "Seara,Paial",
+    "uf": "SC",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -27.140016332229003,
+    "centroidLon": -52.46417838
+  },
+  {
+    "nome": "Pinhalzinho",
+    "etnia": "Guaraní",
+    "municipio": "Tomazina",
+    "uf": "PR",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -23.5600982869645,
+    "centroidLon": -50.070532352394
+  },
+  {
+    "nome": "Pirahã",
+    "etnia": "Múra,Pirahã",
+    "municipio": "Humaitá",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -7.160520952364294,
+    "centroidLon": -62.04909847710519
+  },
+  {
+    "nome": "Pirai",
+    "etnia": "Guarani Mbya",
+    "municipio": "Araquari",
+    "uf": "SC",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -26.480044780763613,
+    "centroidLon": -48.83275207218492
+  },
+  {
+    "nome": "Pirajuí",
+    "etnia": "Guarani Nhandeva",
+    "municipio": "Paranhos",
+    "uf": "MS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -23.957593905,
+    "centroidLon": -55.285722485
+  },
+  {
+    "nome": "Pirakua",
+    "etnia": "Guarani Kaiowá",
+    "municipio": "Bela Vista,Ponta Porã",
+    "uf": "MS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -22.001106808322,
+    "centroidLon": -56.046218623502
+  },
+  {
+    "nome": "Pirineus de Souza",
+    "etnia": "Nambikwára",
+    "municipio": "Comodoro",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -12.762571434087,
+    "centroidLon": -59.927891540638996
+  },
+  {
+    "nome": "Pitaguary",
+    "etnia": "Pitaguari",
+    "municipio": "Pacatuba,Maracanaú",
+    "uf": "CE",
+    "fase": "Homologada",
+    "area_ha": 0,
+    "centroidLat": -3.9381880074313997,
+    "centroidLon": -38.632318228383994
+  },
+  {
+    "nome": "Pium",
+    "etnia": "Wapixana",
+    "municipio": "Alto Alegre",
+    "uf": "RR",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": 3.39997326518955,
+    "centroidLon": -61.105015018391995
+  },
+  {
+    "nome": "Ponta da Serra",
+    "etnia": "Makuxí",
+    "municipio": "Amajari",
+    "uf": "RR",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": 3.6088437071598998,
+    "centroidLon": -60.8752117109135
+  },
+  {
+    "nome": "Ponte de Pedra",
+    "etnia": "Paresí",
+    "municipio": "Nova Maringá,Diamantino,Campo Novo do Parecis",
+    "uf": "MT",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -13.572625309926,
+    "centroidLon": -57.3610860055725
+  },
+  {
+    "nome": "Porquinhos",
+    "etnia": "Kanela",
+    "municipio": "Fernando Falcão,Barra do Corda",
+    "uf": "MA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -6.095573029918654,
+    "centroidLon": -45.64189836048115
+  },
+  {
+    "nome": "Porquinhos dos Canela-Apãnjekra",
+    "etnia": "Kanela",
+    "municipio": "Formosa da Serra Negra,Mirador,Fernando Falcão,Barra do Corda",
+    "uf": "MA",
+    "fase": "Delimitada",
+    "area_ha": 0,
+    "centroidLat": -6.274082835,
+    "centroidLon": -45.574340495
+  },
+  {
+    "nome": "Porto Lindo",
+    "etnia": "Guarani Nhandeva",
+    "municipio": "Japorã",
+    "uf": "MS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -23.787630894334313,
+    "centroidLon": -54.58433336397155
+  },
+  {
+    "nome": "Yvy-katu",
+    "etnia": "Guarani Nhandeva",
+    "municipio": "Japorã",
+    "uf": "MS",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -23.7702560652055,
+    "centroidLon": -54.534992965887
+  },
+  {
+    "nome": "Porto Praia",
+    "etnia": "Tikúna",
+    "municipio": "Uarini",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -2.8901053312454,
+    "centroidLon": -65.1180361643965
+  },
+  {
+    "nome": "Potiguara",
+    "etnia": "Potiguara",
+    "municipio": "Rio Tinto,Marcação,Baía da Traição",
+    "uf": "PB",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -6.68912176,
+    "centroidLon": -35.011929295
+  },
+  {
+    "nome": "Potiguara de Monte-Mor",
+    "etnia": "Potiguara",
+    "municipio": "Rio Tinto,Marcação",
+    "uf": "PB",
+    "fase": "Homologada",
+    "area_ha": 0,
+    "centroidLat": -6.772472791065949,
+    "centroidLon": -35.0465398723175
+  },
+  {
+    "nome": "Potrero Guaçu",
+    "etnia": "Guarani Nhandeva",
+    "municipio": "Paranhos",
+    "uf": "MS",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -23.947475561810002,
+    "centroidLon": -55.3700875188435
+  },
+  {
+    "nome": "Poyanawa",
+    "etnia": "Poyanáwa",
+    "municipio": "Mâncio Lima",
+    "uf": "AC",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -7.564676179999999,
+    "centroidLon": -73.059746695
+  },
+  {
+    "nome": "Praia do Índio",
+    "etnia": "Mundurukú",
+    "municipio": "Itaituba",
+    "uf": "PA",
+    "fase": "Encaminhada RI",
+    "area_ha": 0,
+    "centroidLat": -4.282323385,
+    "centroidLon": -56.02712476
+  },
+  {
+    "nome": "Praia do Mangue",
+    "etnia": "Mundurukú",
+    "municipio": "Itaituba",
+    "uf": "PA",
+    "fase": "Encaminhada RI",
+    "area_ha": 0,
+    "centroidLat": -4.255956291725386,
+    "centroidLon": -55.97380922747225
+  },
+  {
+    "nome": "Queimadas",
+    "etnia": "Kaingang",
+    "municipio": "Ortigueira",
+    "uf": "PR",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -24.24434097,
+    "centroidLon": -50.96437546
+  },
+  {
+    "nome": "Quixaba",
+    "etnia": "Xucuru - Kariri",
+    "municipio": "Glória",
+    "uf": "BA",
+    "fase": "Encaminhada RI",
+    "area_ha": 0,
+    "centroidLat": -9.224631195,
+    "centroidLon": -38.302593294999994
+  },
+  {
+    "nome": "Raimundão",
+    "etnia": "Makuxí,Wapixana",
+    "municipio": "Alto Alegre",
+    "uf": "RR",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": 2.88399729129225,
+    "centroidLon": -61.319830821649006
+  },
+  {
+    "nome": "Rancho Jacaré",
+    "etnia": "Guarani Kaiowá",
+    "municipio": "Laguna Carapã",
+    "uf": "MS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -22.850746034312,
+    "centroidLon": -55.117141973776
+  },
+  {
+    "nome": "Raposa Serra do Sol",
+    "etnia": "Taulipáng,Makuxí,Ingarikó,Wapixana",
+    "municipio": "Normandia,Pacaraima,Uiramutã",
+    "uf": "RR",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": 4.321642825,
+    "centroidLon": -60.32473879946
+  },
+  {
+    "nome": "Recreio/São Félix",
+    "etnia": "Múra",
+    "municipio": "Autazes",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.5472362664393415,
+    "centroidLon": -59.199017571325584
+  },
+  {
+    "nome": "Guarani do Ribeirão Silveira",
+    "etnia": "Guaraní",
+    "municipio": "São Sebastião,Santos",
+    "uf": "SP",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -23.7259984426425,
+    "centroidLon": -45.799321334114
+  },
+  {
+    "nome": "Ribeirão Silveira",
+    "etnia": "Guaraní",
+    "municipio": "São Sebastião,Bertioga",
+    "uf": "SP",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -23.712810118905,
+    "centroidLon": -45.80680706253
+  },
+  {
+    "nome": "Rio Apaporis",
+    "etnia": "Tukano,Makú,Desána,Tuyúca",
+    "municipio": "Japurá",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -1.1640083886118195,
+    "centroidLon": -69.23786160279604
+  },
+  {
+    "nome": "Rio Areia",
+    "etnia": "Guaraní",
+    "municipio": "Inácio Martins",
+    "uf": "PR",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -25.7637786634115,
+    "centroidLon": -51.239925975554
+  },
+  {
+    "nome": "Rio Biá",
+    "etnia": "Katukina",
+    "municipio": "Jutaí,Carauari",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -4.795048992824832,
+    "centroidLon": -67.76379132844079
+  },
+  {
+    "nome": "Rio Branco",
+    "etnia": "Tupaiu,Makuráp",
+    "municipio": "Alta Floresta D´Oeste,São Francisco do Guaporé",
+    "uf": "RO",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -12.151845436981,
+    "centroidLon": -62.644755431321
+  },
+  {
+    "nome": "Rio Branco Itanhaém",
+    "etnia": "Guaraní",
+    "municipio": "São Paulo,São Vicente,Itanhaém",
+    "uf": "SP",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -24.001462159764,
+    "centroidLon": -46.6602954078705
+  },
+  {
+    "nome": "Kuruáya",
+    "etnia": "Kuruáya",
+    "municipio": "Altamira",
+    "uf": "PA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -5.736698979358522,
+    "centroidLon": -54.5856048529032
+  },
+  {
+    "nome": "Rio das Cobras",
+    "etnia": "Guaraní,Kaingang",
+    "municipio": "Nova Laranjeiras,Espigão Alto do Iguaçu",
+    "uf": "PR",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -25.28975616,
+    "centroidLon": -52.700857495
+  },
+  {
+    "nome": "Rio dos Índios",
+    "etnia": "Kaingang",
+    "municipio": "Vicente Dutra",
+    "uf": "RS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -27.181991378568497,
+    "centroidLon": -53.410283896785
+  },
+  {
+    "nome": "Rio dos Pardos",
+    "etnia": "Xokléng",
+    "municipio": "Porto União",
+    "uf": "SC",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -26.478081775,
+    "centroidLon": -50.981107415
+  },
+  {
+    "nome": "Rio Formoso",
+    "etnia": "Paresí",
+    "municipio": "Tangará da Serra",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -14.522904946468,
+    "centroidLon": -58.085443501307
+  },
+  {
+    "nome": "Rio Gregório",
+    "etnia": "Katukina,Yawanawá",
+    "municipio": "Tarauacá",
+    "uf": "AC",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -8.3636451,
+    "centroidLon": -71.76420885
+  },
+  {
+    "nome": "Rio Guaporé",
+    "etnia": "Makuráp",
+    "municipio": "Guajará-Mirim",
+    "uf": "RO",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -11.967858535000001,
+    "centroidLon": -64.713780955
+  },
+  {
+    "nome": "Rio Jumas",
+    "etnia": "Múra",
+    "municipio": "Careiro",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.850186195862,
+    "centroidLon": -59.8846208979625
+  },
+  {
+    "nome": "Rio Manicoré",
+    "etnia": "Múra",
+    "municipio": "Manicoré",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -6.18075157972163,
+    "centroidLon": -61.523830699088876
+  },
+  {
+    "nome": "Rio Mequens",
+    "etnia": "Sakurabiat",
+    "municipio": "Alto Alegre dos Parecis",
+    "uf": "RO",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -12.64406559,
+    "centroidLon": -61.733013744999994
+  },
+  {
+    "nome": "Rio Negro Ocaia",
+    "etnia": "Pakaa Nova",
+    "municipio": "Guajará-Mirim",
+    "uf": "RO",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -11.071542105023042,
+    "centroidLon": -64.6107938249504
+  },
+  {
+    "nome": "Rio Negro Ocaia",
+    "etnia": "Pakaa Nova",
+    "municipio": "Guajará-Mirim",
+    "uf": "RO",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -11.063118047672333,
+    "centroidLon": -64.65907493975689
+  },
+  {
+    "nome": "Rio Omerê",
+    "etnia": "Akuntsú,Kanoé",
+    "municipio": "Chupinguaia,Corumbiara",
+    "uf": "RO",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -12.8182467222225,
+    "centroidLon": -61.0962088055555
+  },
+  {
+    "nome": "Rio Paru DEste",
+    "etnia": "Wayana,Apalaí",
+    "municipio": "Monte Alegre,Almeirim,Alenquer",
+    "uf": "PA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": 0.66400541,
+    "centroidLon": -54.520007125
+  },
+  {
+    "nome": "Rio Pindaré",
+    "etnia": "Tenetehara",
+    "municipio": "Bom Jardim,Monção",
+    "uf": "MA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.626487278172199,
+    "centroidLon": -45.519181427309256
+  },
+  {
+    "nome": "Rio Téa",
+    "etnia": "Tukano,Makú,Piratapuya,Desána,Baré",
+    "municipio": "Santa Isabel do Rio Negro,São Gabriel da Cachoeira",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -0.62443859346428,
+    "centroidLon": -66.02599346070551
+  },
+  {
+    "nome": "Rio Urubu",
+    "etnia": "Múra",
+    "municipio": "Itacoatiara",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.101830425,
+    "centroidLon": -58.935959175
+  },
+  {
+    "nome": "Rodeador",
+    "etnia": "Tenetehara",
+    "municipio": "Barra do Corda",
+    "uf": "MA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -5.703574606455987,
+    "centroidLon": -45.22897522202143
+  },
+  {
+    "nome": "Roosevelt",
+    "etnia": "Cinta Larga",
+    "municipio": "Rondolândia,Pimenta Bueno,Espigão D´Oeste",
+    "uf": "RO,MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -11.10997329,
+    "centroidLon": -60.608230355
+  },
+  {
+    "nome": "Sagarana",
+    "etnia": "Pakaa Nova",
+    "municipio": "Guajará-Mirim",
+    "uf": "RO",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -11.923478410000001,
+    "centroidLon": -64.962749945
+  },
+  {
+    "nome": "Sai-Cinza",
+    "etnia": "Mundurukú",
+    "municipio": "Jacareacanga",
+    "uf": "PA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -6.446066957903469,
+    "centroidLon": -57.99292428673033
+  },
+  {
+    "nome": "Salto Grande do Jacuí",
+    "etnia": "Guaraní",
+    "municipio": "Salto do Jacuí",
+    "uf": "RS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -29.061848455298417,
+    "centroidLon": -53.233543154896694
+  },
+  {
+    "nome": "Sangradouro/Volta Grande",
+    "etnia": "Xavante,Boróro",
+    "municipio": "Poxoréo,Novo São Joaquim,General Carneiro",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -15.4579160524515,
+    "centroidLon": -53.865631895
+  },
+  {
+    "nome": "Santa Inez",
+    "etnia": "Makuxí",
+    "municipio": "Amajari",
+    "uf": "RR",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": 4.1729166272408005,
+    "centroidLon": -61.3669850731325
+  },
+  {
+    "nome": "Santana",
+    "etnia": "Bakairí",
+    "municipio": "Nobres",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -14.148432060000001,
+    "centroidLon": -55.415484754999994
+  },
+  {
+    "nome": "São Francisco do Canimari",
+    "etnia": "Tikúna",
+    "municipio": "Amaturá",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.38368446389165,
+    "centroidLon": -68.33128034500001
+  },
+  {
+    "nome": "São Jeronimo",
+    "etnia": "Xetá,Guaraní,Kaingang",
+    "municipio": "São Jerônimo da Serra",
+    "uf": "PR",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -23.741934352455,
+    "centroidLon": -50.75790371
+  },
+  {
+    "nome": "São Leopoldo",
+    "etnia": "Tikúna",
+    "municipio": "Benjamin Constant",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -4.558256561259441,
+    "centroidLon": -69.74444074666363
+  },
+  {
+    "nome": "São Pedro",
+    "etnia": "Múra",
+    "municipio": "Autazes",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.729505603133788,
+    "centroidLon": -59.24389040439948
+  },
+  {
+    "nome": "São Pedro do Sepatini",
+    "etnia": "Apurinã",
+    "municipio": "Lábrea",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -7.874784581502212,
+    "centroidLon": -65.80967767656293
+  },
+  {
+    "nome": "São Sebastião",
+    "etnia": "Kokama,Kaixana",
+    "municipio": "Tonantins",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -2.69937763,
+    "centroidLon": -67.60146159
+  },
+  {
+    "nome": "Sararé",
+    "etnia": "Nambikwára",
+    "municipio": "Vila Bela da Santíssima Trindade,Nova Lacerda",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -14.805655170254,
+    "centroidLon": -59.481832269165494
+  },
+  {
+    "nome": "Sassoró",
+    "etnia": "Guarani Kaiowá",
+    "municipio": "Tacuru",
+    "uf": "MS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -23.592189060000003,
+    "centroidLon": -54.7669283786375
+  },
+  {
+    "nome": "Sepoti",
+    "etnia": "Tenharim",
+    "municipio": "Humaitá,Manicoré",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -7.00357085,
+    "centroidLon": -61.61828364
+  },
+  {
+    "nome": "Serra da Moça",
+    "etnia": "Wapixana",
+    "municipio": "Boa Vista",
+    "uf": "RR",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": 3.2622363112221002,
+    "centroidLon": -60.680418950171
+  },
+  {
+    "nome": "Serra do Itatins",
+    "etnia": "Guaraní",
+    "municipio": "Itariri",
+    "uf": "SP",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -24.348649295,
+    "centroidLon": -47.1102578
+  },
+  {
+    "nome": "Serra Morena",
+    "etnia": "Cinta Larga",
+    "municipio": "Juína",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -11.007572979999999,
+    "centroidLon": -59.38269854
+  },
+  {
+    "nome": "Serrinha",
+    "etnia": "Kaingang",
+    "municipio": "Três Palmeiras,Ronda Alta,Engenho Velho,Constantina",
+    "uf": "RS",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -27.657691749999998,
+    "centroidLon": -52.86429358
+  },
+  {
+    "nome": "Seruini/Mariene",
+    "etnia": "Apurinã",
+    "municipio": "Lábrea,Pauini",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -8.1881051,
+    "centroidLon": -66.81853095
+  },
+  {
+    "nome": "Sete Cerros",
+    "etnia": "Guarani Nhandeva,Guarani Kaiowá",
+    "municipio": "Paranhos",
+    "uf": "MS",
+    "fase": "Homologada",
+    "area_ha": 0,
+    "centroidLat": -23.583666445,
+    "centroidLon": -55.466959415
+  },
+  {
+    "nome": "Sete de Setembro",
+    "etnia": "Suruí de Rondônia",
+    "municipio": "Rondolândia,Espigão D´Oeste,Cacoal",
+    "uf": "RO,MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -10.993553718712587,
+    "centroidLon": -61.17670093882503
+  },
+  {
+    "nome": "Setemã",
+    "etnia": "Múra",
+    "municipio": "Novo Aripuanã,Borba",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -4.98591675,
+    "centroidLon": -60.068699325
+  },
+  {
+    "nome": "Sororó",
+    "etnia": "Suruí do Pará",
+    "municipio": "São Geraldo do Araguaia,São Domingos do Araguaia,Marabá",
+    "uf": "PA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -5.934292205,
+    "centroidLon": -48.68641669
+  },
+  {
+    "nome": "Sucuba",
+    "etnia": "Makuxí",
+    "municipio": "Alto Alegre",
+    "uf": "RR",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": 2.96556876726405,
+    "centroidLon": -61.160111134475
+  },
+  {
+    "nome": "Sucuriy",
+    "etnia": "Guarani Kaiowá",
+    "municipio": "Maracaju",
+    "uf": "MS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -21.6523157489565,
+    "centroidLon": -55.111458521062
+  },
+  {
+    "nome": "Tabalascada",
+    "etnia": "Wapixana",
+    "municipio": "Cantá",
+    "uf": "RR",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": 2.68103030123045,
+    "centroidLon": -60.5753572403425
+  },
+  {
+    "nome": "Tabocal",
+    "etnia": "Múra",
+    "municipio": "Careiro",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.7310591942051303,
+    "centroidLon": -60.40554402265329
+  },
+  {
+    "nome": "Tadarimana",
+    "etnia": "Boróro",
+    "municipio": "Rondonópolis",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -16.527606855000002,
+    "centroidLon": -54.50447386
+  },
+  {
+    "nome": "Taihantesu",
+    "etnia": "Wasusu",
+    "municipio": "Nova Lacerda",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -14.110336709488,
+    "centroidLon": -59.548601394161
+  },
+  {
+    "nome": "Takuaraty/Yvykuarusu",
+    "etnia": "Guarani Kaiowá",
+    "municipio": "Paranhos",
+    "uf": "MS",
+    "fase": "Homologada",
+    "area_ha": 0,
+    "centroidLat": -23.762688815,
+    "centroidLon": -55.163974165
+  },
+  {
+    "nome": "Tapirapé/Karajá",
+    "etnia": "Tapirapé,Karajá",
+    "municipio": "Luciara,Santa Terezinha",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -10.652065891917175,
+    "centroidLon": -50.67006270587467
+  },
+  {
+    "nome": "Taquaperi",
+    "etnia": "Guarani Kaiowá",
+    "municipio": "Coronel Sapucaia",
+    "uf": "MS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -23.2211975439955,
+    "centroidLon": -55.4373383736005
+  },
+  {
+    "nome": "Taquara",
+    "etnia": "Guarani Kaiowá",
+    "municipio": "Juti",
+    "uf": "MS",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -22.7460375,
+    "centroidLon": -54.620463
+  },
+  {
+    "nome": "Pindoty",
+    "etnia": "Guarani Mbya",
+    "municipio": "Araquari,Balneário Barra do Sul",
+    "uf": "SC",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -26.414667955,
+    "centroidLon": -48.685602515
+  },
+  {
+    "nome": "Taunay/Ipegue",
+    "etnia": "Terena",
+    "municipio": "Aquidauana",
+    "uf": "MS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -20.253440644999998,
+    "centroidLon": -56.073768645
+  },
+  {
+    "nome": "Taunay/Ipegue",
+    "etnia": "Terena",
+    "municipio": "Aquidauana",
+    "uf": "MS",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -20.24349518,
+    "centroidLon": -56.05319417
+  },
+  {
+    "nome": "Tekohá Añetete",
+    "etnia": "Guaraní",
+    "municipio": "Diamante D´Oeste",
+    "uf": "PR",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -25.013812424999998,
+    "centroidLon": -54.06778586
+  },
+  {
+    "nome": "Tembé",
+    "etnia": "Tembé",
+    "municipio": "Tomé-Açu",
+    "uf": "PA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -2.684774725245575,
+    "centroidLon": -48.27218795761294
+  },
+  {
+    "nome": "Tenharim do Igarapé Preto",
+    "etnia": "Tenharim",
+    "municipio": "Novo Aripuanã",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -8.478207094999998,
+    "centroidLon": -61.216861205
+  },
+  {
+    "nome": "Tenharim Marmelos",
+    "etnia": "Tenharim",
+    "municipio": "Humaitá,Manicoré",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -8.346930985,
+    "centroidLon": -61.876937562857
+  },
+  {
+    "nome": "Terena Gleba Iriri",
+    "etnia": "Terena",
+    "municipio": "Matupá",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -9.7176326034771,
+    "centroidLon": -53.8053590126255
+  },
+  {
+    "nome": "Tereza Cristina",
+    "etnia": "Boróro",
+    "municipio": "Santo Antônio do Leverger",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -16.578573366584,
+    "centroidLon": -55.0925252199305
+  },
+  {
+    "nome": "Itixi Mitari",
+    "etnia": "Apurinã",
+    "municipio": "Tapauá,Anori,Beruri",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -4.713614901214299,
+    "centroidLon": -62.59707087432557
+  },
+  {
+    "nome": "Tibagy/Mococa",
+    "etnia": "Kaingang",
+    "municipio": "Ortigueira",
+    "uf": "PR",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -24.016855605,
+    "centroidLon": -50.75108822
+  },
+  {
+    "nome": "Tikúna de Feijoal",
+    "etnia": "Kokama,Tikúna",
+    "municipio": "São Paulo de Olivença,Benjamin Constant",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -4.3349035449999995,
+    "centroidLon": -69.43979630499999
+  },
+  {
+    "nome": "Tingui Botó",
+    "etnia": "Tingui-Botó",
+    "municipio": "Feira Grande,Campo Grande",
+    "uf": "AL",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -9.915567,
+    "centroidLon": -36.718403015
+  },
+  {
+    "nome": "Tirecatinga",
+    "etnia": "Halotesu",
+    "municipio": "Sapezal",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -13.08083951542925,
+    "centroidLon": -58.436777960989396
+  },
+  {
+    "nome": "Toldo Chimbangue",
+    "etnia": "Kaingang",
+    "municipio": "Chapecó",
+    "uf": "SC",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -27.164221766047888,
+    "centroidLon": -52.52479555373202
+  },
+  {
+    "nome": "Toldo Chimbangue II",
+    "etnia": "Kaingang",
+    "municipio": "Chapecó",
+    "uf": "SC",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -27.1332437538365,
+    "centroidLon": -52.521178246741
+  },
+  {
+    "nome": "Toldo Imbu",
+    "etnia": "Kaingang",
+    "municipio": "Abelardo Luz",
+    "uf": "SC",
+    "fase": "Homologada",
+    "area_ha": 0,
+    "centroidLat": -26.577342310599825,
+    "centroidLon": -52.3603328001911
+  },
+  {
+    "nome": "Torá",
+    "etnia": "Torá,Apurinã",
+    "municipio": "Humaitá,Manicoré",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -6.322968072330912,
+    "centroidLon": -61.66858951179689
+  },
+  {
+    "nome": "Tremembé de Almofala",
+    "etnia": "Tremembé",
+    "municipio": "Itarema",
+    "uf": "CE",
+    "fase": "Delimitada",
+    "area_ha": 0,
+    "centroidLat": -2.971605505,
+    "centroidLon": -39.822272575
+  },
+  {
+    "nome": "Trincheira",
+    "etnia": "Múra",
+    "municipio": "Autazes",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.717481078761665,
+    "centroidLon": -59.26637430482336
+  },
+  {
+    "nome": "Trincheira Bacaja",
+    "etnia": "Araweté,Asurini do Xingu",
+    "municipio": "Altamira,São Félix do Xingu,Anapu,Senador José Porfírio",
+    "uf": "PA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -4.6171309845448,
+    "centroidLon": -51.505037515756996
+  },
+  {
+    "nome": "Trocará",
+    "etnia": "Asurini do Tocantins",
+    "municipio": "Baião,Tucuruí",
+    "uf": "PA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.5728332499050497,
+    "centroidLon": -49.719649992483
+  },
+  {
+    "nome": "Trocará - Doação",
+    "etnia": "Asurini do Tocantins",
+    "municipio": "Tucuruí",
+    "uf": "PA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.64700461779546,
+    "centroidLon": -49.8251452042326
+  },
+  {
+    "nome": "Trombetas/Mapuera",
+    "etnia": "Katuena,Xereu,Wai Wai,Tunayana,Sikiyana,Hixkaryána,Isolados,Karafawyana,Katuena,Waimiri Atroari",
+    "municipio": "Nhamundá,Urucará,Caroebe,São João da Baliza,Oriximiná,Faro",
+    "uf": "RR,AM,PA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -0.21339952919544497,
+    "centroidLon": -58.566751102556
+  },
+  {
+    "nome": "Truaru",
+    "etnia": "Makuxí,Wapixana",
+    "municipio": "Boa Vista,Alto Alegre",
+    "uf": "RR",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": 3.23290714746215,
+    "centroidLon": -60.9745884016675
+  },
+  {
+    "nome": "Truká",
+    "etnia": "Truká",
+    "municipio": "Cabrobó",
+    "uf": "PE",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -8.52242276,
+    "centroidLon": -39.42128961
+  },
+  {
+    "nome": "Truká - Ilha da Assunção",
+    "etnia": "Truká",
+    "municipio": "Cabrobó",
+    "uf": "PE",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -8.538188905,
+    "centroidLon": -39.380566130000005
+  },
+  {
+    "nome": "Tubarão Latunde",
+    "etnia": "Laiana,Aikanã",
+    "municipio": "Chupinguaia",
+    "uf": "RO",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -12.64052339864017,
+    "centroidLon": -60.62988097
+  },
+  {
+    "nome": "Tikuna de Santo Antonio",
+    "etnia": "Tikúna",
+    "municipio": "Benjamin Constant",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -4.400070335376455,
+    "centroidLon": -69.99344006641175
+  },
+  {
+    "nome": "Tukuna Porto Espiritual",
+    "etnia": "Tikúna",
+    "municipio": "Benjamin Constant",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -4.466560294050737,
+    "centroidLon": -69.82175052194057
+  },
+  {
+    "nome": "Tukuna Umariaçu",
+    "etnia": "Tikúna",
+    "municipio": "Tabatinga",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -4.2631027706314,
+    "centroidLon": -69.88549229765499
+  },
+  {
+    "nome": "Tumiã",
+    "etnia": "Apurinã",
+    "municipio": "Lábrea",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -8.01464585,
+    "centroidLon": -66.56772726
+  },
+  {
+    "nome": "Tupã-Supé",
+    "etnia": "Tikúna",
+    "municipio": "Uarini,Alvarães",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.135571961216783,
+    "centroidLon": -65.02459842700924
+  },
+  {
+    "nome": "Turé/Mariquita",
+    "etnia": "Tembé",
+    "municipio": "Tomé-Açu",
+    "uf": "PA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -2.291059509954,
+    "centroidLon": -48.3380357071645
+  },
+  {
+    "nome": "Turé/Mariquita II",
+    "etnia": "Tembé",
+    "municipio": "Tomé-Açu",
+    "uf": "PA",
+    "fase": "Encaminhada RI",
+    "area_ha": 0,
+    "centroidLat": -2.2832074167567002,
+    "centroidLon": -48.351490592299996
+  },
+  {
+    "nome": "Uaçá",
+    "etnia": "Karipuna",
+    "municipio": "Oiapoque",
+    "uf": "AP",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": 3.5596457684378997,
+    "centroidLon": -51.4917536044945
+  },
+  {
+    "nome": "Uati-Paraná",
+    "etnia": "Tikúna",
+    "municipio": "Fonte Boa,Japurá,Tonantins",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -2.4099256132166,
+    "centroidLon": -67.3684718134345
+  },
+  {
+    "nome": "Ubawawe",
+    "etnia": "Xavante",
+    "municipio": "Santo Antônio do Leste",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -14.555664508873999,
+    "centroidLon": -53.4962207192525
+  },
+  {
+    "nome": "Uirapuru",
+    "etnia": "Paresí",
+    "municipio": "Campos de Júlio e Nova Lacerda",
+    "uf": "MT",
+    "fase": "Homologada",
+    "area_ha": 0,
+    "centroidLat": -14.383165609999999,
+    "centroidLon": -59.303620300000006
+  },
+  {
+    "nome": "Umutina",
+    "etnia": "Umutina",
+    "municipio": "Barra do Bugres",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -15.011359676864501,
+    "centroidLon": -57.053462415
+  },
+  {
+    "nome": "Uneiuxi",
+    "etnia": "Tukano,Makú",
+    "municipio": "Japurá,Santa Isabel do Rio Negro",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -1.3079281376214023,
+    "centroidLon": -66.77129359660103
+  },
+  {
+    "nome": "Uneiuxi - Reestudo",
+    "etnia": "Makú e Tukano",
+    "municipio": "Japurá e Santa Isabel do Rio Negro",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -1.3943579791362832,
+    "centroidLon": -66.77129359660103
+  },
+  {
+    "nome": "Uru-Eu-Wau-Wau",
+    "etnia": "Uru-Eu-Wau-Wau",
+    "municipio": "Alvorada D´Oeste,Governador Jorge Teixeira,Campo Novo de Rondônia,Mirante da Serra,São Miguel do Guaporé,Cacaulândia,Costa Marques,Jaru,Guajará-Mirim,Seringueiras,Nova Mamoré,Monte Negro",
+    "uf": "RO",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -11.1160364726525,
+    "centroidLon": -63.5010257309725
+  },
+  {
+    "nome": "Urubu Branco",
+    "etnia": "Tapirapé",
+    "municipio": "Luciara,Confresa,Porto Alegre do Norte",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -10.7288356476285,
+    "centroidLon": -51.2400834240895
+  },
+  {
+    "nome": "Urucu/Juruá",
+    "etnia": "Tenetehara",
+    "municipio": "Itaipava do Grajaú",
+    "uf": "MA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -5.37350912075245,
+    "centroidLon": -45.921052326852504
+  },
+  {
+    "nome": "Utiariti",
+    "etnia": "Paresí",
+    "municipio": "Sapezal,Campo Novo do Parecis",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -13.465381325,
+    "centroidLon": -58.321462185
+  },
+  {
+    "nome": "Vale do Guaporé",
+    "etnia": "Nambikwára",
+    "municipio": "Comodoro,Nova Lacerda",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -13.72758515,
+    "centroidLon": -59.917049739999996
+  },
+  {
+    "nome": "Vale do Javari",
+    "etnia": "Matsés,Matís,Kulina Páno",
+    "municipio": "Jutaí,São Paulo de Olivença,Atalaia do Norte,Benjamin Constant",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -5.774997845,
+    "centroidLon": -71.56077995499999
+  },
+  {
+    "nome": "Vanuire",
+    "etnia": "Kaingang",
+    "municipio": "Tupã,Arco-Íris",
+    "uf": "SP",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -21.808120212008497,
+    "centroidLon": -50.375323193157
+  },
+  {
+    "nome": "Vargem Alegre",
+    "etnia": "Pankararú",
+    "municipio": "Serra do Ramalho",
+    "uf": "BA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -13.404550110306971,
+    "centroidLon": -43.78078424581318
+  },
+  {
+    "nome": "Varzinha",
+    "etnia": "Guarani Mbya",
+    "municipio": "Caraá,Maquiné",
+    "uf": "RS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -29.71998293264957,
+    "centroidLon": -50.24549043018652
+  },
+  {
+    "nome": "Ventarra",
+    "etnia": "Kaingang",
+    "municipio": "Erebango",
+    "uf": "RS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -27.79633167,
+    "centroidLon": -52.27741582
+  },
+  {
+    "nome": "Votouro",
+    "etnia": "Kaingang",
+    "municipio": "Benjamin Constant do Sul,Faxinalzinho",
+    "uf": "RS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -27.4594338726485,
+    "centroidLon": -52.6408556469075
+  },
+  {
+    "nome": "Vui-Uata-In",
+    "etnia": "Tikúna",
+    "municipio": "Amaturá",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.5784412259066305,
+    "centroidLon": -68.40074005817218
+  },
+  {
+    "nome": "Waiãpi",
+    "etnia": "Waiãpy",
+    "municipio": "Laranjal do Jari,Mazagão,Pedra Branca do Amapari",
+    "uf": "AP",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": 1.23638031889976,
+    "centroidLon": -52.821973416233
+  },
+  {
+    "nome": "Waimiri-Atroari",
+    "etnia": "Waimiri Atroari",
+    "municipio": "Presidente Figueiredo,Urucará,Novo Airão,São João da Baliza,Rorainópolis",
+    "uf": "RR,AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -0.759997411284843,
+    "centroidLon": -60.63860873779572
+  },
+  {
+    "nome": "WaiWái",
+    "etnia": "Mawayána",
+    "municipio": "Caroebe,São João da Baliza,Caracaraí",
+    "uf": "RR",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": 1.42006749,
+    "centroidLon": -59.623454705
+  },
+  {
+    "nome": "Wassu-Cocal",
+    "etnia": "Wassú",
+    "municipio": "Colônia Leopoldina,Novo Lino,Joaquim Gomes,Matriz de Camaragibe",
+    "uf": "AL",
+    "fase": "Delimitada",
+    "area_ha": 0,
+    "centroidLat": -9.0500520546221,
+    "centroidLon": -35.71354796
+  },
+  {
+    "nome": "Wawi",
+    "etnia": "Kisêdjê",
+    "municipio": "Querência",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -11.723632695050213,
+    "centroidLon": -53.053355768900474
+  },
+  {
+    "nome": "Xacriabá",
+    "etnia": "Xacriabá",
+    "municipio": "São João das Missões,Itacarambi",
+    "uf": "MG",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -14.87655464,
+    "centroidLon": -44.289771204999994
+  },
+  {
+    "nome": "Xacriabá",
+    "etnia": "Xacriabá",
+    "municipio": "São João das Missões,Cônego Marinho,Itacarambi",
+    "uf": "MG",
+    "fase": "Delimitada",
+    "area_ha": 0,
+    "centroidLat": -14.96568051,
+    "centroidLon": -44.2438332
+  },
+  {
+    "nome": "Xakriabá Rancharia",
+    "etnia": "Xacriabá",
+    "municipio": "São João das Missões,Itacarambi",
+    "uf": "MG",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -14.928355645,
+    "centroidLon": -44.1283683827285
+  },
+  {
+    "nome": "Xambioá",
+    "etnia": "Guaraní,Karajá",
+    "municipio": "Santa Fé do Araguaia",
+    "uf": "TO",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -7.13975239,
+    "centroidLon": -49.156956555
+  },
+  {
+    "nome": "Xapecó",
+    "etnia": "Guaraní,Kaingang",
+    "municipio": "Abelardo Luz,Entre Rios",
+    "uf": "SC",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -26.73152756,
+    "centroidLon": -52.5211889203635
+  },
+  {
+    "nome": "Xerente",
+    "etnia": "Xerente",
+    "municipio": "Tocantínia",
+    "uf": "TO",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -9.537871500000001,
+    "centroidLon": -48.135924755000005
+  },
+  {
+    "nome": "Herarekã Xetá",
+    "etnia": "Xetá",
+    "municipio": "Ivaté",
+    "uf": "PR",
+    "fase": "Delimitada",
+    "area_ha": 0,
+    "centroidLat": -23.432294816569758,
+    "centroidLon": -53.42704032155144
+  },
+  {
+    "nome": "Xikrin do Rio Catete",
+    "etnia": "Kayapó",
+    "municipio": "Água Azul do Norte,Parauapebas,Marabá",
+    "uf": "PA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -6.338174488274349,
+    "centroidLon": -50.8216313110225
+  },
+  {
+    "nome": "Xipaya",
+    "etnia": "Xipáya,Kuruáya",
+    "municipio": "Altamira",
+    "uf": "PA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -5.42823795,
+    "centroidLon": -54.671570384999995
+  },
+  {
+    "nome": "Xukuru-Kariri",
+    "etnia": "Xucuru - Kariri",
+    "municipio": "Palmeira dos Índios",
+    "uf": "AL",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -9.397801805,
+    "centroidLon": -36.629385275000004
+  },
+  {
+    "nome": "Xukuru",
+    "etnia": "Xucuru",
+    "municipio": "Poção,Pesqueira",
+    "uf": "PE",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -8.32411568,
+    "centroidLon": -36.766912250000004
+  },
+  {
+    "nome": "Yanomami",
+    "etnia": "Yanomámi",
+    "municipio": "Barcelos,Santa Isabel do Rio Negro,São Gabriel da Cachoeira,Alto Alegre,Mucajaí,Caracaraí,Iracema",
+    "uf": "RR,AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": 1.9841475345000998,
+    "centroidLon": -63.90492566
+  },
+  {
+    "nome": "Zoe",
+    "etnia": "Zo´é",
+    "municipio": "Óbidos",
+    "uf": "PA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -0.227227339271934,
+    "centroidLon": -55.79855986149383
+  },
+  {
+    "nome": "Zoró",
+    "etnia": "Zoró",
+    "municipio": "Aripuanã",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -10.584635476795,
+    "centroidLon": -60.831099840807
+  },
+  {
+    "nome": "Zuruahã",
+    "etnia": "Zuruahã",
+    "municipio": "Tapauá",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -6.877103931950614,
+    "centroidLon": -66.41093286146591
+  },
+  {
+    "nome": "Riozinho do Alto Envira",
+    "etnia": "Isolados",
+    "municipio": "Santa Rosa do Purus,Feijó",
+    "uf": "AC",
+    "fase": "Homologada",
+    "area_ha": 0,
+    "centroidLat": -9.723661032409499,
+    "centroidLon": -71.1881241712385
+  },
+  {
+    "nome": "Sapotal",
+    "etnia": "Kokama",
+    "municipio": "Tabatinga",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -4.253335277643117,
+    "centroidLon": -69.5199560749424
+  },
+  {
+    "nome": "Anaro",
+    "etnia": "Wapixana",
+    "municipio": "Amajari",
+    "uf": "RR",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": 3.9098677944887497,
+    "centroidLon": -60.9580043719795
+  },
+  {
+    "nome": "Arara do Rio Amônia",
+    "etnia": "Arara do Acre",
+    "municipio": "Marechal Thaumaturgo",
+    "uf": "AC",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -9.08034447,
+    "centroidLon": -72.87677544499999
+  },
+  {
+    "nome": "Barro Alto",
+    "etnia": "Kokama",
+    "municipio": "Tonantins",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -2.766603805,
+    "centroidLon": -67.67879376
+  },
+  {
+    "nome": "Batelão",
+    "etnia": "Kaiabi",
+    "municipio": "Nova Canaã do Norte,Juara,Tabaporã",
+    "uf": "MT",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -11.1380121423775,
+    "centroidLon": -56.616302755
+  },
+  {
+    "nome": "Apurinã do Igarapé Mucuim",
+    "etnia": "Apurinã",
+    "municipio": "Lábrea",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -7.56578322633205,
+    "centroidLon": -66.02126053
+  },
+  {
+    "nome": "Lago do Correio",
+    "etnia": "Kokama,Tikúna",
+    "municipio": "Santo Antônio do Içá",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -2.9554407875482998,
+    "centroidLon": -69.053653741058
+  },
+  {
+    "nome": "Guanabara",
+    "etnia": "Kokama",
+    "municipio": "Benjamin Constant",
+    "uf": "AM",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -4.574460538238583,
+    "centroidLon": -69.86102463583407
+  },
+  {
+    "nome": "Ponciano",
+    "etnia": "Múra",
+    "municipio": "Careiro da Várzea",
+    "uf": "AM",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -3.5131920164371877,
+    "centroidLon": -59.455731830037536
+  },
+  {
+    "nome": "Prosperidade",
+    "etnia": "Kokama",
+    "municipio": "Tonantins",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -2.6760297399999997,
+    "centroidLon": -67.47948349
+  },
+  {
+    "nome": "Riozinho",
+    "etnia": "Kokama,Tikúna",
+    "municipio": "Jutaí,Juruá",
+    "uf": "AM",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -3.5385858558168053,
+    "centroidLon": -66.99956996354703
+  },
+  {
+    "nome": "Santa Cruz da Nova Aliança",
+    "etnia": "Kokama",
+    "municipio": "Tonantins",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -2.7782135749999997,
+    "centroidLon": -67.70219556
+  },
+  {
+    "nome": "Mato Preto",
+    "etnia": "Guaraní",
+    "municipio": "Getúlio Vargas,Erechim,Erebango",
+    "uf": "RS",
+    "fase": "Delimitada",
+    "area_ha": 0,
+    "centroidLat": -27.814844248286,
+    "centroidLon": -52.219790731127006
+  },
+  {
+    "nome": "Sururuá",
+    "etnia": "Kokama",
+    "municipio": "São Paulo de Olivença,Benjamin Constant",
+    "uf": "AM",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -4.4764848668050945,
+    "centroidLon": -69.54258688115607
+  },
+  {
+    "nome": "Votouro/Kandóia",
+    "etnia": "Kaingang",
+    "municipio": "Benjamin Constant do Sul,Faxinalzinho",
+    "uf": "RS",
+    "fase": "Delimitada",
+    "area_ha": 0,
+    "centroidLat": -27.440956531075003,
+    "centroidLon": -52.667369722089504
+  },
+  {
+    "nome": "Vista Alegre",
+    "etnia": "Múra",
+    "municipio": "Manaquiri",
+    "uf": "AM",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -3.708634191511209,
+    "centroidLon": -60.48634435006667
+  },
+  {
+    "nome": "Tapeba",
+    "etnia": "Tapeba",
+    "municipio": "Caucaia",
+    "uf": "CE",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -3.733798485,
+    "centroidLon": -38.67840125
+  },
+  {
+    "nome": "Sombrerito",
+    "etnia": "Guarani Nhandeva",
+    "municipio": "Sete Quedas",
+    "uf": "MS",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -23.802451955000002,
+    "centroidLon": -54.746362108955
+  },
+  {
+    "nome": "Maró",
+    "etnia": "Arapiun",
+    "municipio": "Santarém",
+    "uf": "PA",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -2.777528185,
+    "centroidLon": -55.81119395
+  },
+  {
+    "nome": "Pequizal do Naruvôtu",
+    "etnia": "Naravute",
+    "municipio": "Gaúcha do Norte,Canarana",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -12.899459565556796,
+    "centroidLon": -52.86320517304971
+  },
+  {
+    "nome": "Tupinambá de Olivença",
+    "etnia": "Tupinambá",
+    "municipio": "Buerarema e Ilhéus e Una",
+    "uf": "BA",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -15.05768662,
+    "centroidLon": -39.1462252
+  },
+  {
+    "nome": "Nawa",
+    "etnia": "Nawa",
+    "municipio": "Mâncio Lima e Rodrigues Alves",
+    "uf": "AC",
+    "fase": "Delimitada",
+    "area_ha": 0,
+    "centroidLat": -7.5854668942225,
+    "centroidLon": -73.50079277559149
+  },
+  {
+    "nome": "Sawré Muybu (Pimental)",
+    "etnia": "Mundurukú",
+    "municipio": "Itaituba,Trairão",
+    "uf": "PA",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -4.963427055,
+    "centroidLon": -56.58559239
+  },
+  {
+    "nome": "Las Casas",
+    "etnia": "Kayapó",
+    "municipio": "Redenção,Pau D´Arco,Floresta do Araguaia",
+    "uf": "PA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -7.87337045188886,
+    "centroidLon": -49.91407028278391
+  },
+  {
+    "nome": "Porto Limoeiro",
+    "etnia": "Tikúna",
+    "municipio": "Santo Antônio do Içá",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.061451695,
+    "centroidLon": -68.94096015
+  },
+  {
+    "nome": "Munduruku-Taquara",
+    "etnia": "Mundurukú",
+    "municipio": "Belterra",
+    "uf": "PA",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -3.2520293799999997,
+    "centroidLon": -55.04624219
+  },
+  {
+    "nome": "São Marcos - MT",
+    "etnia": "Xavante",
+    "municipio": "Barra do Garças",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -15.167997858139058,
+    "centroidLon": -52.73953750638421
+  },
+  {
+    "nome": "São Domingos do Jacapari e Estação",
+    "etnia": "Kokama",
+    "municipio": "Tonantins,Jutaí",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -2.813534715684824,
+    "centroidLon": -67.38044926552243
+  },
+  {
+    "nome": "São Domingos - MT",
+    "etnia": "Karajá",
+    "municipio": "Luciara,São Félix do Araguaia",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -11.275622325,
+    "centroidLon": -50.7128995968095
+  },
+  {
+    "nome": "São Marcos - RR",
+    "etnia": "Makuxí,Wapixana",
+    "municipio": "Boa Vista,Pacaraima",
+    "uf": "RR",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": 3.783272565,
+    "centroidLon": -60.901095315000006
+  },
+  {
+    "nome": "Boa Vista - AM",
+    "etnia": "Múra",
+    "municipio": "Careiro da Várzea",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.22661146,
+    "centroidLon": -59.37518694
+  },
+  {
+    "nome": "Boa Vista - PR",
+    "etnia": "Kaingang",
+    "municipio": "Laranjeiras do Sul",
+    "uf": "PR",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -25.21218607,
+    "centroidLon": -52.35817881
+  },
+  {
+    "nome": "Cacique Fontoura",
+    "etnia": "Karajá",
+    "municipio": "Luciara,São Félix do Araguaia",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -11.362875505,
+    "centroidLon": -50.793567178889
+  },
+  {
+    "nome": "Barreirinha",
+    "etnia": "Amanayé",
+    "municipio": "Paragominas",
+    "uf": "PA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.2896245200000003,
+    "centroidLon": -48.41132512
+  },
+  {
+    "nome": "Sarauá",
+    "etnia": "Amanayé",
+    "municipio": "Ipixuna do Pará",
+    "uf": "PA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.085035172348427,
+    "centroidLon": -48.033139752310774
+  },
+  {
+    "nome": "Portal do Encantado",
+    "etnia": "Chiquitáno",
+    "municipio": "Porto Esperidião,Pontes e Lacerda,Vila Bela da Santíssima Trindade",
+    "uf": "MT",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -16.15051223,
+    "centroidLon": -59.48492146
+  },
+  {
+    "nome": "Tarumã",
+    "etnia": "Guarani Mbya",
+    "municipio": "Araquari,Balneário Barra do Sul",
+    "uf": "SC",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -26.46556544391614,
+    "centroidLon": -48.70953623458166
+  },
+  {
+    "nome": "Tumbalalá",
+    "etnia": "Tumbalalá",
+    "municipio": "Abaré,Curaçá",
+    "uf": "BA",
+    "fase": "Delimitada",
+    "area_ha": 0,
+    "centroidLat": -8.679921144045494,
+    "centroidLon": -39.37355509642421
+  },
+  {
+    "nome": "Caieiras Velha II",
+    "etnia": "Guarani Mbya,Tupiniquim",
+    "municipio": "Aracruz",
+    "uf": "ES",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -19.9492553408055,
+    "centroidLon": -40.168308495000005
+  },
+  {
+    "nome": "Cobra Grande",
+    "etnia": "Arapiun",
+    "municipio": "Santarém",
+    "uf": "PA",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -2.313032747975901,
+    "centroidLon": -55.155754725636385
+  },
+  {
+    "nome": "Cué Cué/ Marabitanas",
+    "etnia": "Baré",
+    "municipio": "São Gabriel da Cachoeira",
+    "uf": "AM",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": 0.5582341803963999,
+    "centroidLon": -66.783957585
+  },
+  {
+    "nome": "Arara da Volta Grande do Xingu",
+    "etnia": "Arara do Pará",
+    "municipio": "Senador José Porfírio",
+    "uf": "PA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.595381155,
+    "centroidLon": -51.672205269796
+  },
+  {
+    "nome": "Caxixó",
+    "etnia": "Kaxixó",
+    "municipio": "Pompéu,Martinho Campos",
+    "uf": "MG",
+    "fase": "Delimitada",
+    "area_ha": 0,
+    "centroidLat": -19.338143365294002,
+    "centroidLon": -45.071859339919
+  },
+  {
+    "nome": "Kawahiva do Rio Pardo",
+    "etnia": "Isolados",
+    "municipio": "Colniza",
+    "uf": "MT",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -9.06523361054465,
+    "centroidLon": -59.919807655
+  },
+  {
+    "nome": "Juruna do Km 17",
+    "etnia": "Yudjá",
+    "municipio": "Vitória do Xingu",
+    "uf": "PA",
+    "fase": "Encaminhada RI",
+    "area_ha": 0,
+    "centroidLat": -2.8363343299999997,
+    "centroidLon": -52.136538955
+  },
+  {
+    "nome": "Aracá-Padauiri (Baixo Rio Negro)",
+    "etnia": "Baré e Makuráp e Tukano",
+    "municipio": "Barcelos",
+    "uf": "AM",
+    "fase": "Delimitada",
+    "area_ha": 0,
+    "centroidLat": 0.09930970880885492,
+    "centroidLon": -63.654159277346
+  },
+  {
+    "nome": "Fazenda Cristo Rei",
+    "etnia": "Pankararú",
+    "municipio": "Jatobá",
+    "uf": "PE",
+    "fase": "Encaminhada RI",
+    "area_ha": 0,
+    "centroidLat": -9.265243733196101,
+    "centroidLon": -38.198546506628006
+  },
+  {
+    "nome": "Krahó-Kanela",
+    "etnia": "Krahô-Kanela",
+    "municipio": "Lagoa da Confusão",
+    "uf": "TO",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -11.0156126526005,
+    "centroidLon": -49.892493122171004
+  },
+  {
+    "nome": "Utaria Wyhyna/Iròdu Iràna",
+    "etnia": "Javaé,Karajá",
+    "municipio": "Pium",
+    "uf": "TO",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -10.154282222750794,
+    "centroidLon": -50.21815364200788
+  },
+  {
+    "nome": "Bragança-Marituba",
+    "etnia": "Mundurukú",
+    "municipio": "Belterra",
+    "uf": "PA",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -3.0531930249999997,
+    "centroidLon": -55.02714966
+  },
+  {
+    "nome": "Riozinho do Iaco (anteriormente chamada de Manchineri do Seringal Guanabara)",
+    "etnia": "Machineri",
+    "municipio": "Assis Brasil e Sena Madureira",
+    "uf": "AC",
+    "fase": "Delimitada",
+    "area_ha": 0,
+    "centroidLat": -10.3390018983785,
+    "centroidLon": -69.915015343834
+  },
+  {
+    "nome": "Pipipã",
+    "etnia": "Aimore",
+    "municipio": "Floresta",
+    "uf": "PE",
+    "fase": "Delimitada",
+    "area_ha": 0,
+    "centroidLat": -8.57941245713167,
+    "centroidLon": -38.01871963670584
+  },
+  {
+    "nome": "Tenharim Marmelos (Gleba B)",
+    "etnia": "Tenharim",
+    "municipio": "Humaitá,Manicoré",
+    "uf": "AM",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -7.18732451,
+    "centroidLon": -61.88721923
+  },
+  {
+    "nome": "Tuwa Apekuokawera",
+    "etnia": "Suruí de Rondônia",
+    "municipio": "São Geraldo do Araguaia,Marabá",
+    "uf": "PA",
+    "fase": "Delimitada",
+    "area_ha": 0,
+    "centroidLat": -5.9280323416431315,
+    "centroidLon": -48.81988758806554
+  },
+  {
+    "nome": "Yvyporã Laranjinha",
+    "etnia": "Guarani Nhandeva",
+    "municipio": "Cornélio Procópio,Ribeirão do Pinhal,Abatiá",
+    "uf": "PR",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -23.3081100162085,
+    "centroidLon": -50.469461813563996
+  },
+  {
+    "nome": "Kapôt Nhinore",
+    "etnia": "Kayapó",
+    "municipio": "Santa Cruz do Xingu e São Félix do Xingu e Vila Rica",
+    "uf": "MT, PA",
+    "fase": "Delimitada",
+    "area_ha": 0,
+    "centroidLat": -9.629916666666901,
+    "centroidLon": -52.380222222222
+  },
+  {
+    "nome": "Tremembé de Queimadas",
+    "etnia": "Tremembé",
+    "municipio": "Acaraú",
+    "uf": "CE",
+    "fase": "Homologada",
+    "area_ha": 0,
+    "centroidLat": -3.0966076041462998,
+    "centroidLon": -40.0266844203675
+  },
+  {
+    "nome": "Panambi - Lagoa Rica",
+    "etnia": "Guarani Kaiowá",
+    "municipio": "Itaporã,Douradina",
+    "uf": "MS",
+    "fase": "Delimitada",
+    "area_ha": 0,
+    "centroidLat": -21.986559721504,
+    "centroidLon": -54.608428648624
+  },
+  {
+    "nome": "Xapecó (Pinhalzinho-Canhadão)",
+    "etnia": "Guaraní,Kaingang",
+    "municipio": "Abelardo Luz",
+    "uf": "SC",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -26.6592722563705,
+    "centroidLon": -52.421065830180495
+  },
+  {
+    "nome": "Comexatibá",
+    "etnia": "Pataxó",
+    "municipio": "Prado",
+    "uf": "BA",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -17.073388815,
+    "centroidLon": -39.270616175
+  },
+  {
+    "nome": "Passo Grande do Rio Forquilha",
+    "etnia": "Kaingang",
+    "municipio": "Cacique Doble,Sananduva",
+    "uf": "RS",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -27.864094784591913,
+    "centroidLon": -51.77238030371436
+  },
+  {
+    "nome": "Maracaxi",
+    "etnia": "Tembé",
+    "municipio": "Aurora do Pará",
+    "uf": "PA",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -2.3473967337703243,
+    "centroidLon": -47.969068207940296
+  },
+  {
+    "nome": "Tekoha Itamarã",
+    "etnia": "Guarani Nhandeva,Guarani Mbya",
+    "municipio": "Diamante D´Oeste",
+    "uf": "PR",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -25.002500447525122,
+    "centroidLon": -54.050387552733525
+  },
+  {
+    "nome": "Hãm Yîxux",
+    "etnia": "Maxakali",
+    "municipio": "Ladainha",
+    "uf": "MG",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -17.641301079999998,
+    "centroidLon": -41.67046666
+  },
+  {
+    "nome": "Krenrehé",
+    "etnia": "Krenák",
+    "municipio": "Luciara,Canabrava do Norte",
+    "uf": "MT",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -11.056136987138,
+    "centroidLon": -51.469260871036
+  },
+  {
+    "nome": "Jacareúba/Katauixi (restrição uso)",
+    "etnia": "Isolados",
+    "municipio": "Canutama,Lábrea",
+    "uf": "AM",
+    "fase": "Em Estudo",
+    "area_ha": 0,
+    "centroidLat": -8.32706775674896,
+    "centroidLon": -64.41151716253168
+  },
+  {
+    "nome": "Mundo Verde/Cachoeirinha",
+    "etnia": "Maxakali",
+    "municipio": "Teófilo Otoni",
+    "uf": "MG",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -17.559878661700502,
+    "centroidLon": -41.2688808222425
+  },
+  {
+    "nome": "Tekoha Jevy (Rio Pequeno)",
+    "etnia": "Guaraní",
+    "municipio": "Paraty",
+    "uf": "RJ",
+    "fase": "Delimitada",
+    "area_ha": 0,
+    "centroidLat": -23.118892576378393,
+    "centroidLon": -44.752687609772295
+  },
+  {
+    "nome": "Tanaru ( restrição de uso )",
+    "etnia": "Isolados",
+    "municipio": "Chupinguaia,Parecis,Pimenteiras do Oeste,Corumbiara",
+    "uf": "RO",
+    "fase": "Em Estudo",
+    "area_ha": 0,
+    "centroidLat": -12.637175463289001,
+    "centroidLon": -61.381080395
+  },
+  {
+    "nome": "Piripkura ( restrição de uso )",
+    "etnia": "Isolados",
+    "municipio": "Colniza,Rondolândia",
+    "uf": "MT",
+    "fase": "Em Estudo",
+    "area_ha": 0,
+    "centroidLat": -9.705938844506562,
+    "centroidLon": -61.00763502555375
+  },
+  {
+    "nome": "Dourados-Amambaipeguá I",
+    "etnia": "Guaraní",
+    "municipio": "Naviraí,Amambai,Dourados",
+    "uf": "MS",
+    "fase": "Delimitada",
+    "area_ha": 0,
+    "centroidLat": -22.7850816674435,
+    "centroidLon": -54.970738409999996
+  },
+  {
+    "nome": "Jurubaxi-téa",
+    "etnia": "Desána,Kuripako,Tikúna,Tariana,Arapáso,Piratapuya,Nadëb,Baniwa,Baré,Tukano",
+    "municipio": "Barcelos,Santa Isabel do Rio Negro",
+    "uf": "AM",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -0.973627215,
+    "centroidLon": -65.195258
+  },
+  {
+    "nome": "Ilhas da Tapera/São Félix/Porto",
+    "etnia": "Truká",
+    "municipio": "Orocó",
+    "uf": "PE",
+    "fase": "Encaminhada RI",
+    "area_ha": 0,
+    "centroidLat": -8.605813609999998,
+    "centroidLon": -39.574070375000005
+  },
+  {
+    "nome": "Igarapé Taboca do Alto Tarauacá",
+    "etnia": "Isolados",
+    "municipio": "Jordão",
+    "uf": "AC",
+    "fase": "Em Estudo",
+    "area_ha": 0,
+    "centroidLat": -9.439113286859453,
+    "centroidLon": -71.89306745013297
+  },
+  {
+    "nome": "Cerco Grande",
+    "etnia": "Guaraní",
+    "municipio": "Guaraqueçaba",
+    "uf": "PR",
+    "fase": "Delimitada",
+    "area_ha": 0,
+    "centroidLat": -25.31396917925,
+    "centroidLon": -48.29699527805
+  },
+  {
+    "nome": "Sambaqui",
+    "etnia": "Guaraní",
+    "municipio": "Pontal do Paraná",
+    "uf": "PR",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -25.621878838412947,
+    "centroidLon": -48.471972358540114
+  },
+  {
+    "nome": "Kaxuyana-Tunayana",
+    "etnia": "Kaxuyana",
+    "municipio": "Oriximiná",
+    "uf": "PA",
+    "fase": "Homologada",
+    "area_ha": 0,
+    "centroidLat": -0.52942584,
+    "centroidLon": -57.237228556511496
+  },
+  {
+    "nome": "Apiaká do Pontal e Isolados",
+    "etnia": "Isolados,Apiaká",
+    "municipio": "Apiacás",
+    "uf": "MT",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -8.2561320349512,
+    "centroidLon": -58.1141453108805
+  },
+  {
+    "nome": "Mato Castelhano",
+    "etnia": "Kaingang",
+    "municipio": "Mato Castelhano",
+    "uf": "RS",
+    "fase": "Delimitada",
+    "area_ha": 0,
+    "centroidLat": -28.312431569815196,
+    "centroidLon": -52.164748010256105
+  },
+  {
+    "nome": "Tupinambá de Belmonte",
+    "etnia": "Tupinambá",
+    "municipio": "Belmonte",
+    "uf": "BA",
+    "fase": "Delimitada",
+    "area_ha": 0,
+    "centroidLat": -15.93864900837201,
+    "centroidLon": -39.17765656656107
+  },
+  {
+    "nome": "Sissaíma",
+    "etnia": "Múra",
+    "municipio": "Careiro da Várzea",
+    "uf": "AM",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -3.42241922666405,
+    "centroidLon": -59.442642033445
+  },
+  {
+    "nome": "Fazenda Remanso",
+    "etnia": "Tuxá",
+    "municipio": "Muquém de São Francisco",
+    "uf": "BA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -12.34850201,
+    "centroidLon": -43.322607845
+  },
+  {
+    "nome": "Fazenda Sítio",
+    "etnia": "Tuxá",
+    "municipio": "Quijingue",
+    "uf": "BA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -10.630844752615047,
+    "centroidLon": -38.72890303599516
+  },
+  {
+    "nome": "Tekoha Guasú Guavirá",
+    "etnia": "Guarani Nhandeva",
+    "municipio": "Guaíra,  Altônia, Terra Roxa",
+    "uf": "PR",
+    "fase": "Delimitada",
+    "area_ha": 0,
+    "centroidLat": -24.06560224,
+    "centroidLon": -54.13974795
+  },
+  {
+    "nome": "Xukuru de Cimbres",
+    "etnia": "Xucuru",
+    "municipio": "Pesqueira,Pedra,Alagoinha,Venturosa",
+    "uf": "PE",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -8.429657916666699,
+    "centroidLon": -36.8293847222225
+  },
+  {
+    "nome": "Tremembé da Barra do Mundaú",
+    "etnia": "Tremembé",
+    "municipio": "Itapipoca",
+    "uf": "CE",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -3.183483485,
+    "centroidLon": -39.42442405
+  },
+  {
+    "nome": "Pankará da Serra do Arapuá",
+    "etnia": "Pankará",
+    "municipio": "Carnaubeira da Penha",
+    "uf": "PE",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -8.4177605,
+    "centroidLon": -38.714939
+  },
+  {
+    "nome": "Pindoty/Araçá-Mirim",
+    "etnia": "Guarani Mbya",
+    "municipio": "Pariquera-Açu,Cananéia,Iguape",
+    "uf": "SP",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -24.75624833434597,
+    "centroidLon": -47.85021133947967
+  },
+  {
+    "nome": "Tapyi/Rio Branquinho",
+    "etnia": "Guarani Mbya",
+    "municipio": "Cananéia",
+    "uf": "SP",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -24.919731439,
+    "centroidLon": -48.025949255650005
+  },
+  {
+    "nome": "Guaviraty",
+    "etnia": "Guarani Mbya",
+    "municipio": "Iguape",
+    "uf": "SP",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -24.822578421149956,
+    "centroidLon": -47.77611978534998
+  },
+  {
+    "nome": "Ka´aguy Mirim",
+    "etnia": "Guarani Mbya",
+    "municipio": "Miracatu e Pedro de Toledo",
+    "uf": "SP",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -24.27677732799986,
+    "centroidLon": -47.309928423010795
+  },
+  {
+    "nome": "Djaiko-Aty",
+    "etnia": "Guarani Nhandeva",
+    "municipio": "Miracatu",
+    "uf": "SP",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -24.19837144293828,
+    "centroidLon": -47.33756816013178
+  },
+  {
+    "nome": "Amba Porã",
+    "etnia": "Guarani Mbya",
+    "municipio": "Miracatu",
+    "uf": "SP",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -24.124130316283726,
+    "centroidLon": -47.35507040099782
+  },
+  {
+    "nome": "Peguaoty",
+    "etnia": "Guarani Mbya",
+    "municipio": "Sete Barras,Miracatu",
+    "uf": "SP",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -24.197511609107423,
+    "centroidLon": -48.02739324397662
+  },
+  {
+    "nome": "Pakurity",
+    "etnia": "Guarani Mbya",
+    "municipio": "Cananéia",
+    "uf": "SP",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -25.074487715,
+    "centroidLon": -47.978969070000005
+  },
+  {
+    "nome": "Ka´aguy Hovy",
+    "etnia": "Guaraní",
+    "municipio": "Iguape",
+    "uf": "SP",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -24.671005700000002,
+    "centroidLon": -47.485345785
+  },
+  {
+    "nome": "Campo Bonito",
+    "etnia": "Guarani Mbya",
+    "municipio": "Torres",
+    "uf": "RS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -29.363560971469237,
+    "centroidLon": -49.79649772071488
+  },
+  {
+    "nome": "Estrada do Mar",
+    "etnia": "Guarani Mbya",
+    "municipio": "Osório",
+    "uf": "RS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -29.8663734701515,
+    "centroidLon": -50.1532626445585
+  },
+  {
+    "nome": "Riozinho - RS",
+    "etnia": "Guarani Mbya",
+    "municipio": "Riozinho",
+    "uf": "RS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -29.628104446317998,
+    "centroidLon": -50.4055802167035
+  },
+  {
+    "nome": "Ituna/Itatá (restrição de uso)",
+    "etnia": "Isolados",
+    "municipio": "Altamira,Anapu,Senador José Porfírio",
+    "uf": "PA",
+    "fase": "Em Estudo",
+    "area_ha": 0,
+    "centroidLat": -4.116499745,
+    "centroidLon": -51.985651605
+  },
+  {
+    "nome": "Canelinha",
+    "etnia": "Guarani Mbya",
+    "municipio": "Canelinha",
+    "uf": "SC",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -27.297859020888,
+    "centroidLon": -48.74153895044082
+  },
+  {
+    "nome": "Águas Claras",
+    "etnia": "Guarani Mbya",
+    "municipio": "Major Gercino",
+    "uf": "SC",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -27.372846961296972,
+    "centroidLon": -48.93920423872591
+  },
+  {
+    "nome": "Amaral/Tekoá Kuriy",
+    "etnia": "Guarani Mbya",
+    "municipio": "Biguaçu",
+    "uf": "SC",
+    "fase": "Encaminhada RI",
+    "area_ha": 0,
+    "centroidLat": -27.38046270237126,
+    "centroidLon": -48.76165841328928
+  },
+  {
+    "nome": "Morro da Palha",
+    "etnia": "Guarani Mbya",
+    "municipio": "Biguaçu",
+    "uf": "SC",
+    "fase": "Encaminhada RI",
+    "area_ha": 0,
+    "centroidLat": -27.339389354027503,
+    "centroidLon": -48.6632804425
+  },
+  {
+    "nome": "Taego Ãwa",
+    "etnia": "Ava-Canoeiro",
+    "municipio": "Formoso do Araguaia",
+    "uf": "TO",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -11.944671334999999,
+    "centroidLon": -49.798648760000006
+  },
+  {
+    "nome": "Wedezé",
+    "etnia": "Xavante",
+    "municipio": "Cocalinho",
+    "uf": "MT",
+    "fase": "Delimitada",
+    "area_ha": 0,
+    "centroidLat": -13.54056910806,
+    "centroidLon": -51.331688455633
+  },
+  {
+    "nome": "Itãnury Pupykary (antiga Baixo Seruini)",
+    "etnia": "Apurinã",
+    "municipio": "Lábrea e Pauini",
+    "uf": "AM",
+    "fase": "Delimitada",
+    "area_ha": 0,
+    "centroidLat": -7.809490114008399,
+    "centroidLon": -66.56732868748699
+  },
+  {
+    "nome": "Iguatemipegua I",
+    "etnia": "Guarani Kaiowá",
+    "municipio": "Iguatemi",
+    "uf": "MS",
+    "fase": "Delimitada",
+    "area_ha": 0,
+    "centroidLat": -23.449279342037002,
+    "centroidLon": -54.7109455
+  },
+  {
+    "nome": "Pindó Poty (Lami)",
+    "etnia": "Guaraní",
+    "municipio": "Porto Alegre",
+    "uf": "RS",
+    "fase": "Delimitada",
+    "area_ha": 0,
+    "centroidLat": -30.227109140406,
+    "centroidLon": -51.1036954020745
+  },
+  {
+    "nome": "Pirititi",
+    "etnia": "Isolados",
+    "municipio": "Rorainópolis",
+    "uf": "RR",
+    "fase": "Em Estudo",
+    "area_ha": 0,
+    "centroidLat": 0.06144956300222068,
+    "centroidLon": -60.46206420851182
+  },
+  {
+    "nome": "Muã Mimatxi (Fazenda Modelo Diniz)",
+    "etnia": "Pataxó",
+    "municipio": "Itapecerica",
+    "uf": "MG",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -20.4720460932325,
+    "centroidLon": -45.046410256893495
+  },
+  {
+    "nome": "Fazenda Boa Vista - MG",
+    "etnia": "Xucuru - Kariri",
+    "municipio": "Caldas",
+    "uf": "MG",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -21.9448739188,
+    "centroidLon": -46.332236660199996
+  },
+  {
+    "nome": "Ygua Porã (Amâncio)",
+    "etnia": "Guaraní",
+    "municipio": "Biguaçu",
+    "uf": "SC",
+    "fase": "Delimitada",
+    "area_ha": 0,
+    "centroidLat": -27.3513655493905,
+    "centroidLon": -48.7889682942495
+  },
+  {
+    "nome": "Taba dos Anacé",
+    "etnia": "Anacé",
+    "municipio": "São Gonçalo do Amarante,Caucaia",
+    "uf": "CE",
+    "fase": "Encaminhada RI",
+    "area_ha": 0,
+    "centroidLat": -3.7046065394274446,
+    "centroidLon": -38.72756826419372
+  },
+  {
+    "nome": "Fazenda Jenipapeiro",
+    "etnia": "Atikum",
+    "municipio": "Santa Rita de Cássia",
+    "uf": "BA",
+    "fase": "Encaminhada RI",
+    "area_ha": 0,
+    "centroidLat": -11.029586584832,
+    "centroidLon": -44.7524432679845
+  },
+  {
+    "nome": "Krenyê",
+    "etnia": "Timbira,Krenyê",
+    "municipio": "Vitorino Freire,Barra do Corda",
+    "uf": "MA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -6.020353055,
+    "centroidLon": -44.7720750660935
+  },
+  {
+    "nome": "Takuari",
+    "etnia": "Guaraní",
+    "municipio": "Eldorado",
+    "uf": "SP",
+    "fase": "Encaminhada RI",
+    "area_ha": 0,
+    "centroidLat": -24.539335020000003,
+    "centroidLon": -48.220312809999996
+  },
+  {
+    "nome": "Ypoi/Triunfo",
+    "etnia": "Guarani Nhandeva",
+    "municipio": "Paranhos",
+    "uf": "MS",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -23.70739787,
+    "centroidLon": -55.435993355
+  },
+  {
+    "nome": "Sawré Bap in (Apompu)",
+    "etnia": "Mundurukú",
+    "municipio": "Itaituba",
+    "uf": "PA",
+    "fase": "Declarada",
+    "area_ha": 0,
+    "centroidLat": -4.6517796705152,
+    "centroidLon": -56.528598639588495
+  },
+  {
+    "nome": "Fazenda Sempre Verde",
+    "etnia": "Pankararú",
+    "municipio": "Muquém de São Francisco",
+    "uf": "BA",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -12.1788743809745,
+    "centroidLon": -43.271002189503
+  },
+  {
+    "nome": "Apykai",
+    "etnia": "Guarani Kaiowá e Guaraní",
+    "municipio": "Dourados",
+    "uf": "MS",
+    "fase": "Delimitada",
+    "area_ha": 0,
+    "centroidLat": -22.2725200005555,
+    "centroidLon": -54.888340970555504
+  },
+  {
+    "nome": "Uty-Xunati",
+    "etnia": "Terena",
+    "municipio": "Vilhena",
+    "uf": "RO",
+    "fase": "Encaminhada RI",
+    "area_ha": 0,
+    "centroidLat": -12.405413672242638,
+    "centroidLon": -60.0132684997111
+  },
+  {
+    "nome": "Tekoa Gwyra Pepo",
+    "etnia": "Guarani Mbya",
+    "municipio": "Tapiraí",
+    "uf": "SP",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -23.9520315,
+    "centroidLon": -47.5561445
+  },
+  {
+    "nome": "Barragem Norte",
+    "etnia": "Xokléng",
+    "municipio": "José Boiteux",
+    "uf": "SC",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -26.8816015,
+    "centroidLon": -49.70003385
+  },
+  {
+    "nome": "Fazenda Mabel (Gavião/Akrãtikatêjê)",
+    "etnia": "Gavião Krikatejê",
+    "municipio": "Bom Jesus do Tocantins, Marabá",
+    "uf": "PA",
+    "fase": "Encaminhada RI",
+    "area_ha": 0,
+    "centroidLat": -4.962659993692,
+    "centroidLon": -48.9736860292085
+  },
+  {
+    "nome": "Wassu Cocal",
+    "etnia": "Wassú",
+    "municipio": "Colônia Leopoldina,Novo Lino,Joaquim Gomes,Matriz de Camaragibe",
+    "uf": "AL",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -9.04682351310155,
+    "centroidLon": -35.7122588959425
+  },
+  {
+    "nome": "Kariri de Serra Grande",
+    "etnia": "Kariri",
+    "municipio": "Queimada Nova",
+    "uf": "PI",
+    "fase": "Encaminhada RI",
+    "area_ha": 0,
+    "centroidLat": -8.68616347,
+    "centroidLon": -41.353081665000005
+  },
+  {
+    "nome": "Guajanaíra",
+    "etnia": "Guajajara",
+    "municipio": "Itupiranga",
+    "uf": "PA",
+    "fase": "Encaminhada RI",
+    "area_ha": 0,
+    "centroidLat": -4.9189468647438,
+    "centroidLon": -49.982481525
+  },
+  {
+    "nome": "Reserva Indígena Avá Canoeiro",
+    "etnia": "Ava-Canoeiro",
+    "municipio": "Colinas do Sul, Minaçu",
+    "uf": "GO",
+    "fase": "Encaminhada RI",
+    "area_ha": 0,
+    "centroidLat": -13.851064167221999,
+    "centroidLon": -48.232845362517
+  },
+  {
+    "nome": "Aldeia Katurama",
+    "etnia": "Pataxó, Pataxo Há-Há-Há",
+    "municipio": "São Joaquim de Bicas",
+    "uf": "MG",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -20.05577502777,
+    "centroidLon": -44.225610047578996
+  },
+  {
+    "nome": "Kulina do Rio Uerê (Matatibem)",
+    "etnia": "Kulina Madijá",
+    "municipio": "Carauari",
+    "uf": "AM",
+    "fase": "Delimitada",
+    "area_ha": 0,
+    "centroidLat": -5.49529845265785,
+    "centroidLon": -67.101297670612
+  },
+  {
+    "nome": "Vera Tupã?i",
+    "etnia": "Guaraní",
+    "municipio": "Campo Mourão",
+    "uf": "PR",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -24.026201388888502,
+    "centroidLon": -52.274325
+  },
+  {
+    "nome": "Tuxá Setsor Bragagá",
+    "etnia": "Tuxá",
+    "municipio": "Buritizeiro",
+    "uf": "MG",
+    "fase": "Encaminhada RI",
+    "area_ha": 0,
+    "centroidLat": -16.746937135479,
+    "centroidLon": -45.213938027575495
+  },
+  {
+    "nome": "Kiriri de Caldas",
+    "etnia": "Kiriri",
+    "municipio": "Caldas",
+    "uf": "MG",
+    "fase": "Encaminhada RI",
+    "area_ha": 0,
+    "centroidLat": -21.892936866632,
+    "centroidLon": -46.410904772284
+  },
+  {
+    "nome": "Aldeia Escola Floresta",
+    "etnia": "Maxakali",
+    "municipio": "Teófilo Otoni",
+    "uf": "MG",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -17.90396889,
+    "centroidLon": -41.39075625
+  },
+  {
+    "nome": "Tekoá Guavirá",
+    "etnia": "Guaraní",
+    "municipio": "Riozinho",
+    "uf": "RS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -29.628890017756,
+    "centroidLon": -50.3814505800485
+  },
+  {
+    "nome": "Curriã",
+    "etnia": "Apurinã",
+    "municipio": "Lábrea",
+    "uf": "AM",
+    "fase": "Delimitada",
+    "area_ha": 0,
+    "centroidLat": -7.73905477620945,
+    "centroidLon": -65.626862764136
+  },
+  {
+    "nome": "Baixo Marmelos",
+    "etnia": "Mundurukú e Múra e Tenharim e Torá",
+    "municipio": "Humaitá e Manicoré",
+    "uf": "AM",
+    "fase": "Delimitada",
+    "area_ha": 0,
+    "centroidLat": -6.6795921483762495,
+    "centroidLon": -61.6251595792575
+  },
+  {
+    "nome": "Aldeias Santa Maria e Nova Bacaba (Baixo Rio Jatapu)",
+    "etnia": "Hixkaryána",
+    "municipio": "Nhamundá e São Sebastião do Uatumã e Urucará",
+    "uf": "AM",
+    "fase": "Delimitada",
+    "area_ha": 0,
+    "centroidLat": -1.2012948876261,
+    "centroidLon": -58.8574270233525
+  },
+  {
+    "nome": "Aldeia Cerroy",
+    "etnia": "Guaraní",
+    "municipio": "Guia Lopes da Laguna",
+    "uf": "MS",
+    "fase": "Encaminhada RI",
+    "area_ha": 0,
+    "centroidLat": -21.4797300783385,
+    "centroidLon": -55.8079166435285
+  },
+  {
+    "nome": "Gaviãozinho",
+    "etnia": "Kanamarí e Kulina Madijá",
+    "municipio": "Itamarati",
+    "uf": "AM",
+    "fase": "Delimitada",
+    "area_ha": 0,
+    "centroidLat": -6.420048618466,
+    "centroidLon": -68.91210690012349
+  },
+  {
+    "nome": "Curara",
+    "etnia": "Múra",
+    "municipio": "Manicoré",
+    "uf": "AM",
+    "fase": "Delimitada",
+    "area_ha": 0,
+    "centroidLat": -6.232386867543999,
+    "centroidLon": -60.865350760980505
+  },
+  {
+    "nome": "Fazenda Peró",
+    "etnia": "Fulni-ô",
+    "municipio": "Águas Belas",
+    "uf": "PE",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -9.1650237528767,
+    "centroidLon": -37.1226866865555
+  },
+  {
+    "nome": "Aldeia Pó Mág",
+    "etnia": "Kaingang",
+    "municipio": "Tabaí",
+    "uf": "RS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -29.674107437204,
+    "centroidLon": -51.727993845521496
+  },
+  {
+    "nome": "Aldeia Por Fi Ga",
+    "etnia": "Kaingang",
+    "municipio": "São Leopoldo",
+    "uf": "RS",
+    "fase": "Regularizada",
+    "area_ha": 0,
+    "centroidLat": -29.771029220927502,
+    "centroidLon": -51.098339333511504
+  }
+]

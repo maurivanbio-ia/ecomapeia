@@ -611,4 +611,111 @@ function getRestrictionType(code: string): string {
   return types[code] || code;
 }
 
+// ─── Terra Indígena ───────────────────────────────────────────────────────────
+
+interface TIEntry {
+  nome: string;
+  etnia: string;
+  municipio: string;
+  uf: string;
+  fase: string;
+  area_ha: number;
+  centroidLat: number;
+  centroidLon: number;
+}
+
+let tisData: TIEntry[] | null = null;
+
+function loadTIsData(): TIEntry[] {
+  if (tisData) return tisData;
+  try {
+    const filePath = path.join(__dirname, "data", "tis_brasil.json");
+    const content = fs.readFileSync(filePath, "utf-8");
+    tisData = JSON.parse(content) as TIEntry[];
+    console.log(`Loaded ${tisData.length} terras indígenas`);
+    return tisData;
+  } catch (error) {
+    console.error("Error loading TIs data:", error);
+    return [];
+  }
+}
+
+loadTIsData();
+
+router.post("/check-terra-indigena", async (req: Request, res: Response) => {
+  try {
+    const { lat, lon } = req.body;
+
+    if (!lat || !lon) {
+      return res.status(400).json({ error: "Coordenadas são obrigatórias" });
+    }
+
+    const latitude = parseFloat(String(lat));
+    const longitude = parseFloat(String(lon));
+
+    const tis = loadTIsData();
+
+    if (!tis || tis.length === 0) {
+      return res.status(500).json({ error: "Dados de Terras Indígenas não disponíveis" });
+    }
+
+    // Find the nearest TI using haversine distance
+    let nearestTI: TIEntry | null = null;
+    let minDistance = Infinity;
+
+    for (const ti of tis) {
+      if (!ti.centroidLat || !ti.centroidLon) continue;
+      const dist = haversineDistance(latitude, longitude, ti.centroidLat, ti.centroidLon);
+      if (dist < minDistance) {
+        minDistance = dist;
+        nearestTI = ti;
+      }
+    }
+
+    if (!nearestTI) {
+      return res.json({
+        success: true,
+        found: false,
+        distanceKm: null,
+        tiInfo: null,
+      });
+    }
+
+    const distanceKm = parseFloat(minDistance.toFixed(2));
+
+    // Risk level based on distance
+    let riskLevel: "HIGH" | "MEDIUM" | "LOW";
+    if (distanceKm <= 5) {
+      riskLevel = "HIGH";
+    } else if (distanceKm <= 25) {
+      riskLevel = "MEDIUM";
+    } else {
+      riskLevel = "LOW";
+    }
+
+    res.json({
+      success: true,
+      found: true,
+      distanceKm,
+      riskLevel,
+      tiInfo: {
+        nome: nearestTI.nome,
+        etnia: nearestTI.etnia,
+        municipio: nearestTI.municipio,
+        uf: nearestTI.uf,
+        fase: nearestTI.fase,
+        area_ha: nearestTI.area_ha,
+        distanceKm,
+        riskLevel,
+      },
+    });
+  } catch (error) {
+    console.error("Error checking TI:", error);
+    res.status(500).json({
+      error: "Erro ao verificar proximidade de Terra Indígena",
+      details: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+});
+
 export default router;
