@@ -32,7 +32,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const storedUser = await AsyncStorage.getItem(USER_STORAGE_KEY);
       if (storedUser) {
-        setUser(JSON.parse(storedUser));
+        const parsed = JSON.parse(storedUser);
+        setUser(parsed);
+        setIsLoading(false);
+        // Refresh user data from server in background to pick up role/admin changes
+        if (parsed?.id) {
+          try {
+            const res = await fetch(new URL(`/api/auth/me/${parsed.id}`, getApiUrl()).toString());
+            if (res.ok) {
+              const data = await res.json();
+              if (data.user) {
+                setUser(data.user);
+                await AsyncStorage.setItem(USER_STORAGE_KEY, JSON.stringify(data.user));
+              }
+            }
+          } catch {
+            // Ignore refresh errors — cached data still works
+          }
+        }
+        return;
       }
     } catch (e) {
       console.error("Error checking stored auth:", e);

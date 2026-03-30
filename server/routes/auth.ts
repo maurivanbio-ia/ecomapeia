@@ -130,6 +130,28 @@ router.post("/reset-password", async (req: Request, res: Response) => {
   }
 });
 
+// GET /api/auth/me/:userId
+// Retorna dados atualizados do usuário pelo ID
+router.get("/me/:userId", async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+    if (!userId) return res.status(400).json({ message: "userId é obrigatório." });
+
+    const [usuario] = await db
+      .select()
+      .from(usuarios)
+      .where(eq(usuarios.id, userId));
+
+    if (!usuario) return res.status(404).json({ message: "Usuário não encontrado." });
+
+    const { senha_hash, ...safeUser } = usuario;
+    return res.json({ user: safeUser });
+  } catch (err) {
+    console.error("[Auth] me error:", err);
+    return res.status(500).json({ message: "Erro ao buscar usuário." });
+  }
+});
+
 // PUT /api/auth/update-avatar
 // Atualiza a foto de perfil do usuário logado
 router.put("/update-avatar", async (req: Request, res: Response) => {

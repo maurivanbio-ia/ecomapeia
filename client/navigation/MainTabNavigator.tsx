@@ -88,7 +88,7 @@ export default function MainTabNavigator() {
           ),
         }}
       />
-      {user?.is_admin || user?.tipo_usuario === "Coordenador" ? (
+      {user?.is_admin || user?.tipo_usuario === "Coordenador" || user?.tipo_usuario === "Gerente" ? (
         <Tab.Screen
           name="AdminTab"
           component={AdminStackNavigator}
