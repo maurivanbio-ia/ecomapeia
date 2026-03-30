@@ -46,7 +46,12 @@ export default function MapPolygonView({
   const mapContainerRef = useRef<View>(null);
 
   const captureMapImage = async () => {
-    if (polygonCoordinates.length < 3) {
+    const hasContent =
+      polygonCoordinates.length >= 3 ||
+      trackPoints.length > 1 ||
+      savedTracks.length > 0;
+
+    if (!hasContent) {
       return;
     }
 

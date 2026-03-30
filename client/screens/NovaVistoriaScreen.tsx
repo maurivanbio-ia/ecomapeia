@@ -578,7 +578,13 @@ export default function NovaVistoriaScreen() {
   }, [utmPoints, formData.zona_utm]);
 
   const mapRegion = useMemo(() => {
-    if (polygonCoordinates.length === 0) {
+    const allPoints = [
+      ...polygonCoordinates,
+      ...trackPoints.map(p => ({ latitude: p.latitude, longitude: p.longitude })),
+      ...savedTracks.flatMap(t => t.points.map(p => ({ latitude: p.latitude, longitude: p.longitude }))),
+    ];
+
+    if (allPoints.length === 0) {
       return {
         latitude: -23.5,
         longitude: -47.4,
@@ -587,8 +593,8 @@ export default function NovaVistoriaScreen() {
       };
     }
 
-    const lats = polygonCoordinates.map((c) => c.latitude);
-    const lngs = polygonCoordinates.map((c) => c.longitude);
+    const lats = allPoints.map((c) => c.latitude);
+    const lngs = allPoints.map((c) => c.longitude);
     const minLat = Math.min(...lats);
     const maxLat = Math.max(...lats);
     const minLng = Math.min(...lngs);
@@ -603,7 +609,7 @@ export default function NovaVistoriaScreen() {
       latitudeDelta: latDelta,
       longitudeDelta: lngDelta,
     };
-  }, [polygonCoordinates]);
+  }, [polygonCoordinates, trackPoints, savedTracks]);
 
   const handleMapImageCaptured = (uri: string) => {
     setMapImageUri(uri);
@@ -2383,12 +2389,12 @@ export default function NovaVistoriaScreen() {
             </View>
           ) : null}
 
-          {polygonCoordinates.length >= 3 ? (
+          {polygonCoordinates.length >= 3 || trackPoints.length > 1 || savedTracks.length > 0 ? (
             <View style={styles.mapSection}>
               <ThemedText style={styles.subLabel}>
-                Visualização do Polígono {savedTracks.length > 0 || trackPoints.length > 0 
-                  ? `e ${savedTracks.length + (trackPoints.length > 0 ? 1 : 0)} trajeto(s)` 
-                  : ""}
+                {polygonCoordinates.length >= 3
+                  ? `Visualização do Polígono${savedTracks.length > 0 || trackPoints.length > 0 ? ` e ${savedTracks.length + (trackPoints.length > 0 ? 1 : 0)} trajeto(s)` : ""}`
+                  : `Rastreamento de Trajeto — ${savedTracks.length + (trackPoints.length > 0 ? 1 : 0)} trajeto(s)`}
               </ThemedText>
               <MapPolygonView
                 polygonCoordinates={polygonCoordinates}
