@@ -45,7 +45,8 @@ interface Projeto {
   complexo_id: number;
 }
 
-const TIPOS_USUARIO = ["Fiscal", "Técnico", "Coordenador", "Gerente"];
+const TIPOS_USUARIO_ADMIN = ["Fiscal", "Técnico", "Coordenador", "Gerente"];
+const TIPOS_USUARIO_COORD = ["Fiscal", "Técnico"];
 
 const ROLE_COLORS: Record<string, string> = {
   Fiscal: "#6366F1",
@@ -70,12 +71,23 @@ export default function GerenciarUsuariosScreen() {
   const [filterText, setFilterText] = useState("");
   const [filterComplexo, setFilterComplexo] = useState<number | null>(null);
 
+  const isSuperAdmin = !!user?.is_admin;
+  const isCoordinator = user?.tipo_usuario === "Coordenador";
+
   const empresaId = user?.empresa_id || 4;
 
-  const { data: usuarios = [], isLoading } = useQuery<UsuarioAdmin[]>({
+  const { data: allUsuarios = [], isLoading } = useQuery<UsuarioAdmin[]>({
     queryKey: [`/api/tenant/admin/usuarios?empresa_id=${empresaId}`],
-    enabled: !!user?.is_admin || user?.tipo_usuario === "Coordenador",
+    enabled: isSuperAdmin || isCoordinator,
   });
+
+  const usuarios = isSuperAdmin
+    ? allUsuarios
+    : allUsuarios.filter(
+        (u) =>
+          u.complexo_id === (user?.complexo_id ?? null) ||
+          u.complexo_id === null
+      );
 
   const { data: complexos = [] } = useQuery<Complexo[]>({
     queryKey: ["/api/complexos"],
@@ -194,6 +206,27 @@ export default function GerenciarUsuariosScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
+        {isCoordinator && !isSuperAdmin ? (
+          <View
+            style={[
+              styles.coordNotice,
+              {
+                backgroundColor: Colors.light.warning + "18",
+                borderColor: Colors.light.warning + "50",
+              },
+            ]}
+          >
+            <Feather name="info" size={14} color={Colors.light.warning} />
+            <ThemedText
+              style={[styles.coordNoticeText, { color: Colors.light.warning }]}
+            >
+              {user?.complexo_id
+                ? "Você está gerenciando os usuários do seu complexo."
+                : "Você está gerenciando todos os usuários da empresa."}
+            </ThemedText>
+          </View>
+        ) : null}
+
         <View
           style={[
             styles.searchBar,
@@ -453,21 +486,23 @@ export default function GerenciarUsuariosScreen() {
                     </View>
 
                     <View style={styles.userActions}>
-                      <Pressable
-                        onPress={() => openEdit(u)}
-                        style={[
-                          styles.actionBtn,
-                          { backgroundColor: Colors.light.primary + "15" },
-                        ]}
-                        testID={`button-edit-user-${u.id}`}
-                      >
-                        <Feather
-                          name="edit-2"
-                          size={14}
-                          color={Colors.light.primary}
-                        />
-                      </Pressable>
-                      {u.id !== Number(user?.id) ? (
+                      {(isSuperAdmin || (!u.is_admin && u.tipo_usuario !== "Coordenador")) ? (
+                        <Pressable
+                          onPress={() => openEdit(u)}
+                          style={[
+                            styles.actionBtn,
+                            { backgroundColor: Colors.light.primary + "15" },
+                          ]}
+                          testID={`button-edit-user-${u.id}`}
+                        >
+                          <Feather
+                            name="edit-2"
+                            size={14}
+                            color={Colors.light.primary}
+                          />
+                        </Pressable>
+                      ) : null}
+                      {u.id !== Number(user?.id) && (isSuperAdmin || (!u.is_admin && u.tipo_usuario !== "Coordenador")) ? (
                         <Pressable
                           onPress={() => handleDelete(u)}
                           style={[
@@ -534,7 +569,7 @@ export default function GerenciarUsuariosScreen() {
                 <ThemedText style={styles.fieldLabel}>Tipo de Usuário</ThemedText>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                   <View style={styles.typeRow}>
-                    {TIPOS_USUARIO.map((tipo) => (
+                    {(isSuperAdmin ? TIPOS_USUARIO_ADMIN : TIPOS_USUARIO_COORD).map((tipo) => (
                       <Pressable
                         key={tipo}
                         onPress={() => setEditTipo(tipo)}
@@ -677,34 +712,36 @@ export default function GerenciarUsuariosScreen() {
                   </View>
                 </ScrollView>
 
-                <Pressable
-                  onPress={() => setEditIsAdmin(!editIsAdmin)}
-                  style={[
-                    styles.adminToggle,
-                    {
-                      backgroundColor: editIsAdmin
-                        ? "#F59E0B20"
-                        : theme.backgroundSecondary,
-                      borderColor: editIsAdmin ? "#F59E0B" : theme.border,
-                    },
-                  ]}
-                >
-                  <Feather
-                    name={editIsAdmin ? "shield" : "shield-off"}
-                    size={18}
-                    color={editIsAdmin ? "#F59E0B" : theme.tabIconDefault}
-                  />
-                  <ThemedText
+                {isSuperAdmin ? (
+                  <Pressable
+                    onPress={() => setEditIsAdmin(!editIsAdmin)}
                     style={[
-                      styles.adminToggleText,
+                      styles.adminToggle,
                       {
-                        color: editIsAdmin ? "#F59E0B" : theme.tabIconDefault,
+                        backgroundColor: editIsAdmin
+                          ? "#F59E0B20"
+                          : theme.backgroundSecondary,
+                        borderColor: editIsAdmin ? "#F59E0B" : theme.border,
                       },
                     ]}
                   >
-                    {editIsAdmin ? "Administrador" : "Usuário Padrão"}
-                  </ThemedText>
-                </Pressable>
+                    <Feather
+                      name={editIsAdmin ? "shield" : "shield-off"}
+                      size={18}
+                      color={editIsAdmin ? "#F59E0B" : theme.tabIconDefault}
+                    />
+                    <ThemedText
+                      style={[
+                        styles.adminToggleText,
+                        {
+                          color: editIsAdmin ? "#F59E0B" : theme.tabIconDefault,
+                        },
+                      ]}
+                    >
+                      {editIsAdmin ? "Administrador" : "Usuário Padrão"}
+                    </ThemedText>
+                  </Pressable>
+                ) : null}
 
                 <Pressable
                   onPress={handleSaveEdit}
@@ -894,6 +931,20 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
+  },
+  coordNotice: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+    padding: Spacing.md,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    marginBottom: Spacing.md,
+  },
+  coordNoticeText: {
+    flex: 1,
+    fontSize: 13,
+    lineHeight: 18,
   },
   emptyState: {
     alignItems: "center",
