@@ -467,7 +467,7 @@ export default function GerenciarUsuariosScreen() {
                           color={Colors.light.primary}
                         />
                       </Pressable>
-                      {u.id !== user?.id ? (
+                      {u.id !== Number(user?.id) ? (
                         <Pressable
                           onPress={() => handleDelete(u)}
                           style={[
@@ -513,7 +513,7 @@ export default function GerenciarUsuariosScreen() {
           <View
             style={[
               styles.modalContent,
-              { backgroundColor: theme.backgroundCard },
+              { backgroundColor: theme.backgroundDefault },
             ]}
           >
             <View style={styles.modalHeader}>

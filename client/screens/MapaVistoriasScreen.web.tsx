@@ -45,7 +45,7 @@ export default function MapaVistoriasScreen() {
     ? "/api/vistorias?all=true"
     : `/api/vistorias?usuario_id=${user?.id}`;
 
-  const { data: vistorias = [] } = useQuery({
+  const { data: vistorias = [] } = useQuery<any[]>({
     queryKey: [queryKey],
     enabled: !!user?.id,
   });

@@ -170,7 +170,7 @@ export default function MapaVistoriasScreen() {
     ? "/api/vistorias?all=true"
     : `/api/vistorias?usuario_id=${user?.id}`;
 
-  const { data: vistorias = [] } = useQuery({
+  const { data: vistorias = [] } = useQuery<any[]>({
     queryKey: [queryKey],
     enabled: !!user?.id,
   });
@@ -311,7 +311,7 @@ export default function MapaVistoriasScreen() {
               <Feather name="clipboard" size={14} color="#fff" />
             </View>
             <Callout tooltip onPress={() => openDetail(marker)}>
-              <View style={[styles.callout, { backgroundColor: theme.backgroundCard }]}>
+              <View style={[styles.callout, { backgroundColor: theme.backgroundDefault }]}>
                 <ThemedText style={styles.calloutTitle} numberOfLines={1}>
                   {marker.proprietario}
                 </ThemedText>
@@ -414,7 +414,7 @@ export default function MapaVistoriasScreen() {
           <View
             style={[
               styles.modalContent,
-              { backgroundColor: theme.backgroundCard },
+              { backgroundColor: theme.backgroundDefault },
             ]}
           >
             <View style={styles.modalHeader}>
