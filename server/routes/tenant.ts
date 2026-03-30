@@ -582,4 +582,71 @@ router.get("/empresas/:empresaId/export/excel", async (req: Request, res: Respon
   }
 });
 
+// ==========================================
+// ADMIN USER MANAGEMENT ENDPOINTS
+// ==========================================
+
+router.get("/admin/usuarios", async (req: Request, res: Response) => {
+  try {
+    const { empresa_id } = req.query;
+    if (!empresa_id) {
+      return res.status(400).json({ error: "empresa_id é obrigatório" });
+    }
+
+    const result = await db
+      .select({
+        id: usuarios.id,
+        nome: usuarios.nome,
+        email: usuarios.email,
+        tipo_usuario: usuarios.tipo_usuario,
+        is_admin: usuarios.is_admin,
+        complexo_id: usuarios.complexo_id,
+        projeto_atual_id: usuarios.projeto_atual_id,
+        empresa_id: usuarios.empresa_id,
+        complexo_nome: complexos.nome,
+        projeto_nome: projetos.nome,
+      })
+      .from(usuarios)
+      .leftJoin(complexos, eq(complexos.id, usuarios.complexo_id))
+      .leftJoin(projetos, eq(projetos.id, usuarios.projeto_atual_id))
+      .where(eq(usuarios.empresa_id, parseInt(String(empresa_id))))
+      .orderBy(usuarios.nome);
+
+    res.json(result);
+  } catch (error) {
+    console.error("Error fetching admin usuarios:", error);
+    res.status(500).json({ error: "Erro ao buscar usuários" });
+  }
+});
+
+router.put("/admin/usuarios/:userId", async (req: Request, res: Response) => {
+  try {
+    const userId = parseInt(String(req.params.userId));
+    const { tipo_usuario, complexo_id, projeto_atual_id, is_admin } = req.body;
+
+    const updates: Record<string, unknown> = {};
+    if (tipo_usuario !== undefined) updates.tipo_usuario = tipo_usuario;
+    if (complexo_id !== undefined) updates.complexo_id = complexo_id || null;
+    if (projeto_atual_id !== undefined) updates.projeto_atual_id = projeto_atual_id || null;
+    if (is_admin !== undefined) updates.is_admin = is_admin;
+
+    await db.update(usuarios).set(updates).where(eq(usuarios.id, userId));
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error updating usuario:", error);
+    res.status(500).json({ error: "Erro ao atualizar usuário" });
+  }
+});
+
+router.delete("/admin/usuarios/:userId", async (req: Request, res: Response) => {
+  try {
+    const userId = parseInt(String(req.params.userId));
+    await db.delete(usuarios).where(eq(usuarios.id, userId));
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting usuario:", error);
+    res.status(500).json({ error: "Erro ao remover usuário" });
+  }
+});
+
 export default router;

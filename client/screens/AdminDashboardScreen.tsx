@@ -257,6 +257,22 @@ export default function AdminDashboardScreen({ navigation }: any) {
             <Feather name="chevron-right" size={18} color={Colors.light.primary} />
           </Pressable>
 
+          <Pressable
+            style={[styles.projetosBtn, { backgroundColor: "#6366F115" }]}
+            onPress={() => navigation.navigate("GerenciarUsuarios")}
+          >
+            <Feather name="users" size={18} color="#6366F1" />
+            <View style={{ flex: 1 }}>
+              <ThemedText style={styles.projetosBtnTitle} lightColor="#6366F1" darkColor="#6366F1">
+                Gerenciar Usuários
+              </ThemedText>
+              <ThemedText style={styles.projetosBtnSub}>
+                Usuários por complexo e projeto
+              </ThemedText>
+            </View>
+            <Feather name="chevron-right" size={18} color="#6366F1" />
+          </Pressable>
+
           <View style={styles.statsRow}>
             {[
               { label: "Complexos", value: totais?.complexos ?? 0, icon: "layers", color: "#6366F1" },

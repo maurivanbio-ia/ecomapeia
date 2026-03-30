@@ -2,11 +2,13 @@ import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import AdminDashboardScreen from "@/screens/AdminDashboardScreen";
 import GerenciarProjetosScreen from "@/screens/GerenciarProjetosScreen";
+import GerenciarUsuariosScreen from "@/screens/GerenciarUsuariosScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 
 export type AdminStackParamList = {
   AdminDashboard: undefined;
   GerenciarProjetos: undefined;
+  GerenciarUsuarios: undefined;
 };
 
 const Stack = createNativeStackNavigator<AdminStackParamList>();
@@ -25,6 +27,11 @@ export default function AdminStackNavigator() {
         name="GerenciarProjetos"
         component={GerenciarProjetosScreen}
         options={{ headerTitle: "Projetos / UHEs" }}
+      />
+      <Stack.Screen
+        name="GerenciarUsuarios"
+        component={GerenciarUsuariosScreen}
+        options={{ headerTitle: "Gerenciar Usuários" }}
       />
     </Stack.Navigator>
   );

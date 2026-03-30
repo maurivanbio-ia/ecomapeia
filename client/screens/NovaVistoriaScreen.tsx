@@ -1929,6 +1929,15 @@ export default function NovaVistoriaScreen() {
             </View>
           ) : null}
 
+          {(flags.mapbiomas || flags.uc || flags.embargo) && (carInfo || ucInfo || embargoCheck || loadingCAR || loadingUC) ? (
+            <View style={[styles.sectionHeader, { marginTop: Spacing.md, marginBottom: Spacing.xs }]}>
+              <Feather name="activity" size={14} color={Colors.light.primary} />
+              <ThemedText style={[styles.sectionHeaderText, { color: Colors.light.primary }]}>
+                Análise Ambiental Automática
+              </ThemedText>
+            </View>
+          ) : null}
+
           {flags.mapbiomas ? (carInfo ? (
             <View style={[styles.carInfoCard, { backgroundColor: Colors.light.accent + "15", borderColor: Colors.light.accent }]}>
               <View style={styles.carInfoHeader}>
@@ -2966,6 +2975,20 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "700",
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.xs,
+    paddingTop: Spacing.xs,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(0,0,0,0.06)",
+  },
+  sectionHeaderText: {
+    fontSize: 12,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
   },
   carInfoCard: {
     flexDirection: "column",

@@ -19,6 +19,20 @@ router.get("/", async (_req: Request, res: Response) => {
   }
 });
 
+router.get("/all-uhes", async (_req: Request, res: Response) => {
+  try {
+    const result = await db
+      .select()
+      .from(projetos)
+      .where(eq(projetos.ativo, true))
+      .orderBy(projetos.nome);
+    res.json(result);
+  } catch (error) {
+    console.error("Error fetching all uhes:", error);
+    res.status(500).json({ error: "Erro ao buscar UHEs" });
+  }
+});
+
 router.get("/admin/stats", async (_req: Request, res: Response) => {
   try {
     const allComplexos = await db.select().from(complexos).where(eq(complexos.ativo, true));

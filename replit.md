@@ -78,6 +78,19 @@ The application integrates Replit AI, leveraging OpenAI's gpt-5.2 model for vari
 -   **New JSONB columns in vistorias:** `car_info`, `embargo_check`, `compliance_analysis` store environmental compliance data
 -   **Field naming convention:** Database uses snake_case (car_info), API transforms to camelCase (carInfo) for frontend/reports
 
+### Admin User Management (Mar 2026)
+
+-   **New endpoints in `server/routes/tenant.ts`:** `GET /api/tenant/admin/usuarios` (list all users with filters), `PUT /api/tenant/admin/usuarios/:id` (edit role/status), `DELETE /api/tenant/admin/usuarios/:id` (soft/hard delete)
+-   **New endpoint in `server/routes/complexos.ts`:** `GET /api/complexos/all-uhes` (flat list of all UHEs across complexos, admin only)
+-   **`GerenciarUsuariosScreen.tsx`:** Admin panel for user management with search, filter by role, edit modal (nome, email, role, status), and delete with confirmation; accessible from `AdminDashboardScreen` via "Gerenciar Usuários" button
+-   **`AdminStackNavigator.tsx`:** Updated to include `GerenciarUsuarios` screen in the stack
+
+### Vistorias no Mapa (Mar 2026)
+
+-   **`MapaVistoriasScreen.tsx`:** Native map screen showing inspection markers filtered by status; clickable callouts open a detail modal with navigation to `DetalhesVistoria`; filter bar at top; accessible from `VistoriasScreen` quick actions
+-   **`MapaVistoriasScreen.web.tsx`:** Web companion file — shows status summary cards and recent vistoria list (no native map); prevents Metro web bundling error from react-native-maps native-only modules
+-   **`VistoriasStackNavigator.tsx`:** Registered `MapaVistoria` screen
+
 ### Coordinator Report Download (Mar 2026)
 
 -   **Report endpoints:** `server/routes/reports.ts` provides 3 GET endpoints:

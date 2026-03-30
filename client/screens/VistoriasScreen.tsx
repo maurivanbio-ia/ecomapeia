@@ -255,6 +255,13 @@ export default function VistoriasScreen() {
           <Feather name="clock" size={18} color={Colors.light.warning} />
           <ThemedText style={[styles.quickActionText, { color: Colors.light.warning }]}>Histórico</ThemedText>
         </Pressable>
+        <Pressable
+          style={[styles.quickActionButton, { backgroundColor: "#6366F115" }]}
+          onPress={() => navigation.navigate("MapaVistorias")}
+        >
+          <Feather name="map" size={18} color="#6366F1" />
+          <ThemedText style={[styles.quickActionText, { color: "#6366F1" }]}>Mapa</ThemedText>
+        </Pressable>
       </View>
 
       {projetoAtual ? (

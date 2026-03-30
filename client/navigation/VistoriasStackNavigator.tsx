@@ -10,6 +10,7 @@ import EquipesScreen from "@/screens/EquipesScreen";
 import NotificacoesScreen from "@/screens/NotificacoesScreen";
 import HistoricoPropriedadeScreen from "@/screens/HistoricoPropriedadeScreen";
 import MapBiomasScreen from "@/screens/MapBiomasScreen";
+import MapaVistoriasScreen from "@/screens/MapaVistoriasScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 
 export type VistoriasStackParamList = {
@@ -17,6 +18,7 @@ export type VistoriasStackParamList = {
   NovaVistoria: { editVistoriaId?: string } | undefined;
   DetalhesVistoria: { vistoriaId: string };
   MapaGeral: undefined;
+  MapaVistorias: undefined;
   Dashboard: undefined;
   Equipes: undefined;
   Notificacoes: undefined;
@@ -57,6 +59,14 @@ export default function VistoriasStackNavigator() {
         component={MapaGeralScreen}
         options={{
           title: "Mapa das Propriedades",
+        }}
+      />
+      <Stack.Screen
+        name="MapaVistorias"
+        component={MapaVistoriasScreen}
+        options={{
+          title: "Vistorias no Mapa",
+          headerTransparent: true,
         }}
       />
       <Stack.Screen
