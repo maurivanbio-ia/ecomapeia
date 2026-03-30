@@ -2108,19 +2108,7 @@ export default function NovaVistoriaScreen() {
                 Buscando código CAR no MapBiomas...
               </ThemedText>
             </View>
-          ) : (
-            <View style={[styles.carInfoCard, { backgroundColor: theme.backgroundSecondary, borderColor: theme.tabIconDefault + "40" }]}>
-              <View style={styles.carInfoHeader}>
-                <Feather name="map-pin" size={18} color={theme.tabIconDefault} />
-                <ThemedText style={[styles.carInfoTitle, { color: theme.tabIconDefault }]}>
-                  Nenhum CAR encontrado
-                </ThemedText>
-              </View>
-              <ThemedText style={[styles.carDetails, { color: theme.tabIconDefault }]}>
-                Propriedade sem registro no MapBiomas nesta coordenada.
-              </ThemedText>
-            </View>
-          )) : null}
+          ) : null) : null}
 
           {gpsAnalysisStarted && flags.uc ? (ucInfo ? (
             <View style={[styles.carInfoCard, { 
