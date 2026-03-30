@@ -108,6 +108,16 @@ interface VistoriaData {
   complianceAnalysis?: ComplianceAnalysis;
   carInfo?: CARInfo;
   ucInfo?: UCInfo;
+  tiInfo?: {
+    nome: string;
+    etnia: string;
+    municipio: string;
+    uf: string;
+    fase: string;
+    area_ha: number;
+    distanceKm: number;
+    riskLevel: "HIGH" | "MEDIUM" | "LOW";
+  };
   weather_data?: WeatherData;
 }
 
@@ -801,6 +811,74 @@ async function generateWordDocument(vistoria: VistoriaData): Promise<Buffer> {
         );
       });
     }
+  }
+
+  // Terra Indígena Section
+  if (vistoria.tiInfo) {
+    const tiColor = vistoria.tiInfo.riskLevel === 'HIGH' ? 'C62828' : vistoria.tiInfo.riskLevel === 'MEDIUM' ? 'E65100' : '2E7D32';
+    const tiLabel = vistoria.tiInfo.riskLevel === 'HIGH' ? 'ALTO' : vistoria.tiInfo.riskLevel === 'MEDIUM' ? 'MÉDIO' : 'BAIXO';
+
+    sections.push(
+      createColoredSectionHeader(`TERRA INDÍGENA MAIS PRÓXIMA - RISCO ${tiLabel} (${vistoria.tiInfo.distanceKm.toFixed(1)} km)`, tiColor)
+    );
+
+    const tiRows: TableRow[] = [
+      new TableRow({
+        children: [
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Terra Indígena", bold: true, size: 20 })] })], width: { size: 35, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: vistoria.tiInfo.nome, bold: true, size: 20 })] })], width: { size: 65, type: WidthType.PERCENTAGE } }),
+        ],
+      }),
+    ];
+
+    if (vistoria.tiInfo.etnia) {
+      tiRows.push(
+        new TableRow({
+          children: [
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Etnia", bold: true, size: 20 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: vistoria.tiInfo.etnia, size: 20 })] })] }),
+          ],
+        })
+      );
+    }
+
+    if (vistoria.tiInfo.municipio || vistoria.tiInfo.uf) {
+      tiRows.push(
+        new TableRow({
+          children: [
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Localização", bold: true, size: 20 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: `${vistoria.tiInfo.municipio || ""}${vistoria.tiInfo.municipio && vistoria.tiInfo.uf ? " - " : ""}${vistoria.tiInfo.uf || ""}`, size: 20 })] })] }),
+          ],
+        })
+      );
+    }
+
+    tiRows.push(
+      new TableRow({
+        children: [
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Distância", bold: true, size: 20 })] })] }),
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: `${vistoria.tiInfo.distanceKm.toFixed(2)} km`, size: 20, color: tiColor, bold: true })] })] }),
+        ],
+      })
+    );
+
+    if (vistoria.tiInfo.fase) {
+      tiRows.push(
+        new TableRow({
+          children: [
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Situação Fundiária", bold: true, size: 20 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: vistoria.tiInfo.fase, size: 20 })] })] }),
+          ],
+        })
+      );
+    }
+
+    sections.push(
+      new Table({
+        rows: tiRows,
+        width: { size: 100, type: WidthType.PERCENTAGE },
+      })
+    );
   }
 
   // Compliance Analysis Section

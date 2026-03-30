@@ -925,6 +925,7 @@ export default function NovaVistoriaScreen() {
             ucInfo,
             carInfo,
             embargoCheck,
+            tiInfo,
             propertyType: formData.tipo_inspecao,
             landUse: formData.tipo_intervencao,
             observations: formData.observacoes,

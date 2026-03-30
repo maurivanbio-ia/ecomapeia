@@ -561,6 +561,15 @@ export default function ProfileScreen() {
               switchValue={flags.compliance}
               onSwitchChange={() => { Haptics.selectionAsync(); setFlag("compliance", !flags.compliance); }}
             />
+            <View style={[styles.divider, { backgroundColor: theme.border }]} />
+            <SettingsItem
+              icon="users"
+              label="Terra Indigena (FUNAI)"
+              theme={theme}
+              showSwitch
+              switchValue={flags.ti}
+              onSwitchChange={() => { Haptics.selectionAsync(); setFlag("ti", !flags.ti); }}
+            />
           </View>
         </Animated.View>
 

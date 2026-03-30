@@ -71,8 +71,11 @@ The application integrates Replit AI, leveraging OpenAI's gpt-5.2 model for vari
 -   **New endpoint:** `POST /api/conservation/check-terra-indigena` — returns nearest TI name, ethnicity, municipality, UF, fase, and distance in km
 -   **Risk levels:** HIGH (≤5 km), MEDIUM (≤25 km), LOW (>25 km) — color-coded card: red/yellow/green
 -   **Integration flow:** GPS capture or manual UTM entry → automatic TI check (flag `ti: true`)
--   **Persistence:** `ti_info` JSONB column in `vistorias` table; restored in edit mode; included in PDF/DOCX reports
--   **Feature flag:** `ti` in `FeatureFlagsContext` (default `true`)
+-   **Persistence:** `ti_info` JSONB column in `vistorias` table; restored in edit mode
+-   **Feature flag:** `ti` in `FeatureFlagsContext` (default `true`); toggle visible in ProfileScreen settings
+-   **PDF report:** TI section included after embargo section (color-coded header, table with nome/etnia/localização/distância/fase)
+-   **DOCX report:** TI section included after embargo section with matching color-coded header and table
+-   **AI Compliance Analysis:** `tiInfo` passed to `/api/ai/compliance-analysis`; system prompt includes Lei 6.001/1973 and CF Art. 231; TI context included in user prompt for legal analysis
 
 ### Environmental Compliance Features
 

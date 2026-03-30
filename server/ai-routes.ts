@@ -467,6 +467,7 @@ router.post("/compliance-analysis", async (req: Request, res: Response) => {
       ucInfo, 
       carInfo, 
       embargoCheck,
+      tiInfo,
       propertyType,
       landUse,
       observations 
@@ -481,6 +482,7 @@ router.post("/compliance-analysis", async (req: Request, res: Response) => {
       ucInfo: ucInfo || null,
       carInfo: carInfo || null,
       embargoCheck: embargoCheck || null,
+      tiInfo: tiInfo || null,
       propertyType: propertyType || "Não especificado",
       landUse: landUse || "Não especificado",
       observations: observations || "",
@@ -497,6 +499,7 @@ router.post("/compliance-analysis", async (req: Request, res: Response) => {
 - Resoluções CONAMA aplicáveis
 - Legislação sobre APP (Área de Preservação Permanente)
 - Regulamentação de reservatórios hidrelétricos
+- Estatuto do Índio (Lei 6.001/1973) e Constituição Federal Art. 231 (proteção de Terras Indígenas)
 
 Analise os dados da vistoria e produza um relatório de conformidade ambiental.
 Identifique:
@@ -558,6 +561,17 @@ ${contextData.embargoCheck ? `
 - Dentro de área protegida: ${contextData.embargoCheck.isInsideProtectedArea ? "SIM" : "NÃO"}
 - Razões: ${contextData.embargoCheck.reasons?.join(", ") || "Nenhuma"}
 ` : "Verificação não realizada"}
+
+TERRA INDÍGENA MAIS PRÓXIMA:
+${contextData.tiInfo ? `
+- Nome: ${contextData.tiInfo.nome}
+- Etnia: ${contextData.tiInfo.etnia || "Não informada"}
+- Localização: ${contextData.tiInfo.municipio || ""} ${contextData.tiInfo.uf || ""}
+- Distância: ${contextData.tiInfo.distanceKm} km
+- Nível de risco: ${contextData.tiInfo.riskLevel}
+- Situação fundiária: ${contextData.tiInfo.fase || "Não informada"}
+Observação: Atividades próximas a Terras Indígenas podem requerer consulta prévia conforme Art. 231 da CF/88 e Lei 6.001/1973.
+` : "Nenhuma Terra Indígena identificada nas proximidades"}
 
 TIPO DE PROPRIEDADE: ${contextData.propertyType}
 USO DO SOLO: ${contextData.landUse}

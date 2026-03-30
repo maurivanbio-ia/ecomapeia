@@ -96,6 +96,16 @@ interface VistoriaData {
   complianceAnalysis?: ComplianceAnalysis;
   carInfo?: CARInfo;
   ucInfo?: UCInfo;
+  tiInfo?: {
+    nome: string;
+    etnia: string;
+    municipio: string;
+    uf: string;
+    fase: string;
+    area_ha: number;
+    distanceKm: number;
+    riskLevel: "HIGH" | "MEDIUM" | "LOW";
+  };
   weather_data?: WeatherData;
   projeto_nome?: string;
 }
@@ -614,6 +624,43 @@ function generatePDFHTML(vistoria: VistoriaData): string {
         ${vistoria.embargoCheck.recommendations.map(r => `<li>${r}</li>`).join('')}
       </ul>
       ` : ""}
+    </div>
+  </div>
+  ` : ""}
+
+  ${vistoria.tiInfo ? `
+  <div class="section">
+    <div class="section-header" style="background-color: ${vistoria.tiInfo.riskLevel === 'HIGH' ? '#c62828' : vistoria.tiInfo.riskLevel === 'MEDIUM' ? '#e65100' : '#2e7d32'};">
+      TERRA INDÍGENA MAIS PRÓXIMA - RISCO ${vistoria.tiInfo.riskLevel === 'HIGH' ? 'ALTO' : vistoria.tiInfo.riskLevel === 'MEDIUM' ? 'MÉDIO' : 'BAIXO'} (${vistoria.tiInfo.distanceKm.toFixed(1)} km)
+    </div>
+    <div class="section-content">
+      <table class="info-table" style="width: 100%;">
+        <tr>
+          <td class="label">Terra Indígena</td>
+          <td><strong>${vistoria.tiInfo.nome}</strong></td>
+        </tr>
+        ${vistoria.tiInfo.etnia ? `
+        <tr>
+          <td class="label">Etnia</td>
+          <td>${vistoria.tiInfo.etnia}</td>
+        </tr>` : ""}
+        ${vistoria.tiInfo.municipio || vistoria.tiInfo.uf ? `
+        <tr>
+          <td class="label">Localização</td>
+          <td>${vistoria.tiInfo.municipio}${vistoria.tiInfo.municipio && vistoria.tiInfo.uf ? ' - ' : ''}${vistoria.tiInfo.uf}</td>
+        </tr>` : ""}
+        <tr>
+          <td class="label">Distância</td>
+          <td style="color: ${vistoria.tiInfo.riskLevel === 'HIGH' ? '#c62828' : vistoria.tiInfo.riskLevel === 'MEDIUM' ? '#e65100' : '#2e7d32'}; font-weight: bold;">
+            ${vistoria.tiInfo.distanceKm.toFixed(2)} km ${vistoria.tiInfo.riskLevel === 'HIGH' ? '(ATENÇÃO: Proximidade crítica)' : vistoria.tiInfo.riskLevel === 'MEDIUM' ? '(Atenção recomendada)' : '(Distância segura)'}
+          </td>
+        </tr>
+        ${vistoria.tiInfo.fase ? `
+        <tr>
+          <td class="label">Situação Fundiária</td>
+          <td>${vistoria.tiInfo.fase}</td>
+        </tr>` : ""}
+      </table>
     </div>
   </div>
   ` : ""}

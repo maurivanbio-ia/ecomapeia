@@ -236,6 +236,7 @@ export default function DetalhesVistoriaScreen() {
         carInfo: vistoria.carInfo || (vistoria as any).car_info,
         embargoCheck: vistoria.embargoCheck || (vistoria as any).embargo_check,
         complianceAnalysis: vistoria.complianceAnalysis || (vistoria as any).compliance_analysis,
+        tiInfo: (vistoria as any).tiInfo || (vistoria as any).ti_info,
         weather_data: vistoria.weatherData || vistoria.weather_data,
         hora_vistoria: vistoria.horaVistoria || vistoria.hora_vistoria,
         usos_solo: vistoria.usosSolo,
@@ -296,6 +297,7 @@ export default function DetalhesVistoriaScreen() {
         carInfo: vistoria.carInfo || (vistoria as any).car_info,
         embargoCheck: vistoria.embargoCheck || (vistoria as any).embargo_check,
         complianceAnalysis: vistoria.complianceAnalysis || (vistoria as any).compliance_analysis,
+        tiInfo: (vistoria as any).tiInfo || (vistoria as any).ti_info,
         weather_data: vistoria.weatherData || vistoria.weather_data,
       };
       
