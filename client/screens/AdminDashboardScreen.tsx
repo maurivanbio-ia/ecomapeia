@@ -113,7 +113,7 @@ export default function AdminDashboardScreen({ navigation }: any) {
       if (!res.ok) throw new Error("Erro ao carregar estatísticas");
       return res.json();
     },
-    enabled: !!user?.is_admin,
+    enabled: !!user?.is_admin || user?.tipo_usuario === "Coordenador",
     refetchInterval: 30000,
   });
 
