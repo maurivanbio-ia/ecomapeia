@@ -93,6 +93,19 @@ export default function SelecionarProjetoScreen() {
     refetchOnMount: "always",
   });
 
+  // Fallback: fetch complexos + UHEs directly (no auth required)
+  const { data: complexosStats, isLoading: isLoadingComplexos, refetch: refetchComplexos } = useQuery<{
+    complexos: Array<{ id: number; nome: string; uhes: Array<{ id: number; nome: string; codigo: string | null; complexo_id: number }> }>;
+  }>({
+    queryKey: ["/api/complexos/admin/stats"],
+    queryFn: async () => {
+      const res = await fetch(new URL("/api/complexos/admin/stats", getApiUrl()).toString());
+      if (!res.ok) throw new Error("Failed");
+      return res.json();
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
   const selectProjetoMutation = useMutation({
     mutationFn: async (projetoId: number) => {
       return apiRequest("POST", `/api/tenant/usuarios/${user?.id}/projeto`, { projeto_id: projetoId });
@@ -107,7 +120,7 @@ export default function SelecionarProjetoScreen() {
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await refetch();
+    await Promise.all([refetch(), refetchComplexos()]);
     setRefreshing(false);
   };
 
@@ -117,7 +130,8 @@ export default function SelecionarProjetoScreen() {
     selectProjetoMutation.mutate(projetoId);
   };
 
-  if (isLoading) {
+  // Show spinner only while BOTH queries are still loading for the first time
+  if (isLoading && isLoadingComplexos) {
     return (
       <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
         <ActivityIndicator size="large" color={Colors.light.primary} />
@@ -127,8 +141,34 @@ export default function SelecionarProjetoScreen() {
 
   const currentProjetoId = selectedProjetoId || tenantData?.projetoAtual?.id;
 
-  // Group projects by complexo
-  const projetosDisponiveis = tenantData?.projetosDisponiveis ?? [];
+  // Group projects by complexo — prefer tenant data, fall back to complexosStats
+  const projetosDisponiveis: Projeto[] = (() => {
+    if (tenantData?.projetosDisponiveis && tenantData.projetosDisponiveis.length > 0) {
+      return tenantData.projetosDisponiveis;
+    }
+    // Build from direct complexos stats (fallback)
+    if (complexosStats?.complexos && complexosStats.complexos.length > 0) {
+      const result: Projeto[] = [];
+      for (const c of complexosStats.complexos) {
+        for (const uhe of (c.uhes || [])) {
+          result.push({
+            id: uhe.id,
+            empresa_id: 4,
+            complexo_id: c.id,
+            complexo_nome: c.nome,
+            nome: uhe.nome,
+            codigo: uhe.codigo,
+            descricao: null,
+            reservatorio: null,
+            rio_principal: null,
+            municipios: null,
+          });
+        }
+      }
+      return result;
+    }
+    return [];
+  })();
   const groupsMap: Record<string, ComplexoGroup> = {};
   const semComplexo: Projeto[] = [];
 

@@ -193,9 +193,41 @@ export default function NovaVistoriaScreen() {
   const [selectedProjetoId, setSelectedProjetoId] = useState<number | null>(null);
   const [showUHESelector, setShowUHESelector] = useState(false);
 
+  // Direct query for all complexos + UHEs (no auth required, works as reliable fallback)
+  const { data: complexosStats } = useQuery<{
+    complexos: Array<{ id: number; nome: string; uhes: Array<{ id: number; nome: string; codigo: string | null }> }>;
+  }>({
+    queryKey: ["/api/complexos/admin/stats"],
+    queryFn: async () => {
+      const res = await fetch(new URL("/api/complexos/admin/stats", getApiUrl()).toString());
+      if (!res.ok) throw new Error("Failed to fetch complexos");
+      return res.json();
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Build a flat list of all available projects from the best available source
+  const allProjetos: Array<{ id: number; nome: string; complexo_nome: string | null; codigo?: string | null }> = React.useMemo(() => {
+    // Prefer tenant data (has complexo_nome per project)
+    if (tenantData?.projetosDisponiveis && tenantData.projetosDisponiveis.length > 0) {
+      return tenantData.projetosDisponiveis;
+    }
+    // Fallback: build from complexos stats
+    if (complexosStats?.complexos && complexosStats.complexos.length > 0) {
+      const result: Array<{ id: number; nome: string; complexo_nome: string | null; codigo?: string | null }> = [];
+      for (const c of complexosStats.complexos) {
+        for (const uhe of (c.uhes || [])) {
+          result.push({ id: uhe.id, nome: uhe.nome, complexo_nome: c.nome, codigo: uhe.codigo });
+        }
+      }
+      return result;
+    }
+    return [];
+  }, [tenantData?.projetosDisponiveis, complexosStats?.complexos]);
+
   // Use explicitly selected project, otherwise fall back to user's current project
   const projetoAtualId = selectedProjetoId ?? tenantData?.projetoAtual?.id ?? null;
-  const projetoSelecionado = tenantData?.projetosDisponiveis?.find(p => p.id === projetoAtualId) ?? tenantData?.projetoAtual ?? null;
+  const projetoSelecionado = allProjetos.find(p => p.id === projetoAtualId) ?? tenantData?.projetoAtual ?? null;
   const { flags } = useFeatureFlags();
 
   const {
@@ -1489,8 +1521,16 @@ export default function NovaVistoriaScreen() {
               <Feather name="zap" size={18} /> Selecionar UHE / PCH
             </ThemedText>
             <ScrollView showsVerticalScrollIndicator={false}>
+              {allProjetos.length === 0 ? (
+                <View style={{ padding: 20, alignItems: "center" }}>
+                  <Feather name="wifi-off" size={32} color={theme.tabIconDefault} />
+                  <ThemedText style={{ marginTop: 8, color: theme.tabIconDefault, textAlign: "center" }}>
+                    Carregando complexos...
+                  </ThemedText>
+                </View>
+              ) : null}
               {(() => {
-                const projetos = tenantData?.projetosDisponiveis ?? [];
+                const projetos = allProjetos;
                 const groupsMap: Record<string, typeof projetos> = {};
                 for (const p of projetos) {
                   const key = p.complexo_nome ?? "Outros";
