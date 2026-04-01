@@ -16,10 +16,10 @@ import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import Animated, { FadeIn, FadeInUp } from "react-native-reanimated";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ThemedText } from "@/components/ThemedText";
-import { Colors, Spacing, BorderRadius } from "@/constants/theme";
+import { Spacing } from "@/constants/theme";
 import { getApiUrl } from "@/lib/query-client";
 
 import logoImage from "../../assets/images/ecomapeia-logo-clean.png";
@@ -28,12 +28,6 @@ import bgImage from "../../assets/images/hidroeletrica-bg.png";
 const TUTORIAL_COMPLETED_KEY = "@mapeia_tutorial_completed";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
-
-interface Complexo {
-  id: number;
-  nome: string;
-  descricao: string | null;
-}
 
 interface RegisterScreenProps {
   navigation: any;
@@ -49,21 +43,10 @@ export default function RegisterScreen({ navigation }: RegisterScreenProps) {
   const [senha, setSenha] = useState("");
   const [confirmarSenha, setConfirmarSenha] = useState("");
   const [tipoUsuario, setTipoUsuario] = useState("Fiscal");
-  const [complexoId, setComplexoId] = useState<number | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showTipoDropdown, setShowTipoDropdown] = useState(false);
-  const [showComplexoDropdown, setShowComplexoDropdown] = useState(false);
-
-  const { data: complexos = [], isLoading: loadingComplexos } = useQuery<Complexo[]>({
-    queryKey: ["/api/complexos"],
-    queryFn: async () => {
-      const res = await fetch(new URL("/api/complexos", getApiUrl()).toString());
-      if (!res.ok) throw new Error("Erro ao carregar complexos");
-      return res.json();
-    },
-  });
 
   const registerMutation = useMutation({
     mutationFn: async (data: {
@@ -71,7 +54,6 @@ export default function RegisterScreen({ navigation }: RegisterScreenProps) {
       email: string;
       senha: string;
       tipo_usuario: string;
-      complexo_id?: number;
     }) => {
       const res = await fetch(new URL("/api/auth/register", getApiUrl()).toString(), {
         method: "POST",
@@ -107,22 +89,14 @@ export default function RegisterScreen({ navigation }: RegisterScreenProps) {
       setError("A senha deve ter pelo menos 6 caracteres");
       return;
     }
-    if (!complexoId && tipoUsuario !== "Coordenador") {
-      setError("Selecione o complexo ao qual você está designado");
-      return;
-    }
-
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     registerMutation.mutate({
       nome: nome.trim(),
       email: email.trim().toLowerCase(),
       senha,
       tipo_usuario: tipoUsuario,
-      complexo_id: complexoId ?? undefined,
     });
   };
-
-  const selectedComplexo = complexos.find((c) => c.id === complexoId);
 
   return (
     <ImageBackground source={bgImage} style={styles.background} resizeMode="cover">
@@ -247,7 +221,6 @@ export default function RegisterScreen({ navigation }: RegisterScreenProps) {
                 onPress={() => {
                   Haptics.selectionAsync();
                   setShowTipoDropdown(!showTipoDropdown);
-                  setShowComplexoDropdown(false);
                 }}
               >
                 <Feather name="briefcase" size={18} color="#9CA3AF" style={styles.inputIcon} />
@@ -265,7 +238,6 @@ export default function RegisterScreen({ navigation }: RegisterScreenProps) {
                       onPress={() => {
                         setTipoUsuario(tipo);
                         setShowTipoDropdown(false);
-                        if (tipo === "Coordenador") setComplexoId(null);
                         Haptics.selectionAsync();
                       }}
                     >
@@ -285,75 +257,6 @@ export default function RegisterScreen({ navigation }: RegisterScreenProps) {
               ) : null}
             </View>
 
-            {tipoUsuario !== "Coordenador" ? (
-              <View style={styles.inputGroup}>
-                <ThemedText style={styles.inputLabel} lightColor="#374151" darkColor="#374151">
-                  Complexo hidrelétrico *
-                </ThemedText>
-                <Pressable
-                  style={[styles.inputContainer, !complexoId && styles.inputContainerRequired]}
-                  onPress={() => {
-                    Haptics.selectionAsync();
-                    setShowComplexoDropdown(!showComplexoDropdown);
-                    setShowTipoDropdown(false);
-                  }}
-                >
-                  <Feather name="zap" size={18} color={complexoId ? "#1A7A52" : "#9CA3AF"} style={styles.inputIcon} />
-                  <ThemedText
-                    style={styles.dropdownText}
-                    lightColor={complexoId ? "#1F2937" : "#9CA3AF"}
-                    darkColor={complexoId ? "#1F2937" : "#9CA3AF"}
-                  >
-                    {loadingComplexos
-                      ? "Carregando..."
-                      : selectedComplexo
-                      ? selectedComplexo.nome
-                      : "Selecione o complexo"}
-                  </ThemedText>
-                  <Feather name="chevron-down" size={18} color="#9CA3AF" />
-                </Pressable>
-                {showComplexoDropdown ? (
-                  <View style={styles.dropdown}>
-                    {complexos.map((complexo) => (
-                      <Pressable
-                        key={complexo.id}
-                        style={[
-                          styles.dropdownItem,
-                          complexoId === complexo.id && styles.dropdownItemActive,
-                        ]}
-                        onPress={() => {
-                          setComplexoId(complexo.id);
-                          setShowComplexoDropdown(false);
-                          Haptics.selectionAsync();
-                        }}
-                      >
-                        <View style={{ flex: 1 }}>
-                          <ThemedText
-                            style={[styles.dropdownItemText, { fontWeight: "600" }]}
-                            lightColor={complexoId === complexo.id ? "#1A7A52" : "#374151"}
-                            darkColor={complexoId === complexo.id ? "#1A7A52" : "#374151"}
-                          >
-                            {complexo.nome}
-                          </ThemedText>
-                          {complexo.descricao ? (
-                            <ThemedText
-                              style={styles.dropdownItemSubtext}
-                              lightColor="#9CA3AF"
-                              darkColor="#9CA3AF"
-                            >
-                              {complexo.descricao}
-                            </ThemedText>
-                          ) : null}
-                        </View>
-                        {complexoId === complexo.id ? (
-                          <Feather name="check" size={16} color="#1A7A52" />
-                        ) : null}
-                      </Pressable>
-                    ))}
-                  </View>
-                ) : null}
-              </View>
-            ) : null}
 
             {error ? (
               <Animated.View entering={FadeIn.duration(300)} style={styles.errorContainer}>
