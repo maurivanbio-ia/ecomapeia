@@ -166,7 +166,11 @@ function utmToLatLng(easting: number, northing: number, zone: number, isNorth: b
 
 export default function NovaVistoriaScreen() {
   const insets = useSafeAreaInsets();
-  const headerHeight = useHeaderHeight();
+  const rawHeaderHeight = useHeaderHeight();
+  // Guard: useHeaderHeight can return 0 before layout is measured on native.
+  // Fall back to insets.top + 44 (status bar + standard nav bar) to avoid
+  // content being hidden behind the transparent header.
+  const headerHeight = rawHeaderHeight > 0 ? rawHeaderHeight : insets.top + 44;
   const { theme } = useTheme();
   const { user } = useAuth();
   const navigation = useNavigation<NativeStackNavigationProp<VistoriasStackParamList>>();
@@ -1658,21 +1662,22 @@ export default function NovaVistoriaScreen() {
         {/* UHE / Complexo Selector Card */}
         <Pressable
           style={[styles.uheSelectorCard, {
-            backgroundColor: projetoSelecionado ? Colors.light.primary + "12" : theme.backgroundDefault,
-            borderColor: projetoSelecionado ? Colors.light.primary + "60" : theme.border,
+            backgroundColor: theme.backgroundDefault,
+            borderColor: projetoSelecionado ? theme.primary ?? "#1E3A5F" : theme.border,
+            borderWidth: projetoSelecionado ? 2 : 1.5,
           }]}
           onPress={() => {
             Haptics.selectionAsync();
             setShowUHESelector(true);
           }}
         >
-          <View style={[styles.uheSelectorIcon, { backgroundColor: projetoSelecionado ? Colors.light.primary : theme.tabIconDefault + "40" }]}>
+          <View style={[styles.uheSelectorIcon, { backgroundColor: projetoSelecionado ? (theme.primary ?? "#1E3A5F") : theme.backgroundSecondary }]}>
             <Feather name="zap" size={20} color={projetoSelecionado ? "#fff" : theme.tabIconDefault} />
           </View>
           <View style={{ flex: 1 }}>
             {projetoSelecionado ? (
               <>
-                <ThemedText style={[styles.uheSelectorTitle, { color: Colors.light.primary }]} numberOfLines={1}>
+                <ThemedText style={[styles.uheSelectorTitle, { color: theme.text }]} numberOfLines={1}>
                   {(projetoSelecionado as any).nome}
                 </ThemedText>
                 <ThemedText style={[styles.uheSelectorSub, { color: theme.tabIconDefault }]} numberOfLines={1}>
@@ -1681,7 +1686,7 @@ export default function NovaVistoriaScreen() {
               </>
             ) : (
               <>
-                <ThemedText style={[styles.uheSelectorTitle, { color: Colors.light.error ?? "#e53935" }]}>
+                <ThemedText style={[styles.uheSelectorTitle, { color: "#e53935" }]}>
                   Selecione a UHE / Complexo
                 </ThemedText>
                 <ThemedText style={[styles.uheSelectorSub, { color: theme.tabIconDefault }]}>
@@ -1690,7 +1695,7 @@ export default function NovaVistoriaScreen() {
               </>
             )}
           </View>
-          <Feather name="chevron-right" size={18} color={projetoSelecionado ? Colors.light.primary : theme.tabIconDefault} />
+          <Feather name="chevron-right" size={18} color={projetoSelecionado ? (theme.primary ?? "#1E3A5F") : theme.tabIconDefault} />
         </Pressable>
 
         <View
