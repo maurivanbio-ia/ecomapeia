@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   View,
   Pressable,
@@ -18,10 +18,22 @@ interface VoiceTranscribeButtonProps {
 
 type RecordingState = "idle" | "recording" | "transcribing";
 
-const SUPPORTED = typeof window !== "undefined" &&
+// ── Detecção de suporte ────────────────────────────────────────────────────
+const SpeechRecognitionAPI =
+  typeof window !== "undefined"
+    ? (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+    : null;
+
+const SUPPORTS_SPEECH_RECOGNITION = !!SpeechRecognitionAPI;
+
+const SUPPORTS_MEDIA_RECORDER =
+  typeof window !== "undefined" &&
   !!window.MediaRecorder &&
   !!navigator.mediaDevices?.getUserMedia;
 
+const SUPPORTED = SUPPORTS_SPEECH_RECOGNITION || SUPPORTS_MEDIA_RECORDER;
+
+// ── MediaRecorder helpers (fallback Whisper) ───────────────────────────────
 function getMimeTypeAndFormat(): { mimeType: string; format: string } {
   const types = [
     { mimeType: "audio/webm;codecs=opus", format: "webm" },
@@ -42,6 +54,12 @@ export default function VoiceTranscribeButton({
   const { theme } = useTheme();
   const [state, setState] = useState<RecordingState>("idle");
   const [error, setError] = useState<string | null>(null);
+  const [liveText, setLiveText] = useState<string>("");
+
+  // Web Speech API refs
+  const recognitionRef = useRef<any>(null);
+
+  // MediaRecorder refs (fallback)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
@@ -49,11 +67,80 @@ export default function VoiceTranscribeButton({
 
   useEffect(() => {
     return () => {
-      streamRef.current?.getTracks().forEach((t) => t.stop());
+      // Cleanup on unmount
+      recognitionRef.current?.stop();
+      streamRef.current?.getTracks().forEach((t: MediaStreamTrack) => t.stop());
     };
   }, []);
 
-  const startRecording = async () => {
+  // ── Web Speech API (melhor opção: sem chave, tempo real) ─────────────────
+  const startSpeechRecognition = () => {
+    setError(null);
+    setLiveText("");
+
+    const recognition = new SpeechRecognitionAPI();
+    recognitionRef.current = recognition;
+
+    recognition.lang = "pt-BR";
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.maxAlternatives = 1;
+
+    let finalTranscript = "";
+
+    recognition.onstart = () => {
+      setState("recording");
+    };
+
+    recognition.onresult = (event: any) => {
+      let interim = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const t = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalTranscript += t + " ";
+        } else {
+          interim = t;
+        }
+      }
+      setLiveText(finalTranscript + interim);
+    };
+
+    recognition.onerror = (event: any) => {
+      if (event.error === "not-allowed") {
+        setError("Permissão de microfone negada");
+      } else if (event.error === "no-speech") {
+        setError("Nenhuma fala detectada. Tente novamente.");
+      } else {
+        setError(`Erro: ${event.error}`);
+      }
+      setState("idle");
+      setLiveText("");
+    };
+
+    recognition.onend = () => {
+      // If we have a result, deliver it
+      if (finalTranscript.trim()) {
+        onTranscription(finalTranscript.trim());
+        setError(null);
+      } else if (state === "recording") {
+        setError("Nenhuma fala detectada. Tente novamente.");
+      }
+      setState("idle");
+      setLiveText("");
+    };
+
+    recognition.start();
+  };
+
+  const stopSpeechRecognition = () => {
+    setState("transcribing");
+    recognitionRef.current?.stop();
+    // onend will fire and deliver the result
+    setTimeout(() => setState("idle"), 1500);
+  };
+
+  // ── MediaRecorder + Whisper (fallback) ────────────────────────────────────
+  const startMediaRecording = async () => {
     try {
       setError(null);
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -72,13 +159,13 @@ export default function VoiceTranscribeButton({
 
       mr.start(250);
       setState("recording");
-    } catch (err) {
-      setError("Erro ao acessar microfone");
+    } catch {
+      setError("Erro ao acessar microfone. Verifique as permissões.");
       setState("idle");
     }
   };
 
-  const stopAndTranscribe = async () => {
+  const stopAndTranscribeWhisper = async () => {
     const mr = mediaRecorderRef.current;
     if (!mr) return;
 
@@ -118,17 +205,26 @@ export default function VoiceTranscribeButton({
       } else {
         setError("Não foi possível transcrever o áudio");
       }
-    } catch (err) {
-      setError("Erro ao transcrever áudio");
+    } catch {
+      setError("Erro ao transcrever. Verifique a conexão com o servidor.");
     } finally {
       setState("idle");
     }
   };
 
+  // ── Handler principal ─────────────────────────────────────────────────────
   const handlePress = () => {
     if (disabled || state === "transcribing") return;
-    if (state === "idle") startRecording();
-    else if (state === "recording") stopAndTranscribe();
+
+    if (SUPPORTS_SPEECH_RECOGNITION) {
+      // Modo preferencial: Web Speech API (Chrome/Edge)
+      if (state === "idle") startSpeechRecognition();
+      else if (state === "recording") stopSpeechRecognition();
+    } else {
+      // Fallback: MediaRecorder + Whisper
+      if (state === "idle") startMediaRecording();
+      else if (state === "recording") stopAndTranscribeWhisper();
+    }
   };
 
   if (!SUPPORTED) {
@@ -136,7 +232,7 @@ export default function VoiceTranscribeButton({
       <View style={[styles.unsupported, { borderColor: theme.border }]}>
         <Feather name="mic-off" size={14} color={theme.tabIconDefault} />
         <ThemedText style={[styles.unsupportedText, { color: theme.tabIconDefault }]}>
-          Gravação não disponível neste navegador
+          Gravação não disponível neste navegador. Use Chrome ou Edge.
         </ThemedText>
       </View>
     );
@@ -144,7 +240,6 @@ export default function VoiceTranscribeButton({
 
   const isRecording = state === "recording";
   const isTranscribing = state === "transcribing";
-  const isActive = isRecording || isTranscribing;
   const buttonColor = isRecording ? "#EF4444" : Colors.light.primary;
 
   return (
@@ -177,15 +272,15 @@ export default function VoiceTranscribeButton({
           )}
           <ThemedText style={[styles.label, { color: buttonColor }]}>
             {isRecording
-              ? "Parar e transcrever"
+              ? "Parar gravação"
               : isTranscribing
-              ? "Transcrevendo..."
+              ? "Processando..."
               : "Gravar observação"}
           </ThemedText>
           {isRecording ? <View style={styles.recDot} /> : null}
         </Pressable>
 
-        {isActive ? (
+        {(isRecording || isTranscribing) ? (
           <View
             style={[
               styles.statusBadge,
@@ -196,11 +291,21 @@ export default function VoiceTranscribeButton({
             ]}
           >
             <ThemedText style={[styles.statusText, { color: buttonColor }]}>
-              {isRecording ? "REC" : "IA"}
+              {isRecording ? "REC" : "···"}
             </ThemedText>
           </View>
         ) : null}
       </View>
+
+      {/* Transcrição em tempo real (Web Speech API) */}
+      {isRecording && liveText ? (
+        <View style={styles.livePreview}>
+          <Feather name="type" size={11} color={Colors.light.primary} />
+          <ThemedText style={styles.liveText} numberOfLines={3}>
+            {liveText}
+          </ThemedText>
+        </View>
+      ) : null}
 
       {error ? (
         <View style={styles.errorRow}>
@@ -211,10 +316,14 @@ export default function VoiceTranscribeButton({
 
       <ThemedText style={styles.hint}>
         {isRecording
-          ? "Fale suas observacoes. Toque em parar para transcrever."
+          ? SUPPORTS_SPEECH_RECOGNITION
+            ? "Fale normalmente. Toque em parar quando terminar."
+            : "Fale suas observações. Toque em parar para transcrever via IA."
           : isTranscribing
-          ? "A IA esta transcrevendo seu audio..."
-          : "Grave um audio e a IA transcrevera automaticamente para o campo abaixo."}
+          ? "Finalizando transcrição..."
+          : SUPPORTS_SPEECH_RECOGNITION
+          ? "Toque para gravar. Transcrição automática em tempo real."
+          : "Grave um áudio e a IA transcreverá automaticamente."}
       </ThemedText>
     </View>
   );
@@ -242,6 +351,23 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   statusText: { fontSize: 11, fontWeight: "700", letterSpacing: 0.5 },
+  livePreview: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 6,
+    backgroundColor: "#EFF6FF",
+    borderRadius: BorderRadius.sm,
+    padding: Spacing.sm,
+    borderWidth: 1,
+    borderColor: Colors.light.primary + "40",
+  },
+  liveText: {
+    flex: 1,
+    fontSize: 12,
+    color: Colors.light.primary,
+    fontStyle: "italic",
+    lineHeight: 17,
+  },
   errorRow: { flexDirection: "row", alignItems: "center", gap: 4 },
   errorText: { fontSize: 12, color: "#EF4444" },
   hint: { fontSize: 11, color: "#888", lineHeight: 15 },

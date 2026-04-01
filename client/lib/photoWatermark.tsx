@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import { View, Text, StyleSheet, Dimensions, Platform } from "react-native";
 import { Image } from "expo-image";
-import ViewShot, { captureRef } from "react-native-view-shot";
+import { captureRef } from "react-native-view-shot";
 import * as Location from "expo-location";
 
 export interface WatermarkData {
@@ -12,13 +12,8 @@ export interface WatermarkData {
 }
 
 function formatDateTime(date: Date): string {
-  const day = date.getDate().toString().padStart(2, "0");
-  const month = (date.getMonth() + 1).toString().padStart(2, "0");
-  const year = date.getFullYear();
-  const hours = date.getHours().toString().padStart(2, "0");
-  const minutes = date.getMinutes().toString().padStart(2, "0");
-  const seconds = date.getSeconds().toString().padStart(2, "0");
-  return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
 }
 
 function formatCoordinates(lat: number, lng: number): string {
@@ -30,18 +25,11 @@ function formatCoordinates(lat: number, lng: number): string {
 export async function getCurrentLocation(): Promise<{ lat: number; lng: number } | null> {
   try {
     const { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== "granted") {
-      return null;
-    }
-    
+    if (status !== "granted") return null;
     const location = await Location.getCurrentPositionAsync({
       accuracy: Location.Accuracy.High,
     });
-    
-    return {
-      lat: location.coords.latitude,
-      lng: location.coords.longitude,
-    };
+    return { lat: location.coords.latitude, lng: location.coords.longitude };
   } catch {
     return null;
   }
@@ -49,18 +37,16 @@ export async function getCurrentLocation(): Promise<{ lat: number; lng: number }
 
 export function createWatermarkData(location: { lat: number; lng: number } | null): WatermarkData {
   const now = new Date();
-  const timestamp = formatDateTime(now);
-  const coordinates = location 
-    ? formatCoordinates(location.lat, location.lng)
-    : "GPS não disponível";
-
   return {
-    timestamp,
-    coordinates,
+    timestamp: formatDateTime(now),
+    coordinates: location ? formatCoordinates(location.lat, location.lng) : "GPS não disponível",
     lat: location?.lat,
     lng: location?.lng,
   };
 }
+
+// EcoBrasil white logo PNG
+const ECOBRASIL_LOGO = require("../assets/images/ecobrasil-logo-white.png");
 
 interface PhotoWatermarkProcessorProps {
   pendingPhoto: {
@@ -72,8 +58,8 @@ interface PhotoWatermarkProcessorProps {
   onError: (id: string) => void;
 }
 
-export function PhotoWatermarkProcessor({ 
-  pendingPhoto, 
+export function PhotoWatermarkProcessor({
+  pendingPhoto,
   onProcessed,
   onError,
 }: PhotoWatermarkProcessorProps) {
@@ -83,12 +69,13 @@ export function PhotoWatermarkProcessor({
   const processImage = useCallback(async () => {
     if (!pendingPhoto || !imageLoaded || !viewRef.current) return;
 
-    await new Promise(resolve => setTimeout(resolve, 200));
+    // Give layout engine time to render the watermark overlay
+    await new Promise(resolve => setTimeout(resolve, 250));
 
     try {
       const uri = await captureRef(viewRef, {
         format: "jpg",
-        quality: 0.85,
+        quality: 0.88,
       });
       onProcessed(pendingPhoto.id, uri);
     } catch (error) {
@@ -114,26 +101,34 @@ export function PhotoWatermarkProcessor({
   const imageHeight = (imageWidth * 4) / 3;
 
   return (
+    // FIX: position off-screen (top: -99999) instead of 1×1px + overflow:hidden.
+    // The tiny clipped container prevented captureRef from rendering the view.
     <View style={styles.hiddenContainer} pointerEvents="none">
-      <View 
-        ref={viewRef} 
+      <View
+        ref={viewRef}
         style={[styles.imageContainer, { width: imageWidth, height: imageHeight }]}
         collapsable={false}
       >
+        {/* Base photo */}
         <Image
           source={{ uri: pendingPhoto.uri }}
           style={[styles.image, { width: imageWidth, height: imageHeight }]}
           contentFit="cover"
           onLoad={() => setImageLoaded(true)}
         />
-        
+
+        {/* TOP LEFT: EcoBrasil logo PNG com fundo escuro semitransparente */}
         <View style={styles.logoContainer}>
-          <View style={styles.brandContainer}>
-            <Text style={styles.brandEco}>Eco</Text>
-            <Text style={styles.brandBrasil}>Brasil</Text>
+          <View style={styles.logoBadge}>
+            <Image
+              source={ECOBRASIL_LOGO}
+              style={styles.logoImage}
+              contentFit="contain"
+            />
           </View>
         </View>
-        
+
+        {/* BOTTOM RIGHT: data/hora e coordenadas */}
         <View style={styles.timestampContainer}>
           <View style={styles.timestampBackground}>
             <Text style={styles.timestampText}>{pendingPhoto.watermarkData.timestamp}</Text>
@@ -146,14 +141,13 @@ export function PhotoWatermarkProcessor({
 }
 
 const styles = StyleSheet.create({
+  // FIX: use top:-99999 so the view is off-screen but still rendered correctly
+  // (overflow:hidden in a 1×1 box clips the canvas, breaking captureRef)
   hiddenContainer: {
     position: "absolute",
+    top: -99999,
     left: 0,
-    top: 0,
     zIndex: -1000,
-    overflow: "hidden",
-    width: 1,
-    height: 1,
   },
   imageContainer: {
     position: "relative",
@@ -164,37 +158,23 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
   },
+  // ── Logo EcoBrasil ──────────────────────────────────────────────────
   logoContainer: {
     position: "absolute",
     top: 16,
     left: 16,
   },
-  brandContainer: {
-    flexDirection: "row",
+  logoBadge: {
     backgroundColor: "rgba(0, 0, 0, 0.65)",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 7,
     borderRadius: 6,
-    alignItems: "center",
   },
-  brandEco: {
-    color: "#4ADE80",
-    fontSize: 18,
-    fontWeight: "800",
-    fontFamily: Platform.OS === "ios" ? "System" : "sans-serif-medium",
-    textShadowColor: "rgba(0, 0, 0, 0.5)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+  logoImage: {
+    width: 120,
+    height: 36,
   },
-  brandBrasil: {
-    color: "#FFFFFF",
-    fontSize: 18,
-    fontWeight: "800",
-    fontFamily: Platform.OS === "ios" ? "System" : "sans-serif-medium",
-    textShadowColor: "rgba(0, 0, 0, 0.5)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
-  },
+  // ── Timestamp ────────────────────────────────────────────────────────
   timestampContainer: {
     position: "absolute",
     bottom: 16,
@@ -208,7 +188,7 @@ const styles = StyleSheet.create({
   },
   timestampText: {
     color: "#FFFFFF",
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: "600",
     textAlign: "right",
     fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",

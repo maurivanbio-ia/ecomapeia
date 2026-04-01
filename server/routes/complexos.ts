@@ -2,11 +2,17 @@ import { Router, Request, Response } from "express";
 import { db } from "../db";
 import { complexos, projetos, usuarios, vistorias } from "../../shared/schema";
 import { eq, and, inArray, count, sql } from "drizzle-orm";
+import { COMPLEXOS_DATA } from "../mem-storage";
+
+const DATABASE_URL = process.env.DATABASE_URL;
 
 const router = Router();
 
 router.get("/", async (_req: Request, res: Response) => {
   try {
+    if (!DATABASE_URL) {
+      return res.json(COMPLEXOS_DATA.map(({ uhes: _u, ...c }) => c));
+    }
     const result = await db
       .select()
       .from(complexos)
@@ -21,6 +27,10 @@ router.get("/", async (_req: Request, res: Response) => {
 
 router.get("/all-uhes", async (_req: Request, res: Response) => {
   try {
+    if (!DATABASE_URL) {
+      const allUhes = COMPLEXOS_DATA.flatMap(c => c.uhes);
+      return res.json(allUhes);
+    }
     const result = await db
       .select()
       .from(projetos)
@@ -35,6 +45,23 @@ router.get("/all-uhes", async (_req: Request, res: Response) => {
 
 router.get("/admin/stats", async (_req: Request, res: Response) => {
   try {
+    // Fallback: sem banco de dados, retorna dados estáticos do mem-storage
+    if (!DATABASE_URL) {
+      const stats = COMPLEXOS_DATA.map(c => ({
+        ...c,
+        totalUhes: c.uhes.length,
+        totalVistorias: 0,
+        totalUsuarios: 0,
+      }));
+      const totais = {
+        complexos: stats.length,
+        uhes: stats.reduce((a, s) => a + s.totalUhes, 0),
+        vistorias: 0,
+        usuarios: 0,
+      };
+      return res.json({ complexos: stats, totais });
+    }
+
     const allComplexos = await db.select().from(complexos).where(eq(complexos.ativo, true));
 
     const statsPromises = allComplexos.map(async (complexo) => {

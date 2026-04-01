@@ -8,6 +8,8 @@ import {
   Image,
   Share,
   Platform,
+  Modal,
+  TouchableOpacity,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
@@ -168,7 +170,11 @@ export default function DetalhesVistoriaScreen() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const { vistoriaId } = route.params as RouteParams;
+  const [pdfLoading, setPdfLoading] = useState(false);
+  const [wordLoading, setWordLoading] = useState(false);
+  const [shareLoading, setShareLoading] = useState(false);
   const [mapImageUri, setMapImageUri] = useState<string | null>(null);
+  const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
 
   const { data: vistoria, isLoading } = useQuery<VistoriaData>({
     queryKey: [`/api/vistorias/${vistoriaId}`],
@@ -199,26 +205,24 @@ export default function DetalhesVistoriaScreen() {
   };
 
   const handleDelete = () => {
-    Alert.alert(
-      "Excluir Vistoria",
-      "Tem certeza que deseja excluir esta vistoria? Esta ação não pode ser desfeita.",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Excluir",
-          style: "destructive",
-          onPress: () => deleteVistoria.mutate(),
-        },
-      ]
-    );
+    setDeleteConfirmVisible(true);
+  };
+
+  const confirmDelete = () => {
+    setDeleteConfirmVisible(false);
+    deleteVistoria.mutate();
+  };
+
+  const cancelDelete = () => {
+    setDeleteConfirmVisible(false);
   };
 
   const generatePDF = async () => {
     if (!vistoria) return;
-
     try {
+      setPdfLoading(true);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      
+
       const [preparedFotos, preparedCroqui, preparedSig, preparedSigTec] = await Promise.all([
         preparePhotosForReport(vistoria.fotos),
         prepareUriForReport((vistoria as any).croqui_imagem || mapImageUri),
@@ -240,24 +244,30 @@ export default function DetalhesVistoriaScreen() {
         weather_data: vistoria.weatherData || vistoria.weather_data,
         hora_vistoria: vistoria.horaVistoria || vistoria.hora_vistoria,
         usos_solo: vistoria.usosSolo,
+        projeto_nome: vistoria.projeto_nome,
         coordenadas_utm: vistoria.coordenadas_utm || vistoria.coordenadas?.map((c) => ({
           e: c.latitude?.toFixed(6) || "",
           n: c.longitude?.toFixed(6) || ""
         })),
       };
-      
+
       const response = await apiRequest("POST", "/api/pdf/generate", pdfData);
       const html = await response.text();
 
       if (Platform.OS === "web") {
-        const newWindow = window.open();
-        if (newWindow) {
-          newWindow.document.write(html);
-          newWindow.document.close();
-        }
+        // Download direto do arquivo HTML
+        const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+        const blobUrl = URL.createObjectURL(blob);
+        const date = new Date().toISOString().slice(0, 10);
+        const filename = `Relatorio_Vistoria_${vistoria.numero_notificacao?.replace(/[^a-zA-Z0-9]/g, "_") || vistoria.id}_${date}.html`;
+        const a = document.createElement("a");
+        a.href = blobUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(blobUrl); }, 100);
       } else {
         const { uri } = await Print.printToFileAsync({ html });
-        
         if (await Sharing.isAvailableAsync()) {
           await Sharing.shareAsync(uri, {
             mimeType: "application/pdf",
@@ -265,18 +275,19 @@ export default function DetalhesVistoriaScreen() {
           });
         }
       }
-      
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (error) {
       console.error("Error generating PDF:", error);
       Alert.alert("Erro", "Não foi possível gerar o relatório PDF.");
+    } finally {
+      setPdfLoading(false);
     }
   };
 
   const generateWord = async () => {
     if (!vistoria) return;
-
     try {
+      setWordLoading(true);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
       const [preparedFotos, preparedCroqui, preparedSig, preparedSigTec] = await Promise.all([
@@ -293,6 +304,7 @@ export default function DetalhesVistoriaScreen() {
         assinatura_uri: preparedSig,
         assinatura_tecnico_uri: preparedSigTec,
         usos_solo: vistoria.usosSolo,
+        projeto_nome: vistoria.projeto_nome,
         ucInfo: (vistoria as any).ucInfo || (vistoria as any).uc_info,
         carInfo: vistoria.carInfo || (vistoria as any).car_info,
         embargoCheck: vistoria.embargoCheck || (vistoria as any).embargo_check,
@@ -300,46 +312,87 @@ export default function DetalhesVistoriaScreen() {
         tiInfo: (vistoria as any).tiInfo || (vistoria as any).ti_info,
         weather_data: vistoria.weatherData || vistoria.weather_data,
       };
-      
-      const apiUrl = getApiUrl();
-      const url = new URL("/api/docx/generate", apiUrl);
-      
+
+      const url = new URL("/api/docx/generate", getApiUrl());
       const response = await fetch(url.toString(), {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(wordData),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to generate Word document");
-      }
+      if (!response.ok) throw new Error("Failed to generate Word document");
 
       if (Platform.OS === "web") {
         const blob = await response.blob();
         const downloadUrl = window.URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = downloadUrl;
-        link.download = `RO-NOT-ITU_${vistoria.numero_notificacao?.replace(/[^a-zA-Z0-9]/g, "_") || vistoria.id}.docx`;
+        link.download = `Relatorio_Vistoria_${vistoria.numero_notificacao?.replace(/[^a-zA-Z0-9]/g, "_") || vistoria.id}.docx`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
         window.URL.revokeObjectURL(downloadUrl);
       } else {
-        Alert.alert(
-          "Documento Word",
-          "O documento Word está disponível para download na versão web. Acesse a aplicação pelo navegador para baixar o arquivo.",
-          [{ text: "OK" }]
-        );
+        // Mobile: salvar e compartilhar via expo-sharing
+        const { shareAsync } = Sharing;
+        const blob = await response.blob();
+        const arrayBuffer = await blob.arrayBuffer();
+        const bytes = new Uint8Array(arrayBuffer);
+        let binary = "";
+        for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+        const base64 = btoa(binary);
+        const fileUri = (FileSystem as any).documentDirectory
+          ? `${(FileSystem as any).documentDirectory}relatorio_vistoria.docx`
+          : "relatorio_vistoria.docx";
+        await (FileSystem as any).writeAsStringAsync(fileUri, base64, { encoding: "base64" });
+        if (await Sharing.isAvailableAsync()) {
+          await shareAsync(fileUri, {
+            mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            dialogTitle: "Compartilhar Relatório Word",
+          });
+        }
       }
-      
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (error) {
       console.error("Error generating Word document:", error);
       Alert.alert("Erro", "Não foi possível gerar o documento Word.");
+    } finally {
+      setWordLoading(false);
     }
   };
+
+  const shareViaWhatsApp = async () => {
+    if (!vistoria) return;
+    try {
+      setShareLoading(true);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      const uhe = vistoria.projeto_nome || "";
+      const data = vistoria.data_vistoria || "";
+      const prop = vistoria.proprietario || "";
+      const num = vistoria.numero_notificacao || vistoria.id;
+      const msg = encodeURIComponent(
+        `📋 *Vistoria EcoBrasil*\n` +
+        `${uhe ? `🏭 ${uhe}\n` : ""}` +
+        `📅 Data: ${data}\n` +
+        `👤 Proprietário: ${prop}\n` +
+        `🔢 Notificação: ${num}\n` +
+        `📍 Município: ${vistoria.municipio || "-"}\n\n` +
+        `_Relatório gerado pelo EcoMapeIA_`
+      );
+      const whatsappUrl = `https://wa.me/?text=${msg}`;
+      if (Platform.OS === "web") {
+        window.open(whatsappUrl, "_blank");
+      } else {
+        const { Linking } = await import("react-native");
+        await Linking.openURL(whatsappUrl);
+      }
+    } catch (err) {
+      Alert.alert("Erro", "Não foi possível abrir o WhatsApp.");
+    } finally {
+      setShareLoading(false);
+    }
+  };
+
 
   const polygonCoordinates = React.useMemo(() => {
     if (!vistoria?.coordenadas_utm) return [];
@@ -429,17 +482,27 @@ export default function DetalhesVistoriaScreen() {
         <View style={styles.headerActions}>
           <Pressable
             onPress={generatePDF}
-            style={[styles.actionBtn, { backgroundColor: Colors.light.primary }]}
+            disabled={pdfLoading}
+            style={[styles.actionBtn, { backgroundColor: Colors.light.primary, opacity: pdfLoading ? 0.7 : 1 }]}
           >
-            <Feather name="file-text" size={18} color="#FFFFFF" />
-            <ThemedText style={styles.actionBtnText}>PDF</ThemedText>
+            <Feather name={pdfLoading ? "loader" : "download"} size={18} color="#FFFFFF" />
+            <ThemedText style={styles.actionBtnText}>{pdfLoading ? "Gerando..." : "Baixar PDF"}</ThemedText>
           </Pressable>
           <Pressable
             onPress={generateWord}
-            style={[styles.actionBtn, { backgroundColor: Colors.light.accent }]}
+            disabled={wordLoading}
+            style={[styles.actionBtn, { backgroundColor: Colors.light.accent, opacity: wordLoading ? 0.7 : 1 }]}
           >
-            <Feather name="file" size={18} color="#FFFFFF" />
-            <ThemedText style={styles.actionBtnText}>Word</ThemedText>
+            <Feather name={wordLoading ? "loader" : "file"} size={18} color="#FFFFFF" />
+            <ThemedText style={styles.actionBtnText}>{wordLoading ? "Gerando..." : "Baixar Word"}</ThemedText>
+          </Pressable>
+          <Pressable
+            onPress={shareViaWhatsApp}
+            disabled={shareLoading}
+            style={[styles.actionBtn, { backgroundColor: "#25D366" }]}
+          >
+            <Feather name="message-circle" size={18} color="#FFFFFF" />
+            <ThemedText style={styles.actionBtnText}>WhatsApp</ThemedText>
           </Pressable>
           <Pressable
             onPress={handleEdit}
@@ -572,6 +635,41 @@ export default function DetalhesVistoriaScreen() {
           </View>
         </View>
       </ScrollView>
+
+      {/* Modal de confirmação de exclusão */}
+      <Modal
+        visible={deleteConfirmVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={cancelDelete}
+      >
+        <TouchableOpacity
+          style={styles.deleteModalOverlay}
+          activeOpacity={1}
+          onPress={cancelDelete}
+        >
+          <TouchableOpacity activeOpacity={1} style={styles.deleteModalBox}>
+            <ThemedText style={styles.deleteModalTitle}>Excluir Vistoria</ThemedText>
+            <ThemedText style={styles.deleteModalMessage}>
+              Tem certeza que deseja excluir esta vistoria? Esta ação não pode ser desfeita.
+            </ThemedText>
+            <View style={styles.deleteModalButtons}>
+              <Pressable
+                style={[styles.deleteModalBtn, styles.deleteModalBtnCancel]}
+                onPress={cancelDelete}
+              >
+                <ThemedText style={styles.deleteModalBtnCancelText}>Cancelar</ThemedText>
+              </Pressable>
+              <Pressable
+                style={[styles.deleteModalBtn, styles.deleteModalBtnConfirm]}
+                onPress={confirmDelete}
+              >
+                <ThemedText style={styles.deleteModalBtnConfirmText}>Excluir</ThemedText>
+              </Pressable>
+            </View>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
     </ThemedView>
   );
 }
@@ -660,5 +758,63 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontWeight: "600",
     fontSize: 13,
+  },
+  // Estilos do modal de confirmação de exclusão
+  deleteModalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 24,
+  },
+  deleteModalBox: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 24,
+    width: "100%",
+    maxWidth: 360,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  deleteModalTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#1E3A5F",
+    marginBottom: 12,
+  },
+  deleteModalMessage: {
+    fontSize: 14,
+    color: "#666",
+    lineHeight: 20,
+    marginBottom: 24,
+  },
+  deleteModalButtons: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  deleteModalBtn: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  deleteModalBtnCancel: {
+    backgroundColor: "#F3F4F6",
+  },
+  deleteModalBtnCancelText: {
+    color: "#374151",
+    fontWeight: "600",
+    fontSize: 15,
+  },
+  deleteModalBtnConfirm: {
+    backgroundColor: "#EF4444",
+  },
+  deleteModalBtnConfirmText: {
+    color: "#FFFFFF",
+    fontWeight: "700",
+    fontSize: 15,
   },
 });

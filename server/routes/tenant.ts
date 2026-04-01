@@ -196,7 +196,55 @@ router.put("/projetos/:id", async (req: Request, res: Response) => {
 router.get("/usuarios/:userId/tenant", async (req: Request, res: Response) => {
   try {
     const userId = String(req.params.userId);
-    
+
+    // ─── Fallback para MemStorage (sem banco de dados) ──────────────────────
+    if (!process.env.DATABASE_URL) {
+      const { memStorage, COMPLEXOS_DATA } = await import("../mem-storage");
+      const memUser = await memStorage.getUsuario(userId);
+      if (!memUser) {
+        return res.status(404).json({ error: "Usuário não encontrado" });
+      }
+
+      // Montar lista completa de projetos a partir do COMPLEXOS_DATA
+      const projetosDisponiveis: any[] = [];
+      for (const complexo of COMPLEXOS_DATA) {
+        for (const uhe of complexo.uhes) {
+          projetosDisponiveis.push({
+            id: uhe.id,
+            nome: uhe.nome,
+            codigo: uhe.codigo,
+            complexo_id: complexo.id,
+            complexo_nome: complexo.nome,
+            empresa_id: complexo.empresa_id,
+            ativo: true,
+            descricao: null,
+            reservatorio: null,
+            rio_principal: null,
+            municipios: null,
+          });
+        }
+      }
+
+      // projetoAtual: ler do campo projeto_atual_id do usuário em memória
+      let projetoAtual = null;
+      const projetoAtualId = (memUser as any).projeto_atual_id;
+      if (projetoAtualId) {
+        projetoAtual = projetosDisponiveis.find(p => p.id === projetoAtualId) || null;
+      }
+
+      const empresa = memUser.empresa_id
+        ? { id: memUser.empresa_id, nome: "CBA – Companhia Brasileira de Alumínio", cnpj: null }
+        : null;
+
+      return res.json({
+        empresa,
+        projetoAtual,
+        projetosDisponiveis,
+        isAdmin: memUser.is_admin ?? false,
+      });
+    }
+
+    // ─── Caminho normal com banco de dados ─────────────────────────────────
     const user = await db.select().from(usuarios).where(eq(usuarios.id, userId));
     
     if (user.length === 0) {
@@ -213,7 +261,6 @@ router.get("/usuarios/:userId/tenant", async (req: Request, res: Response) => {
       empresa = empresaResult[0] || null;
     }
 
-    // Busca todos os projetos ativos com nome do complexo (sem filtro por empresa para garantir visibilidade total)
     const projetosRaw = await db
       .select({
         id: projetos.id,
@@ -276,6 +323,16 @@ router.post("/usuarios/:userId/projeto", async (req: Request, res: Response) => 
   try {
     const userId = String(req.params.userId);
     const { projeto_id } = req.body;
+
+    // Fallback para MemStorage
+    if (!process.env.DATABASE_URL) {
+      const { memStorage } = await import("../mem-storage");
+      const updated = await memStorage.updateUsuario(userId, { projeto_atual_id: projeto_id } as any);
+      if (!updated) {
+        return res.status(404).json({ error: "Usuário não encontrado" });
+      }
+      return res.json(updated);
+    }
 
     const result = await db.update(usuarios)
       .set({ projeto_atual_id: projeto_id })

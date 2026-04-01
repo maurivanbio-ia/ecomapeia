@@ -5,15 +5,18 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
  * @returns {string} The API base URL
  */
 export function getApiUrl(): string {
-  let host = process.env.EXPO_PUBLIC_DOMAIN;
+  // URL completa tem prioridade (ex: https://abc.ngrok-free.app ou https://meuapp.render.com)
+  const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+  if (apiUrl) return apiUrl.replace(/\/$/, "");
 
-  if (!host) {
-    throw new Error("EXPO_PUBLIC_DOMAIN is not set");
+  // Legado: domínio sem protocolo (formato Replit)
+  const host = process.env.EXPO_PUBLIC_DOMAIN;
+  if (host) {
+    return new URL(`https://${host}`).href.replace(/\/$/, "");
   }
 
-  let url = new URL(`https://${host}`);
-
-  return url.href;
+  // Desenvolvimento local
+  return "http://localhost:5001";
 }
 
 async function throwIfResNotOk(res: Response) {

@@ -1,9 +1,16 @@
 import React from "react";
-import { StyleSheet } from "react-native";
+import { Platform, StyleSheet } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+
+// KeyboardProvider não tem suporte web — usar wrapper vazio na web
+let KeyboardProvider: React.ComponentType<{ children: React.ReactNode }>;
+if (Platform.OS !== "web") {
+  KeyboardProvider = require("react-native-keyboard-controller").KeyboardProvider;
+} else {
+  KeyboardProvider = ({ children }: { children: React.ReactNode }) => <>{children}</>;
+}
 import { StatusBar } from "expo-status-bar";
 
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -21,7 +28,7 @@ import { FeatureFlagsProvider } from "@/contexts/FeatureFlagsContext";
 
 function AppContent() {
   const { isDark } = useThemeContext();
-  const { syncStatus, isConnected, lastSyncAt } = useAutoSyncContext();
+  const { syncStatus, isConnected, connectionType, lastSyncAt } = useAutoSyncContext();
 
   return (
     <>
@@ -31,6 +38,7 @@ function AppContent() {
       <SyncStatusBanner
         status={syncStatus}
         isConnected={isConnected}
+        connectionType={connectionType}
         lastSyncAt={lastSyncAt}
       />
       <StatusBar style={isDark ? "light" : "dark"} />

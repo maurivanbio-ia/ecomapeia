@@ -3,10 +3,17 @@ import OpenAI from "openai";
 
 const router = Router();
 
-const openai = new OpenAI({
-  apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
-  baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
-});
+// Lazy-initialize OpenAI to avoid crash on startup when API key is not set
+let _openai: OpenAI | null = null;
+function getOpenAI(): OpenAI {
+  if (!_openai) {
+    _openai = new OpenAI({
+      apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY || process.env.OPENAI_API_KEY || "no-key",
+      baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
+    });
+  }
+  return _openai;
+}
 
 router.post("/analyze-photo", async (req: Request, res: Response) => {
   try {
@@ -16,7 +23,7 @@ router.post("/analyze-photo", async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Image data is required" });
     }
 
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI().chat.completions.create({
       model: "gpt-5.2",
       messages: [
         {
@@ -81,7 +88,7 @@ router.post("/suggest-description", async (req: Request, res: Response) => {
   try {
     const { fieldName, currentValue, vistoriaContext } = req.body;
 
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI().chat.completions.create({
       model: "gpt-5.2",
       messages: [
         {
@@ -119,7 +126,7 @@ router.post("/generate-report-summary", async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Vistoria data is required" });
     }
 
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI().chat.completions.create({
       model: "gpt-5.2",
       messages: [
         {
@@ -189,7 +196,7 @@ router.post("/transcribe-audio", async (req: Request, res: Response) => {
       type: `audio/${format}` 
     });
 
-    const transcription = await openai.audio.transcriptions.create({
+    const transcription = await getOpenAI().audio.transcriptions.create({
       file,
       model: "gpt-4o-mini-transcribe",
       response_format: "json",
@@ -214,7 +221,7 @@ router.post("/validate-coordinates", async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Coordinates are required" });
     }
 
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI().chat.completions.create({
       model: "gpt-5.2",
       messages: [
         {
@@ -277,7 +284,7 @@ router.post("/field-assistant", async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Question is required" });
     }
 
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI().chat.completions.create({
       model: "gpt-5.2",
       messages: [
         {
@@ -413,7 +420,7 @@ router.post("/auto-fill-form", async (req: Request, res: Response) => {
   try {
     const { photoAnalysis, existingData } = req.body;
 
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI().chat.completions.create({
       model: "gpt-5.2",
       messages: [
         {
@@ -488,7 +495,7 @@ router.post("/compliance-analysis", async (req: Request, res: Response) => {
       observations: observations || "",
     };
 
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI().chat.completions.create({
       model: "gpt-5.2",
       messages: [
         {

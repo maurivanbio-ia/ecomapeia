@@ -9,6 +9,11 @@ dist/
 web-build/
 expo-env.d.ts
 
+# Dados locais / arquivos de sistema
+.local/
+.vistoria-geo-data.json
+*.env.local
+
 # Native
 .kotlin/
 *.orig.*

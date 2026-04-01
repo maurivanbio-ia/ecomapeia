@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StyleSheet, TextInput } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
@@ -16,23 +16,32 @@ export default function DatePickerField({ label, value, onChange }: DatePickerFi
   return (
     <View style={styles.container}>
       <ThemedText style={styles.label}>{label}</ThemedText>
-      <TextInput
-        style={[
-          styles.input,
-          {
-            backgroundColor: theme.backgroundDefault,
-            borderColor: theme.border,
-            color: theme.text,
-          },
-        ]}
+      {/* Using native HTML date input for web — returns YYYY-MM-DD in LOCAL timezone */}
+      <input
+        type="date"
         value={value}
-        onChangeText={onChange}
-        placeholder="AAAA-MM-DD"
-        placeholderTextColor={theme.tabIconDefault}
+        onChange={(e) => {
+          // e.target.value is always YYYY-MM-DD in local time — no UTC offset issue
+          onChange(e.target.value);
+        }}
+        style={{
+          width: "100%",
+          borderWidth: 1,
+          borderStyle: "solid",
+          borderColor: theme.border,
+          borderRadius: BorderRadius.md,
+          backgroundColor: theme.backgroundDefault,
+          color: theme.text,
+          fontSize: 15,
+          paddingTop: Spacing.sm,
+          paddingBottom: Spacing.sm,
+          paddingLeft: Spacing.md,
+          paddingRight: Spacing.md,
+          boxSizing: "border-box",
+          fontFamily: "inherit",
+          outline: "none",
+        } as React.CSSProperties}
       />
-      <ThemedText style={[styles.hint, { color: theme.tabIconDefault }]}>
-        Formato: AAAA-MM-DD (ex: 2026-02-03)
-      </ThemedText>
     </View>
   );
 }
@@ -45,16 +54,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
     marginBottom: Spacing.xs,
-  },
-  input: {
-    borderWidth: 1,
-    borderRadius: BorderRadius.md,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    fontSize: 15,
-  },
-  hint: {
-    fontSize: 12,
-    marginTop: Spacing.xs,
   },
 });

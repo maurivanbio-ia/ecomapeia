@@ -4,6 +4,9 @@ import * as path from "path";
 import { db } from "../db";
 import { complexos, projetos, vistorias } from "../../shared/schema";
 import { eq, and, inArray, sql } from "drizzle-orm";
+import { COMPLEXOS_DATA } from "../mem-storage";
+
+const DATABASE_URL = process.env.DATABASE_URL;
 
 const router = Router();
 
@@ -16,6 +19,19 @@ function getCBALogoBase64(): string {
     }
   } catch (error) {
     console.error("Error loading CBA logo:", error);
+  }
+  return "";
+}
+
+function getEcoBrasilLogoBase64(): string {
+  try {
+    const logoPath = path.join(__dirname, "../assets/ecobrasil_logo.png");
+    if (fs.existsSync(logoPath)) {
+      const logoBuffer = fs.readFileSync(logoPath);
+      return `data:image/png;base64,${logoBuffer.toString("base64")}`;
+    }
+  } catch (error) {
+    console.error("Error loading EcoBrasil logo:", error);
   }
   return "";
 }
@@ -53,7 +69,8 @@ interface ComplexoData {
 }
 
 function generateReportHTML(title: string, subtitle: string, data: ComplexoData[]): string {
-  const logoBase64 = getCBALogoBase64();
+  const cbaLogo = getCBALogoBase64();
+  const ecoLogo = getEcoBrasilLogoBase64();
   const geradoEm = nowFormatted();
 
   const totalVistorias = data.reduce((acc, c) => acc + c.vistoriasList.length, 0);
@@ -300,7 +317,10 @@ function generateReportHTML(title: string, subtitle: string, data: ComplexoData[
 <body>
   <div class="page-header">
     <div class="logo-wrap">
-      ${logoBase64 ? `<img src="${logoBase64}" alt="CBA Logo" />` : `<div class="no-logo">CBA</div>`}
+      <div style="display:flex;align-items:center;gap:12px;">
+        ${cbaLogo ? `<img src="${cbaLogo}" alt="CBA Logo" style="height:50px;object-fit:contain;" />` : `<div class="no-logo">CBA</div>`}
+        ${ecoLogo ? `<img src="${ecoLogo}" alt="EcoBrasil Logo" style="height:44px;object-fit:contain;" />` : `<div class="no-logo" style="color:#27ae60;">EcoBrasil</div>`}
+      </div>
     </div>
     <div class="header-center">
       <h1>${title}</h1>
@@ -340,29 +360,49 @@ function generateReportHTML(title: string, subtitle: string, data: ComplexoData[
   `;
 }
 
-router.get("/all", async (_req: Request, res: Response) => {
-  try {
-    const allComplexos = await db.select().from(complexos).where(eq(complexos.ativo, true)).orderBy(complexos.nome);
+// Helper: send HTML either as download or inline
+function sendReport(req: Request, res: Response, html: string, filename: string) {
+  const forceDownload = req.query.download === "1";
+  res.setHeader("Content-Type", "text/html; charset=utf-8");
+  if (forceDownload) {
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}.html"`);
+  }
+  res.send(html);
+}
 
-    const data: ComplexoData[] = await Promise.all(
-      allComplexos.map(async (c) => {
-        const uhes = await db.select().from(projetos).where(and(eq(projetos.complexo_id, c.id), eq(projetos.ativo, true)));
-        const uheIds = uhes.map((u) => u.id);
-        const vistoriasList =
-          uheIds.length > 0
-            ? await db.select().from(vistorias).where(inArray(vistorias.projeto_id, uheIds)).orderBy(sql`data_vistoria DESC`)
-            : [];
-        return { id: c.id, nome: c.nome, uhes, vistoriasList };
-      })
-    );
+router.get("/all", async (req: Request, res: Response) => {
+  try {
+    let data: ComplexoData[];
+
+    if (!DATABASE_URL) {
+      // MemStorage fallback: use static data
+      data = COMPLEXOS_DATA.map((c) => ({
+        id: c.id,
+        nome: c.nome,
+        uhes: c.uhes as UHERow[],
+        vistoriasList: [],
+      }));
+    } else {
+      const allComplexos = await db.select().from(complexos).where(eq(complexos.ativo, true)).orderBy(complexos.nome);
+      data = await Promise.all(
+        allComplexos.map(async (c) => {
+          const uhes = await db.select().from(projetos).where(and(eq(projetos.complexo_id, c.id), eq(projetos.ativo, true)));
+          const uheIds = uhes.map((u) => u.id);
+          const vistoriasList =
+            uheIds.length > 0
+              ? await db.select().from(vistorias).where(inArray(vistorias.projeto_id, uheIds)).orderBy(sql`data_vistoria DESC`)
+              : [];
+          return { id: c.id, nome: c.nome, uhes, vistoriasList };
+        })
+      );
+    }
 
     const html = generateReportHTML(
-      "Relatorio de Levantamento Fundiario",
-      "Todos os Complexos Hidroeletricos CBA",
+      "Relatório de Levantamento Fundiário",
+      "Todos os Complexos Hidrelétricos CBA",
       data
     );
-    res.setHeader("Content-Type", "text/html; charset=utf-8");
-    res.send(html);
+    sendReport(req, res, html, `relatorio_geral_${new Date().toISOString().slice(0,10)}`);
   } catch (error) {
     console.error("Error generating full report:", error);
     res.status(500).json({ error: "Erro ao gerar relatório" });
@@ -371,25 +411,31 @@ router.get("/all", async (_req: Request, res: Response) => {
 
 router.get("/complexo/:complexoId", async (req: Request, res: Response) => {
   try {
-    const complexoId = parseInt(req.params.complexoId);
-    const [complexo] = await db.select().from(complexos).where(eq(complexos.id, complexoId));
-    if (!complexo) return res.status(404).json({ error: "Complexo não encontrado" });
+    const complexoId = parseInt(req.params.complexoId as string);
+    let data: ComplexoData[];
 
-    const uhes = await db.select().from(projetos).where(and(eq(projetos.complexo_id, complexoId), eq(projetos.ativo, true)));
-    const uheIds = uhes.map((u) => u.id);
-    const vistoriasList =
-      uheIds.length > 0
-        ? await db.select().from(vistorias).where(inArray(vistorias.projeto_id, uheIds)).orderBy(sql`data_vistoria DESC`)
-        : [];
+    if (!DATABASE_URL) {
+      const found = COMPLEXOS_DATA.find((c) => c.id === complexoId);
+      if (!found) return res.status(404).json({ error: "Complexo não encontrado" });
+      data = [{ id: found.id, nome: found.nome, uhes: found.uhes as UHERow[], vistoriasList: [] }];
+    } else {
+      const [complexo] = await db.select().from(complexos).where(eq(complexos.id, complexoId));
+      if (!complexo) return res.status(404).json({ error: "Complexo não encontrado" });
+      const uhes = await db.select().from(projetos).where(and(eq(projetos.complexo_id, complexoId), eq(projetos.ativo, true)));
+      const uheIds = uhes.map((u) => u.id);
+      const vistoriasList =
+        uheIds.length > 0
+          ? await db.select().from(vistorias).where(inArray(vistorias.projeto_id, uheIds)).orderBy(sql`data_vistoria DESC`)
+          : [];
+      data = [{ id: complexo.id, nome: complexo.nome, uhes, vistoriasList }];
+    }
 
-    const data: ComplexoData[] = [{ id: complexo.id, nome: complexo.nome, uhes, vistoriasList }];
     const html = generateReportHTML(
-      "Relatorio de Levantamento Fundiario",
-      `Complexo: ${complexo.nome}`,
+      "Relatório de Levantamento Fundiário",
+      `Complexo: ${data[0].nome}`,
       data
     );
-    res.setHeader("Content-Type", "text/html; charset=utf-8");
-    res.send(html);
+    sendReport(req, res, html, `relatorio_${data[0].nome.replace(/\s+/g,"_")}_${new Date().toISOString().slice(0,10)}`);
   } catch (error) {
     console.error("Error generating complexo report:", error);
     res.status(500).json({ error: "Erro ao gerar relatório do complexo" });
@@ -398,35 +444,41 @@ router.get("/complexo/:complexoId", async (req: Request, res: Response) => {
 
 router.get("/uhe/:uheId", async (req: Request, res: Response) => {
   try {
-    const uheId = parseInt(req.params.uheId);
-    const [uhe] = await db.select().from(projetos).where(eq(projetos.id, uheId));
-    if (!uhe) return res.status(404).json({ error: "UHE não encontrada" });
+    const uheId = parseInt(req.params.uheId as string);
+    let data: ComplexoData[];
+    let uheName = "";
 
-    const [complexo] = uhe.complexo_id
-      ? await db.select().from(complexos).where(eq(complexos.id, uhe.complexo_id))
-      : [{ id: 0, nome: "Sem complexo" }];
+    if (!DATABASE_URL) {
+      let foundUhe: any = null;
+      let foundComplexo: any = null;
+      for (const c of COMPLEXOS_DATA) {
+        const u = c.uhes.find((u) => u.id === uheId);
+        if (u) { foundUhe = u; foundComplexo = c; break; }
+      }
+      if (!foundUhe) return res.status(404).json({ error: "UHE não encontrada" });
+      uheName = foundUhe.nome;
+      data = [{ id: foundComplexo.id, nome: foundComplexo.nome, uhes: [foundUhe as UHERow], vistoriasList: [] }];
+    } else {
+      const [uhe] = await db.select().from(projetos).where(eq(projetos.id, uheId));
+      if (!uhe) return res.status(404).json({ error: "UHE não encontrada" });
+      uheName = uhe.nome;
+      const [complexo] = uhe.complexo_id
+        ? await db.select().from(complexos).where(eq(complexos.id, uhe.complexo_id))
+        : [{ id: 0, nome: "Sem complexo" }];
+      const vistoriasList = await db
+        .select()
+        .from(vistorias)
+        .where(eq(vistorias.projeto_id, uheId))
+        .orderBy(sql`data_vistoria DESC`);
+      data = [{ id: complexo?.id ?? 0, nome: complexo?.nome ?? "Sem complexo", uhes: [uhe as UHERow], vistoriasList }];
+    }
 
-    const vistoriasList = await db
-      .select()
-      .from(vistorias)
-      .where(eq(vistorias.projeto_id, uheId))
-      .orderBy(sql`data_vistoria DESC`);
-
-    const data: ComplexoData[] = [
-      {
-        id: complexo?.id ?? 0,
-        nome: complexo?.nome ?? "Sem complexo",
-        uhes: [uhe as UHERow],
-        vistoriasList,
-      },
-    ];
     const html = generateReportHTML(
-      "Relatorio de Levantamento Fundiario",
-      `UHE: ${uhe.nome}`,
+      "Relatório de Levantamento Fundiário",
+      `UHE/PCH: ${uheName}`,
       data
     );
-    res.setHeader("Content-Type", "text/html; charset=utf-8");
-    res.send(html);
+    sendReport(req, res, html, `relatorio_${uheName.replace(/\s+/g,"_")}_${new Date().toISOString().slice(0,10)}`);
   } catch (error) {
     console.error("Error generating UHE report:", error);
     res.status(500).json({ error: "Erro ao gerar relatório da UHE" });

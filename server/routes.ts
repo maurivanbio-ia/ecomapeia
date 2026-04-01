@@ -187,14 +187,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       let projetoNome: string | null = null;
       if (vistoria.projeto_id) {
-        const projeto = await db.select({ nome: projetos.nome, codigo: projetos.codigo })
-          .from(projetos)
-          .where(eqOp(projetos.id, vistoria.projeto_id))
-          .limit(1);
-        if (projeto.length > 0) {
-          projetoNome = projeto[0].codigo
-            ? `${projeto[0].codigo} – ${projeto[0].nome}`
-            : projeto[0].nome;
+        try {
+          if (process.env.DATABASE_URL) {
+            // Com banco: busca via Drizzle ORM
+            const projeto = await db.query.projetos.findFirst({
+              where: eqOp(projetos.id, vistoria.projeto_id),
+              columns: { nome: true, codigo: true },
+            });
+            if (projeto) {
+              projetoNome = projeto.codigo
+                ? `${projeto.codigo} – ${projeto.nome}`
+                : projeto.nome;
+            }
+          } else {
+            // Sem banco: busca no COMPLEXOS_DATA (MemStorage)
+            const { COMPLEXOS_DATA } = await import("./mem-storage");
+            for (const complexo of COMPLEXOS_DATA) {
+              const uhe = complexo.uhes.find((u: any) => u.id === vistoria.projeto_id);
+              if (uhe) {
+                projetoNome = uhe.codigo
+                  ? `${uhe.codigo} – ${uhe.nome}`
+                  : uhe.nome;
+                break;
+              }
+            }
+          }
+        } catch (projErr) {
+          console.warn("Não foi possível buscar projeto_nome:", projErr);
         }
       }
 

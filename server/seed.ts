@@ -4,9 +4,15 @@ import { pool } from "./db";
  * Seeds the database with initial data if it's empty.
  * This runs on every server startup but only inserts data
  * if the 'empresas' table is empty (first boot scenario).
+ * No-op when DATABASE_URL is not set (uses MemStorage instead).
  */
 export async function seedIfEmpty(): Promise<void> {
-  const client = await pool.connect();
+  if (!process.env.DATABASE_URL) {
+    console.log("[seed] No DATABASE_URL — skipping seed (using in-memory storage).");
+    return;
+  }
+  const client = await (pool as any).connect();
+
   try {
     const { rows } = await client.query("SELECT COUNT(*) as count FROM empresas");
     if (parseInt(rows[0].count) > 0) {

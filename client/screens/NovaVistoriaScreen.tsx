@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+
 import {
   View,
   StyleSheet,
@@ -247,7 +248,10 @@ export default function NovaVistoriaScreen() {
   } = useGPSTracking();
 
   const now = new Date();
-  const today = now.toISOString().split("T")[0];
+  // FIX: toISOString() retorna UTC — no Brasil (UTC-3) isso resulta no dia anterior.
+  // Usando getFullYear/getMonth/getDate que respeitam o fuso local do dispositivo.
+  const _pad = (n: number) => n.toString().padStart(2, "0");
+  const today = `${now.getFullYear()}-${_pad(now.getMonth() + 1)}-${_pad(now.getDate())}`;
   const currentTime = now.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 
   const [formData, setFormData] = useState<FormData>({
@@ -274,7 +278,7 @@ export default function NovaVistoriaScreen() {
     observacoes: "",
     observacoes_usos: "",
   });
-  
+
   const [emCondominio, setEmCondominio] = useState(false);
 
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
@@ -323,6 +327,8 @@ export default function NovaVistoriaScreen() {
     autoLegenda?: string;
     replaceExisting?: boolean;
   } | null>(null);
+  const [pendingGalleryQueue, setPendingGalleryQueue] = useState<Array<{ uri: string; watermarkData: WatermarkData }>>([]);
+  const [showAdditionalPhotoModal, setShowAdditionalPhotoModal] = useState(false);
   const [processingPhoto, setProcessingPhoto] = useState(false);
   const [mapImageUri, setMapImageUri] = useState<string | null>(null);
   const [signatureUri, setSignatureUri] = useState<string | null>(null);
@@ -353,7 +359,7 @@ export default function NovaVistoriaScreen() {
     areaKm2?: number;
   } | null>(null);
   const [loadingUC, setLoadingUC] = useState(false);
-  
+
   const [embargoCheck, setEmbargoCheck] = useState<{
     level: string;
     hasEmbargoRisk: boolean;
@@ -365,7 +371,7 @@ export default function NovaVistoriaScreen() {
   } | null>(null);
   const [loadingEmbargo, setLoadingEmbargo] = useState(false);
   const [gpsAnalysisStarted, setGpsAnalysisStarted] = useState(false);
-  
+
   const [complianceAnalysis, setComplianceAnalysis] = useState<{
     conformidadeGeral: string;
     pontuacao: number;
@@ -577,7 +583,7 @@ export default function NovaVistoriaScreen() {
 
   const saveCurrentTrack = () => {
     if (trackPoints.length === 0) return;
-    
+
     const newTrack = {
       id: Date.now().toString(),
       legenda: trackLegendInput.trim() || `Trajeto ${savedTracks.length + 1}`,
@@ -586,7 +592,7 @@ export default function NovaVistoriaScreen() {
       duration: elapsedTime,
       color: trackColors[savedTracks.length % trackColors.length],
     };
-    
+
     setSavedTracks(prev => [...prev, newTrack]);
     clearTrack();
     setTrackLegendInput("");
@@ -614,8 +620,8 @@ export default function NovaVistoriaScreen() {
       if (!isNaN(e) && !isNaN(n) && e > 0 && n > 0) {
         try {
           const latLng = utmToLatLng(e, n, zone, isNorth);
-          if (latLng.latitude >= -90 && latLng.latitude <= 90 && 
-              latLng.longitude >= -180 && latLng.longitude <= 180) {
+          if (latLng.latitude >= -90 && latLng.latitude <= 90 &&
+            latLng.longitude >= -180 && latLng.longitude <= 180) {
             coords.push(latLng);
           }
         } catch (err) {
@@ -802,7 +808,7 @@ export default function NovaVistoriaScreen() {
               ts: p.timestamp,
             })),
           }));
-          
+
           if (trackPoints.length > 0) {
             allTracks.push({
               legenda: `Trajeto ${savedTracks.length + 1}`,
@@ -818,7 +824,7 @@ export default function NovaVistoriaScreen() {
               })),
             });
           }
-          
+
           return allTracks.length > 0 ? allTracks : null;
         })(),
       });
@@ -881,7 +887,7 @@ export default function NovaVistoriaScreen() {
         body: JSON.stringify({ latitude, longitude }),
       });
       const data = await response.json();
-      
+
       if (data.success && data.carCodes && data.carCodes.length > 0) {
         const carCode = data.carCodes[0];
         setCarInfo({
@@ -908,7 +914,7 @@ export default function NovaVistoriaScreen() {
         new URL(`/api/conservation/ucs/nearest?lat=${latitude}&lon=${longitude}&limit=1`, getApiUrl()).toString()
       );
       const data = await response.json();
-      
+
       if (data.success && data.nearestUCs && data.nearestUCs.length > 0) {
         const nearest = data.nearestUCs[0];
         setUcInfo({
@@ -945,7 +951,7 @@ export default function NovaVistoriaScreen() {
         }
       );
       const data = await response.json();
-      
+
       if (data.success) {
         setEmbargoCheck({
           level: data.embargoRisk?.level || "LOW",
@@ -988,7 +994,7 @@ export default function NovaVistoriaScreen() {
         }
       );
       const data = await response.json();
-      
+
       if (data.success && data.analysis) {
         setComplianceAnalysis(data.analysis);
         return data.analysis;
@@ -1163,18 +1169,18 @@ export default function NovaVistoriaScreen() {
 
     try {
       const latLng = utmToLatLng(e, n, zone, isNorth);
-      
+
       if (latLng.latitude && latLng.longitude) {
         setManualChecksTriggered(true);
         setGpsAnalysisStarted(true);
-        
+
         // Trigger all environmental checks
         if (flags.mapbiomas) fetchCARByCoordinates(latLng.latitude, latLng.longitude);
         if (flags.uc) fetchUCByCoordinates(latLng.latitude, latLng.longitude);
         if (flags.embargo) checkEmbargoByCoordinates(latLng.latitude, latLng.longitude, carInfo?.carCode);
         if (flags.weather) fetchWeatherByCoordinates(latLng.latitude, latLng.longitude);
         if (flags.ti) fetchTerraIndigenaByCoordinates(latLng.latitude, latLng.longitude);
-        
+
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         Alert.alert(
           "Coordenadas Válidas",
@@ -1203,10 +1209,10 @@ export default function NovaVistoriaScreen() {
 
     if (!result.canceled && result.assets[0]) {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      
+
       const photoId = Date.now().toString();
       const watermarkData = createWatermarkData(location);
-      
+
       setProcessingPhoto(true);
       setPendingWatermark({
         id: photoId,
@@ -1236,14 +1242,14 @@ export default function NovaVistoriaScreen() {
           const newInstancias = uso.instancias.map((inst, j) =>
             j === instIndex
               ? {
-                  ...inst,
-                  coordenada: {
-                    utm_e: utm.easting.toFixed(0),
-                    utm_n: utm.northing.toFixed(0),
-                    lat: utm.latitude || 0,
-                    lng: utm.longitude || 0,
-                  },
-                }
+                ...inst,
+                coordenada: {
+                  utm_e: utm.easting.toFixed(0),
+                  utm_n: utm.northing.toFixed(0),
+                  lat: utm.latitude || 0,
+                  lng: utm.longitude || 0,
+                },
+              }
               : inst
           );
           return { ...uso, instancias: newInstancias };
@@ -1351,7 +1357,20 @@ export default function NovaVistoriaScreen() {
         : [...prev, newPhoto]
     );
     setPendingWatermark(null);
-    setProcessingPhoto(false);
+    // Process next item from gallery queue
+    if (pendingGalleryQueue.length > 0) {
+      const [next, ...rest] = pendingGalleryQueue;
+      setPendingGalleryQueue(rest);
+      setProcessingPhoto(true);
+      setPendingWatermark({
+        id: Date.now().toString(),
+        uri: next.uri,
+        watermarkData: next.watermarkData,
+        autoLegenda: "",
+      });
+    } else {
+      setProcessingPhoto(false);
+    }
   };
 
   const handleWatermarkError = (id: string) => {
@@ -1390,12 +1409,14 @@ export default function NovaVistoriaScreen() {
     );
   };
 
-  const pickFromGallery = async () => {
+  const pickFromGallery = async (forAdditional = false) => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
       Alert.alert("Permissão Necessária", "Precisamos de acesso à galeria para selecionar fotos.");
       return;
     }
+
+    const location = await getCurrentLocation();
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
@@ -1406,13 +1427,42 @@ export default function NovaVistoriaScreen() {
 
     if (!result.canceled && result.assets.length > 0) {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      const newPhotos = result.assets.map((asset) => ({
-        id: Date.now().toString() + Math.random(),
-        uri: asset.uri,
-        legenda: "",
-        saved: false,
-      }));
-      setPhotos((prev) => [...prev, ...newPhotos]);
+      const watermarkData = createWatermarkData(location);
+      // Process first photo through watermark pipeline; remaining queued in pendingGalleryQueue
+      const [first, ...rest] = result.assets;
+      setPendingGalleryQueue(rest.map(a => ({ uri: a.uri, watermarkData })));
+      setProcessingPhoto(true);
+      setPendingWatermark({
+        id: Date.now().toString(),
+        uri: first.uri,
+        watermarkData,
+        autoLegenda: forAdditional ? "Foto adicional" : "",
+      });
+    }
+  };
+
+  const pickAdditionalFromCamera = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permissão Necessária", "Precisamos de acesso à câmera para tirar fotos.");
+      return;
+    }
+    const location = await getCurrentLocation();
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ["images"],
+      quality: 0.8,
+      allowsEditing: false,
+    });
+    if (!result.canceled && result.assets[0]) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      const watermarkData = createWatermarkData(location);
+      setProcessingPhoto(true);
+      setPendingWatermark({
+        id: Date.now().toString(),
+        uri: result.assets[0].uri,
+        watermarkData,
+        autoLegenda: "Foto adicional",
+      });
     }
   };
 
@@ -1802,7 +1852,7 @@ export default function NovaVistoriaScreen() {
           <ThemedText style={[styles.subLabel, { marginTop: 0 }]}>
             Marque os usos identificados e informe as quantidades
           </ThemedText>
-          
+
           <View style={styles.usosSoloGrid}>
             {usosSolo.map((uso, index) => {
               const usoPhotos = photos.filter((p) => p.legenda.startsWith(uso.tipo + " "));
@@ -2206,8 +2256,8 @@ export default function NovaVistoriaScreen() {
                 Trajetos Salvos ({savedTracks.length})
               </ThemedText>
               {savedTracks.map((track, index) => (
-                <View 
-                  key={track.id} 
+                <View
+                  key={track.id}
                   style={[styles.savedTrackItem, { borderLeftColor: track.color }]}
                 >
                   <View style={styles.savedTrackInfo}>
@@ -2217,8 +2267,8 @@ export default function NovaVistoriaScreen() {
                         {track.legenda}
                       </ThemedText>
                       <ThemedText style={[styles.savedTrackStats, { color: theme.tabIconDefault }]}>
-                        {track.points.length} pontos • {track.distance >= 1000 
-                          ? `${(track.distance / 1000).toFixed(2)} km` 
+                        {track.points.length} pontos • {track.distance >= 1000
+                          ? `${(track.distance / 1000).toFixed(2)} km`
                           : `${Math.round(track.distance)} m`} • {Math.floor(track.duration / 60)}:{(track.duration % 60).toString().padStart(2, "0")}
                       </ThemedText>
                     </View>
@@ -2281,9 +2331,9 @@ export default function NovaVistoriaScreen() {
           ) : null) : null}
 
           {gpsAnalysisStarted && flags.uc ? (ucInfo ? (
-            <View style={[styles.carInfoCard, { 
-              backgroundColor: ucInfo.isInside ? Colors.light.warning + "20" : Colors.light.success + "15", 
-              borderColor: ucInfo.isInside ? Colors.light.warning : Colors.light.success 
+            <View style={[styles.carInfoCard, {
+              backgroundColor: ucInfo.isInside ? Colors.light.warning + "20" : Colors.light.success + "15",
+              borderColor: ucInfo.isInside ? Colors.light.warning : Colors.light.success
             }]}>
               <View style={styles.carInfoHeader}>
                 <Feather name="shield" size={18} color={ucInfo.isInside ? Colors.light.warning : Colors.light.success} />
@@ -2331,28 +2381,28 @@ export default function NovaVistoriaScreen() {
           )) : null}
 
           {gpsAnalysisStarted && flags.embargo ? (embargoCheck ? (
-            <View style={[styles.carInfoCard, { 
-              backgroundColor: embargoCheck.level === "HIGH" ? "#e5393520" : 
-                              embargoCheck.level === "MEDIUM" ? Colors.light.warning + "20" : 
-                              Colors.light.success + "15", 
-              borderColor: embargoCheck.level === "HIGH" ? "#e53935" : 
-                          embargoCheck.level === "MEDIUM" ? Colors.light.warning : 
-                          Colors.light.success
+            <View style={[styles.carInfoCard, {
+              backgroundColor: embargoCheck.level === "HIGH" ? "#e5393520" :
+                embargoCheck.level === "MEDIUM" ? Colors.light.warning + "20" :
+                  Colors.light.success + "15",
+              borderColor: embargoCheck.level === "HIGH" ? "#e53935" :
+                embargoCheck.level === "MEDIUM" ? Colors.light.warning :
+                  Colors.light.success
             }]}>
               <View style={styles.carInfoHeader}>
-                <Feather 
-                  name={embargoCheck.level === "HIGH" ? "alert-octagon" : embargoCheck.level === "MEDIUM" ? "alert-triangle" : "check-circle"} 
-                  size={18} 
-                  color={embargoCheck.level === "HIGH" ? "#e53935" : embargoCheck.level === "MEDIUM" ? Colors.light.warning : Colors.light.success} 
+                <Feather
+                  name={embargoCheck.level === "HIGH" ? "alert-octagon" : embargoCheck.level === "MEDIUM" ? "alert-triangle" : "check-circle"}
+                  size={18}
+                  color={embargoCheck.level === "HIGH" ? "#e53935" : embargoCheck.level === "MEDIUM" ? Colors.light.warning : Colors.light.success}
                 />
-                <ThemedText style={[styles.carInfoTitle, { 
-                  color: embargoCheck.level === "HIGH" ? "#e53935" : 
-                        embargoCheck.level === "MEDIUM" ? Colors.light.warning : 
-                        Colors.light.success 
+                <ThemedText style={[styles.carInfoTitle, {
+                  color: embargoCheck.level === "HIGH" ? "#e53935" :
+                    embargoCheck.level === "MEDIUM" ? Colors.light.warning :
+                      Colors.light.success
                 }]}>
-                  {embargoCheck.level === "HIGH" ? "Risco de Embargo: ALTO" : 
-                   embargoCheck.level === "MEDIUM" ? "Risco de Embargo: MÉDIO" : 
-                   "Sem Risco de Embargo"}
+                  {embargoCheck.level === "HIGH" ? "Risco de Embargo: ALTO" :
+                    embargoCheck.level === "MEDIUM" ? "Risco de Embargo: MÉDIO" :
+                      "Sem Risco de Embargo"}
                 </ThemedText>
               </View>
               {embargoCheck.reasons.length > 0 ? (
@@ -2399,11 +2449,11 @@ export default function NovaVistoriaScreen() {
           {gpsAnalysisStarted && flags.ti ? (tiInfo ? (
             <View style={[styles.carInfoCard, {
               backgroundColor: tiInfo.riskLevel === "HIGH" ? "#e5393520" :
-                              tiInfo.riskLevel === "MEDIUM" ? "#ff980020" :
-                              Colors.light.success + "15",
+                tiInfo.riskLevel === "MEDIUM" ? "#ff980020" :
+                  Colors.light.success + "15",
               borderColor: tiInfo.riskLevel === "HIGH" ? "#e53935" :
-                          tiInfo.riskLevel === "MEDIUM" ? "#ff9800" :
-                          Colors.light.success,
+                tiInfo.riskLevel === "MEDIUM" ? "#ff9800" :
+                  Colors.light.success,
             }]}>
               <View style={styles.carInfoHeader}>
                 <Feather
@@ -2413,8 +2463,8 @@ export default function NovaVistoriaScreen() {
                 />
                 <ThemedText style={[styles.carInfoTitle, {
                   color: tiInfo.riskLevel === "HIGH" ? "#e53935" :
-                        tiInfo.riskLevel === "MEDIUM" ? "#ff9800" :
-                        Colors.light.success,
+                    tiInfo.riskLevel === "MEDIUM" ? "#ff9800" :
+                      Colors.light.success,
                 }]}>
                   Terra Indígena Mais Próxima
                 </ThemedText>
@@ -2432,13 +2482,13 @@ export default function NovaVistoriaScreen() {
               ) : null}
               <ThemedText style={[styles.carDetails, {
                 color: tiInfo.riskLevel === "HIGH" ? "#e53935" :
-                      tiInfo.riskLevel === "MEDIUM" ? "#ff9800" :
-                      Colors.light.success,
+                  tiInfo.riskLevel === "MEDIUM" ? "#ff9800" :
+                    Colors.light.success,
                 fontWeight: "600",
               }]}>
                 Distância: {tiInfo.distanceKm.toFixed(1)} km
                 {tiInfo.riskLevel === "HIGH" ? " (PROXIMA)" :
-                 tiInfo.riskLevel === "MEDIUM" ? " (ATENÇÃO)" : " (SEGURA)"}
+                  tiInfo.riskLevel === "MEDIUM" ? " (ATENÇÃO)" : " (SEGURA)"}
               </ThemedText>
               {tiInfo.fase ? (
                 <ThemedText style={[styles.carDetails, { color: theme.tabIconDefault }]}>
@@ -2632,6 +2682,123 @@ export default function NovaVistoriaScreen() {
           {renderInput("Observações Gerais", "observacoes", "Observações adicionais...", { multiline: true })}
         </View>
 
+        {/* ─── FOTOS ADICIONAIS ─────────────────────────────────── */}
+        <View
+          style={[
+            styles.section,
+            { backgroundColor: theme.backgroundDefault, borderColor: theme.border },
+          ]}
+        >
+          <ThemedText style={styles.sectionTitle}>
+            <Feather name="camera" size={18} /> Fotos Adicionais
+          </ThemedText>
+          <ThemedText style={[styles.subLabel, { marginTop: 0, marginBottom: 12 }]}>
+            Registre fotos gerais da vistoria (panorâmicas, evidências, entorno)
+          </ThemedText>
+
+          {/* Adicionar foto — botões câmera / galeria */}
+          <View style={{ flexDirection: "row", gap: 10, marginBottom: 14 }}>
+            <Pressable
+              onPress={pickAdditionalFromCamera}
+              disabled={processingPhoto}
+              style={[styles.gpsBtn, { flex: 1, backgroundColor: Colors.light.primary, opacity: processingPhoto ? 0.6 : 1 }]}
+            >
+              {processingPhoto ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Feather name="camera" size={18} color="#fff" />
+              )}
+              <ThemedText style={styles.gpsBtnText}>
+                {processingPhoto ? "Processando..." : "Tirar Foto"}
+              </ThemedText>
+            </Pressable>
+            <Pressable
+              onPress={() => pickFromGallery(true)}
+              disabled={processingPhoto}
+              style={[styles.addPointBtn, { flex: 1, borderColor: Colors.light.primary, opacity: processingPhoto ? 0.6 : 1 }]}
+            >
+              <Feather name="image" size={18} color={Colors.light.primary} />
+              <ThemedText style={{ color: Colors.light.primary, marginLeft: 6, fontWeight: "600" }}>Galeria</ThemedText>
+            </Pressable>
+          </View>
+
+          {/* Lista de fotos adicionais */}
+          {photos.filter(p => !p.legenda || p.legenda === "Foto adicional" || p.legenda.startsWith("Foto adicional")).length > 0 ? (
+            <View style={{ gap: 10 }}>
+              {photos
+                .filter(p => !p.legenda || p.legenda === "Foto adicional" || p.legenda.startsWith("Foto adicional"))
+                .map((photo) => (
+                  <View
+                    key={photo.id}
+                    style={[
+                      styles.addPhotoCard,
+                      { backgroundColor: theme.backgroundSecondary, borderColor: theme.border },
+                    ]}
+                  >
+                    <Image
+                      source={{ uri: photo.uri }}
+                      style={styles.addPhotoPreview}
+                    />
+                    <View style={styles.addPhotoInfo}>
+                      {photo.saved ? (
+                        <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 4 }}>
+                          <Feather name="check-circle" size={14} color={Colors.light.success} />
+                          <ThemedText style={[styles.addPhotoLegendaText, { color: Colors.light.success }]}>
+                            {photo.legenda || "Sem legenda"}
+                          </ThemedText>
+                          <Pressable onPress={() => editPhoto(photo.id)} style={{ marginLeft: "auto" }}>
+                            <Feather name="edit-2" size={14} color={Colors.light.primary} />
+                          </Pressable>
+                        </View>
+                      ) : (
+                        <TextInput
+                          style={[
+                            styles.addPhotoLegendaInput,
+                            { backgroundColor: theme.backgroundDefault, borderColor: theme.border, color: theme.text },
+                          ]}
+                          placeholder="Legenda da foto..."
+                          placeholderTextColor={theme.tabIconDefault}
+                          value={photo.legenda}
+                          onChangeText={(v) => updatePhotoLegenda(photo.id, v)}
+                          onBlur={() => savePhoto(photo.id)}
+                          returnKeyType="done"
+                          onSubmitEditing={() => savePhoto(photo.id)}
+                        />
+                      )}
+                      {photo.timestamp || photo.coordinates ? (
+                        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 4 }}>
+                          {photo.timestamp ? (
+                            <View style={[styles.addPhotoBadge, { backgroundColor: "#1E3A5F20" }]}>
+                              <Feather name="clock" size={10} color="#1E3A5F" />
+                              <ThemedText style={[styles.addPhotoBadgeText, { color: "#1E3A5F" }]}>{photo.timestamp}</ThemedText>
+                            </View>
+                          ) : null}
+                          {photo.coordinates ? (
+                            <View style={[styles.addPhotoBadge, { backgroundColor: Colors.light.success + "20" }]}>
+                              <Feather name="map-pin" size={10} color={Colors.light.success} />
+                              <ThemedText style={[styles.addPhotoBadgeText, { color: Colors.light.success }]}>{photo.coordinates}</ThemedText>
+                            </View>
+                          ) : null}
+                        </View>
+                      ) : null}
+                    </View>
+                    <Pressable onPress={() => removePhoto(photo.id)} style={styles.removePhotoBtn}>
+                      <Feather name="trash-2" size={18} color={Colors.light.error} />
+                    </Pressable>
+                  </View>
+                ))}
+            </View>
+          ) : (
+            <View style={[styles.emptyPhotosBox, { borderColor: theme.border }]}>
+              <Feather name="camera-off" size={28} color={theme.tabIconDefault} />
+              <ThemedText style={{ color: theme.tabIconDefault, marginTop: 8, textAlign: "center", fontSize: 13 }}>
+                Nenhuma foto adicional registrada
+              </ThemedText>
+            </View>
+          )}
+        </View>
+
+        {/* ─── ASSINATURAS ─────────────────────────────────────── */}
         <View
           style={[
             styles.section,
@@ -2701,26 +2868,26 @@ export default function NovaVistoriaScreen() {
               </View>
             ) : complianceAnalysis ? (
               <ScrollView showsVerticalScrollIndicator={false}>
-                <View style={[styles.complianceScore, { 
+                <View style={[styles.complianceScore, {
                   backgroundColor: complianceAnalysis.conformidadeGeral === "CONFORME" ? Colors.light.success + "20" :
-                                   complianceAnalysis.conformidadeGeral === "PARCIALMENTE_CONFORME" ? Colors.light.warning + "20" :
-                                   "#e5393520"
+                    complianceAnalysis.conformidadeGeral === "PARCIALMENTE_CONFORME" ? Colors.light.warning + "20" :
+                      "#e5393520"
                 }]}>
-                  <ThemedText style={[styles.scoreValue, { 
+                  <ThemedText style={[styles.scoreValue, {
                     color: complianceAnalysis.conformidadeGeral === "CONFORME" ? Colors.light.success :
-                           complianceAnalysis.conformidadeGeral === "PARCIALMENTE_CONFORME" ? Colors.light.warning :
-                           "#e53935"
+                      complianceAnalysis.conformidadeGeral === "PARCIALMENTE_CONFORME" ? Colors.light.warning :
+                        "#e53935"
                   }]}>
                     {complianceAnalysis.pontuacao || 0}%
                   </ThemedText>
-                  <ThemedText style={[styles.scoreLabel, { 
+                  <ThemedText style={[styles.scoreLabel, {
                     color: complianceAnalysis.conformidadeGeral === "CONFORME" ? Colors.light.success :
-                           complianceAnalysis.conformidadeGeral === "PARCIALMENTE_CONFORME" ? Colors.light.warning :
-                           "#e53935"
+                      complianceAnalysis.conformidadeGeral === "PARCIALMENTE_CONFORME" ? Colors.light.warning :
+                        "#e53935"
                   }]}>
                     {complianceAnalysis.conformidadeGeral === "CONFORME" ? "CONFORME" :
-                     complianceAnalysis.conformidadeGeral === "PARCIALMENTE_CONFORME" ? "PARCIALMENTE CONFORME" :
-                     "NÃO CONFORME"}
+                      complianceAnalysis.conformidadeGeral === "PARCIALMENTE_CONFORME" ? "PARCIALMENTE CONFORME" :
+                        "NÃO CONFORME"}
                   </ThemedText>
                 </View>
 
@@ -2741,15 +2908,15 @@ export default function NovaVistoriaScreen() {
                       Riscos Identificados
                     </ThemedText>
                     {complianceAnalysis.riscos.map((risco, idx) => (
-                      <View key={idx} style={[styles.riskItem, { 
-                        backgroundColor: risco.nivel === "CRITICO" || risco.nivel === "ALTO" ? "#e5393515" : 
-                                        risco.nivel === "MEDIO" ? Colors.light.warning + "15" : 
-                                        Colors.light.success + "15"
+                      <View key={idx} style={[styles.riskItem, {
+                        backgroundColor: risco.nivel === "CRITICO" || risco.nivel === "ALTO" ? "#e5393515" :
+                          risco.nivel === "MEDIO" ? Colors.light.warning + "15" :
+                            Colors.light.success + "15"
                       }]}>
-                        <ThemedText style={[styles.riskItemTitle, { 
-                          color: risco.nivel === "CRITICO" || risco.nivel === "ALTO" ? "#e53935" : 
-                                risco.nivel === "MEDIO" ? Colors.light.warning : 
-                                Colors.light.success
+                        <ThemedText style={[styles.riskItemTitle, {
+                          color: risco.nivel === "CRITICO" || risco.nivel === "ALTO" ? "#e53935" :
+                            risco.nivel === "MEDIO" ? Colors.light.warning :
+                              Colors.light.success
                         }]}>
                           [{risco.nivel}] {risco.tipo}
                         </ThemedText>
@@ -2814,8 +2981,8 @@ export default function NovaVistoriaScreen() {
 
             <View style={{ marginTop: Spacing.md }}>
               <ThemedText style={[styles.savedTrackStats, { color: theme.tabIconDefault }]}>
-                {trackPoints.length} pontos • {totalDistance >= 1000 
-                  ? `${(totalDistance / 1000).toFixed(2)} km` 
+                {trackPoints.length} pontos • {totalDistance >= 1000
+                  ? `${(totalDistance / 1000).toFixed(2)} km`
                   : `${Math.round(totalDistance)} m`} • {Math.floor(elapsedTime / 60)}:{(elapsedTime % 60).toString().padStart(2, "0")}
               </ThemedText>
             </View>
@@ -3715,5 +3882,59 @@ const styles = StyleSheet.create({
   },
   savedTrackStats: {
     fontSize: 12,
+  },
+  // ── Fotos Adicionais ──────────────────────────────────────────────
+  addPhotoCard: {
+    flexDirection: "row",
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    overflow: "hidden",
+    alignItems: "flex-start",
+  },
+  addPhotoPreview: {
+    width: 88,
+    height: 88,
+    backgroundColor: "#000",
+  },
+  addPhotoInfo: {
+    flex: 1,
+    padding: Spacing.sm,
+  },
+  addPhotoLegendaText: {
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  addPhotoLegendaInput: {
+    borderWidth: 1,
+    borderRadius: BorderRadius.sm,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 6,
+    fontSize: 13,
+    marginBottom: 4,
+  },
+  addPhotoBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    borderRadius: 4,
+  },
+  photoBadgeText: {
+    fontSize: 10,
+    fontWeight: "500",
+  },
+  removePhotoBtn: {
+    padding: Spacing.sm,
+    alignSelf: "center",
+  },
+  emptyPhotosBox: {
+    borderWidth: 1.5,
+    borderStyle: "dashed",
+    borderRadius: BorderRadius.md,
+    padding: Spacing.xl,
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 100,
   },
 });

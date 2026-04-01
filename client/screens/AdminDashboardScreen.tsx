@@ -77,7 +77,7 @@ export default function AdminDashboardScreen({ navigation }: any) {
 
   const [downloadingReport, setDownloadingReport] = useState<string | null>(null);
 
-  const downloadReport = async (endpoint: string, key: string) => {
+  const downloadReport = async (endpoint: string, key: string, label?: string) => {
     try {
       setDownloadingReport(key);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -87,8 +87,22 @@ export default function AdminDashboardScreen({ navigation }: any) {
       const html = await res.text();
 
       if (Platform.OS === "web") {
-        const win = window.open();
-        if (win) { win.document.write(html); win.document.close(); }
+        // Dispara download de arquivo HTML (abre caixa de "Salvar como")
+        const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+        const blobUrl = URL.createObjectURL(blob);
+        const date = new Date().toISOString().slice(0, 10);
+        const filename = label
+          ? `relatorio_${label.replace(/\s+/g, "_")}_${date}.html`
+          : `relatorio_${key}_${date}.html`;
+        const a = document.createElement("a");
+        a.href = blobUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+          document.body.removeChild(a);
+          URL.revokeObjectURL(blobUrl);
+        }, 100);
       } else {
         const { uri } = await Print.printToFileAsync({ html });
         if (await Sharing.isAvailableAsync()) {
@@ -292,7 +306,7 @@ export default function AdminDashboardScreen({ navigation }: any) {
 
           <Pressable
             style={[styles.relatorioGeralBtn, { borderColor: "#6366F1" }]}
-            onPress={() => downloadReport("/api/reports/all", "all")}
+            onPress={() => downloadReport("/api/reports/all", "all", "Geral_Todos_Complexos")}
             disabled={downloadingReport !== null}
           >
             {downloadingReport === "all" ? (
@@ -360,7 +374,7 @@ export default function AdminDashboardScreen({ navigation }: any) {
                     style={styles.relatorioBtn}
                     onPress={(e) => {
                       e.stopPropagation?.();
-                      downloadReport(`/api/reports/complexo/${complexo.id}`, `complexo-${complexo.id}`);
+                      downloadReport(`/api/reports/complexo/${complexo.id}`, `complexo-${complexo.id}`, complexo.nome);
                     }}
                     disabled={downloadingReport !== null}
                   >
@@ -421,7 +435,7 @@ export default function AdminDashboardScreen({ navigation }: any) {
                         </View>
                         <Pressable
                           style={styles.uheRelatorioBtn}
-                          onPress={() => downloadReport(`/api/reports/uhe/${uhe.id}`, `uhe-${uhe.id}`)}
+                          onPress={() => downloadReport(`/api/reports/uhe/${uhe.id}`, `uhe-${uhe.id}`, uhe.nome)}
                           disabled={downloadingReport !== null}
                         >
                           {downloadingReport === `uhe-${uhe.id}` ? (

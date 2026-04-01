@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: vistoria-geo-server
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: npm install && npm run server:build
+    startCommand: npm run server:prod
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5001
+      - key: DATABASE_URL
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false

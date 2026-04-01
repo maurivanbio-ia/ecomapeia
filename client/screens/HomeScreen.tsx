@@ -119,14 +119,12 @@ export default function HomeScreen() {
   };
 
   const handleSyncPending = async () => {
-    if (totalPendingCount === 0) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-      Alert.alert(t.syncNow, "Todas as vistorias já estão sincronizadas.");
-      return;
-    }
     if (!isConnected) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Alert.alert("Sem conexão", "Conecte-se à internet (WiFi, 4G ou 5G) para sincronizar.");
+      Alert.alert(
+        "Sem conexão",
+        "Conecte-se à internet (WiFi, 4G ou 5G) para sincronizar."
+      );
       return;
     }
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -391,18 +389,19 @@ function QuickActionCard({ icon, label, color, onPress, theme, loading }: QuickA
       onPress={onPress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
-      disabled={loading}
       style={[
         styles.actionCard,
         { backgroundColor: theme.backgroundDefault },
         animatedStyle,
-        loading && { opacity: 0.7 },
+        loading && { opacity: 0.75 },
       ]}
     >
       <View style={[styles.actionIconContainer, { backgroundColor: color }]}>
         <Feather name={loading ? "loader" : icon} size={24} color="#FFFFFF" />
       </View>
-      <ThemedText style={styles.actionLabel}>{label}</ThemedText>
+      <ThemedText style={styles.actionLabel}>
+        {loading ? "Sincronizando..." : label}
+      </ThemedText>
     </AnimatedPressable>
   );
 }

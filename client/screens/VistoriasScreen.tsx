@@ -8,6 +8,8 @@ import {
   TextInput,
   Alert,
   Platform,
+  Modal,
+  TouchableOpacity,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
@@ -55,6 +57,7 @@ export default function VistoriasScreen() {
   const route = useRoute<RouteProp<VistoriasStackParamList, "VistoriasList">>();
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -93,7 +96,13 @@ export default function VistoriasScreen() {
       await apiRequest("DELETE", `/api/vistorias/${id}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: vistoriasQueryKey });
+      // Invalida TODAS as queries de vistorias (VistoriasScreen + HomeScreen + qualquer filtro)
+      queryClient.invalidateQueries({
+        predicate: (query) => {
+          const key = query.queryKey[0];
+          return typeof key === "string" && key.startsWith("/api/vistorias");
+        },
+      });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     },
     onError: () => {
@@ -106,21 +115,18 @@ export default function VistoriasScreen() {
   };
 
   const handleDelete = (id: string) => {
-    if (Platform.OS === "web") {
-      const confirmed = window.confirm("Tem certeza que deseja excluir esta vistoria? Esta ação não pode ser desfeita.");
-      if (confirmed) {
-        deleteVistoria.mutate(id);
-      }
-    } else {
-      Alert.alert(
-        "Excluir Vistoria",
-        "Tem certeza que deseja excluir esta vistoria? Esta ação não pode ser desfeita.",
-        [
-          { text: "Cancelar", style: "cancel" },
-          { text: "Excluir", style: "destructive", onPress: () => deleteVistoria.mutate(id) },
-        ]
-      );
+    setDeleteId(id);
+  };
+
+  const confirmDelete = () => {
+    if (deleteId) {
+      deleteVistoria.mutate(deleteId);
     }
+    setDeleteId(null);
+  };
+
+  const cancelDelete = () => {
+    setDeleteId(null);
   };
 
   const vistoriasUrl = projetoAtual
@@ -364,6 +370,41 @@ export default function VistoriasScreen() {
       />
 
       <FAB onPress={handleNewVistoria} tabBarHeight={tabBarHeight} />
+
+      {/* Modal de confirmação de exclusão */}
+      <Modal
+        visible={deleteId !== null}
+        transparent
+        animationType="fade"
+        onRequestClose={cancelDelete}
+      >
+        <TouchableOpacity
+          style={styles.deleteModalOverlay}
+          activeOpacity={1}
+          onPress={cancelDelete}
+        >
+          <TouchableOpacity activeOpacity={1} style={styles.deleteModalBox}>
+            <ThemedText style={styles.deleteModalTitle}>Excluir Vistoria</ThemedText>
+            <ThemedText style={styles.deleteModalMessage}>
+              Tem certeza que deseja excluir esta vistoria? Esta ação não pode ser desfeita.
+            </ThemedText>
+            <View style={styles.deleteModalButtons}>
+              <Pressable
+                style={[styles.deleteModalBtn, styles.deleteModalBtnCancel]}
+                onPress={cancelDelete}
+              >
+                <ThemedText style={styles.deleteModalBtnCancelText}>Cancelar</ThemedText>
+              </Pressable>
+              <Pressable
+                style={[styles.deleteModalBtn, styles.deleteModalBtnConfirm]}
+                onPress={confirmDelete}
+              >
+                <ThemedText style={styles.deleteModalBtnConfirmText}>Excluir</ThemedText>
+              </Pressable>
+            </View>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
     </ThemedView>
   );
 }
@@ -559,5 +600,62 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 8,
+  },
+  deleteModalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 24,
+  },
+  deleteModalBox: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 24,
+    width: "100%",
+    maxWidth: 360,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  deleteModalTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#1E3A5F",
+    marginBottom: 12,
+  },
+  deleteModalMessage: {
+    fontSize: 14,
+    color: "#666",
+    lineHeight: 20,
+    marginBottom: 24,
+  },
+  deleteModalButtons: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  deleteModalBtn: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  deleteModalBtnCancel: {
+    backgroundColor: "#F3F4F6",
+  },
+  deleteModalBtnCancelText: {
+    color: "#374151",
+    fontWeight: "600",
+    fontSize: 15,
+  },
+  deleteModalBtnConfirm: {
+    backgroundColor: "#EF4444",
+  },
+  deleteModalBtnConfirmText: {
+    color: "#FFFFFF",
+    fontWeight: "700",
+    fontSize: 15,
   },
 });
